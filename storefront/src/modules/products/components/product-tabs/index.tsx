@@ -24,19 +24,30 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   ]
 
   return (
-    <div className="w-full">
-      <Accordion type="multiple">
-        {tabs.map((tab, i) => (
-          <Accordion.Item
-            key={i}
-            title={tab.label}
-            headingSize="medium"
-            value={tab.label}
-          >
-            {tab.component}
-          </Accordion.Item>
-        ))}
-      </Accordion>
+    <div className="w-full space-y-6">
+      {/* Product Information */}
+      <section className="rounded-2xl border border-ui-border-base bg-ui-bg-base">
+        <div className="px-6 py-4 border-b border-ui-border-base">
+          <h3 className="text-base font-semibold text-ui-fg-base">
+            Product Information
+          </h3>
+        </div>
+        <div className="px-6">
+          <ProductInfoTab product={product} />
+        </div>
+      </section>
+
+      {/* Shipping & Returns
+      <section className="rounded-2xl border border-ui-border-base bg-ui-bg-base">
+        <div className="px-6 py-4 border-b border-ui-border-base">
+          <h3 className="text-base font-semibold text-ui-fg-base">
+            Shipping & Returns
+          </h3>
+        </div>
+        <div className="px-6">
+          <ShippingInfoTab />
+        </div>
+      </section> */}
     </div>
   )
 }
@@ -60,18 +71,18 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-y-4">
-          <div>
+          {/* <div>
             <span className="font-semibold">Weight</span>
             <p>{product.weight ? `${product.weight} g` : "-"}</p>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <span className="font-semibold">Dimensions</span>
             <p>
               {product.length && product.width && product.height
                 ? `${product.length}L x ${product.width}W x ${product.height}H`
                 : "-"}
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

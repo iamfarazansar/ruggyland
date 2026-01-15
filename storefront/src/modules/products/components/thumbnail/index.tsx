@@ -6,7 +6,6 @@ import PlaceholderImage from "@modules/common/icons/placeholder-image"
 
 type ThumbnailProps = {
   thumbnail?: string | null
-  // TODO: Fix image typings
   images?: any[] | null
   size?: "small" | "medium" | "large" | "full" | "square"
   isFeatured?: boolean
@@ -18,7 +17,6 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   thumbnail,
   images,
   size = "small",
-  isFeatured,
   className,
   "data-testid": dataTestid,
 }) => {
@@ -27,12 +25,15 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   return (
     <Container
       className={clx(
-        "relative w-full overflow-hidden p-4 bg-ui-bg-subtle shadow-elevation-card-rest rounded-large group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150",
+        // ✅ “new” style: image-first, no padding, clipped corners
+        "relative w-full overflow-hidden rounded-md bg-ui-bg-subtle shadow-elevation-card-rest transition-shadow ease-in-out duration-150 group-hover:shadow-elevation-card-hover",
         className,
         {
-          "aspect-[11/14]": isFeatured,
-          "aspect-[9/16]": !isFeatured && size !== "square",
+          // ✅ use the newer ratio
+          "aspect-[29/34]": size !== "square",
           "aspect-[1/1]": size === "square",
+
+          // width presets
           "w-[180px]": size === "small",
           "w-[290px]": size === "medium",
           "w-[440px]": size === "large",
@@ -56,12 +57,13 @@ const ImageOrPlaceholder = ({
       alt="Thumbnail"
       className="absolute inset-0 object-cover object-center"
       draggable={false}
-      quality={50}
-      sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
       fill
+      quality={60}
+      // ✅ better than 100vw, works well for grid cards
+      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
     />
   ) : (
-    <div className="w-full h-full absolute inset-0 flex items-center justify-center">
+    <div className="absolute inset-0 flex items-center justify-center bg-ui-bg-subtle">
       <PlaceholderImage size={size === "small" ? 16 : 24} />
     </div>
   )

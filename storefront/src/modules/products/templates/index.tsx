@@ -1,61 +1,195 @@
 import React, { Suspense } from "react"
+import { notFound } from "next/navigation"
+import { HttpTypes } from "@medusajs/types"
 
 import ImageGallery from "@modules/products/components/image-gallery"
-import ProductActions from "@modules/products/components/product-actions"
-import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
-import ProductTabs from "@modules/products/components/product-tabs"
-import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
+import ProductActions from "@modules/products/components/product-actions"
+import RelatedProducts from "@modules/products/components/related-products"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
-import { notFound } from "next/navigation"
+
 import ProductActionsWrapper from "./product-actions-wrapper"
-import { HttpTypes } from "@medusajs/types"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
+  images: HttpTypes.StoreProductImage[]
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
   countryCode,
+  images,
 }) => {
-  if (!product || !product.id) {
-    return notFound()
-  }
+  if (!product || !product.id) return notFound()
 
   return (
     <>
-      <div
-        className="content-container flex flex-col small:flex-row small:items-start py-6 relative"
-        data-testid="product-container"
-      >
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
-          <ProductInfo product={product} />
-          <ProductTabs product={product} />
-        </div>
-        <div className="block w-full relative">
-          <ImageGallery images={product?.images || []} />
-        </div>
-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
-          <ProductOnboardingCta />
-          <Suspense
-            fallback={
-              <ProductActions
-                disabled={true}
-                product={product}
-                region={region}
-              />
-            }
-          >
-            <ProductActionsWrapper id={product.id} region={region} />
-          </Suspense>
+      {/* TOP GRID */}
+      <div className="content-container py-6" data-testid="product-container">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+          {/* LEFT: Gallery */}
+          <div className="lg:col-span-7">
+            <ImageGallery images={images} />
+          </div>
+
+          {/* RIGHT: Title + Price/CTA card (sticky like screenshot) */}
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-24 flex flex-col gap-6">
+              {/* Title + subtitle (keep your existing component) */}
+              <ProductInfo product={product} />
+
+              {/* PRICE + CTA CARD */}
+              <div className="rounded-2xl border border-ui-border-base bg-white shadow-sm">
+                <div className="p-6">
+                  {/* ProductActionsWrapper usually renders price + options + add-to-cart.
+                      We keep it here so it looks like the big right card. */}
+                  <Suspense
+                    fallback={
+                      <ProductActions
+                        disabled={true}
+                        product={product}
+                        region={region}
+                      />
+                    }
+                  >
+                    <ProductActionsWrapper id={product.id} region={region} />
+                  </Suspense>
+
+                  {/* Trust rows under CTA (like screenshot) */}
+                  <div className="mt-5 rounded-xl border border-ui-border-base bg-ui-bg-subtle">
+                    <div className="grid grid-cols-1 sm:grid-cols-2">
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <span className="text-lg">🚚</span>
+                        <p className="text-sm text-ui-fg-base">
+                          Ships in 7–10 days
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <span className="text-lg">🧶</span>
+                        <p className="text-sm text-ui-fg-base">
+                          Handmade by artisans
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <span className="text-lg">✨</span>
+                        <p className="text-sm text-ui-fg-base">
+                          Premium quality
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <span className="text-lg">🛡️</span>
+                        <p className="text-sm text-ui-fg-base">
+                          Secure checkout
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* BOTTOM CARDS (same row on desktop) */}
+          <div className="lg:col-span-7">
+            <div className="rounded-2xl border border-ui-border-base bg-white shadow-sm">
+              <div className="border-b border-ui-border-base px-6 py-4">
+                <h3 className="text-lg font-semibold text-ui-fg-base">
+                  Product Information
+                </h3>
+              </div>
+
+              <div className="p-6 text-sm">
+                <div className="grid grid-cols-1 gap-5">
+                  <div className="flex items-start justify-between gap-6">
+                    <span className="font-semibold text-ui-fg-base">
+                      Material
+                    </span>
+                    <span className="text-ui-fg-subtle text-right">
+                      {product.material || "-"}
+                    </span>
+                  </div>
+                  <div className="h-px w-full bg-ui-border-base" />
+                  <div className="flex items-start justify-between gap-6">
+                    <span className="font-semibold text-ui-fg-base">
+                      Country of origin
+                    </span>
+                    <span className="text-ui-fg-subtle text-right">
+                      {product.origin_country || "-"}
+                    </span>
+                  </div>
+                  <div className="h-px w-full bg-ui-border-base" />
+                  <div className="flex items-start justify-between gap-6">
+                    <span className="font-semibold text-ui-fg-base">Type</span>
+                    <span className="text-ui-fg-subtle text-right">
+                      {product.type?.value || "-"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="rounded-2xl border border-ui-border-base bg-white shadow-sm">
+              <div className="border-b border-ui-border-base px-6 py-4">
+                <h3 className="text-lg font-semibold text-ui-fg-base">
+                  Shipping & Returns
+                </h3>
+              </div>
+
+              <div className="p-6 text-sm space-y-6">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">⚡</span>
+                  <div>
+                    <p className="font-semibold text-ui-fg-base">
+                      Fast delivery
+                    </p>
+                    <p className="mt-1 text-ui-fg-subtle">
+                      Your rug is handmade and ships in 7–10 days. Worldwide
+                      delivery available.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">🔁</span>
+                  <div>
+                    <p className="font-semibold text-ui-fg-base">
+                      Simple updates
+                    </p>
+                    <p className="mt-1 text-ui-fg-subtle">
+                      We’ll keep you updated with tracking once dispatched.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">↩️</span>
+                  <div>
+                    <p className="font-semibold text-ui-fg-base">
+                      Returns & support
+                    </p>
+                    <p className="mt-1 text-ui-fg-subtle">
+                      Need help? Contact us and we’ll sort it out quickly.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* /BOTTOM CARDS */}
         </div>
       </div>
+
+      {/* RELATED */}
       <div
-        className="content-container my-16 small:my-32"
+        className="content-container my-16 small:my-28"
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>

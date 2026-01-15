@@ -9,6 +9,7 @@ import X from "@modules/common/icons/x"
 import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
 import { HttpTypes } from "@medusajs/types"
+import { isSimpleProduct } from "@lib/util/product"
 
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
@@ -16,6 +17,13 @@ type MobileActionsProps = {
   options: Record<string, string | undefined>
   updateOptions: (title: string, value: string) => void
   inStock?: boolean
+
+  // ✅ change to accept qty
+  quantity: number
+  onIncQty: () => void
+  onDecQty: () => void
+  maxQuantity?: number
+
   handleAddToCart: () => void
   isAdding?: boolean
   show: boolean
@@ -28,6 +36,10 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   options,
   updateOptions,
   inStock,
+  quantity,
+  onIncQty,
+  onDecQty,
+  maxQuantity = 10,
   handleAddToCart,
   isAdding,
   show,
@@ -41,18 +53,20 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   })
 
   const selectedPrice = useMemo(() => {
-    if (!price) {
-      return null
-    }
+    if (!price) return null
     const { variantPrice, cheapestPrice } = price
-
     return variantPrice || cheapestPrice || null
   }, [price])
+
+  const isSimple = isSimpleProduct(product)
+
+  const canDec = quantity > 1 && !isAdding
+  const canInc = quantity < maxQuantity && !isAdding
 
   return (
     <>
       <div
-        className={clx("lg:hidden inset-x-0 bottom-0 fixed", {
+        className={clx("lg:hidden inset-x-0 bottom-0 fixed z-50", {
           "pointer-events-none": !show,
         })}
       >
@@ -70,17 +84,19 @@ const MobileActions: React.FC<MobileActionsProps> = ({
             className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
             data-testid="mobile-actions"
           >
+            {/* Title + Price */}
             <div className="flex items-center gap-x-2">
-              <span data-testid="mobile-title">{product.title}</span>
+              <span data-testid="mobile-title" className="line-clamp-1">
+                {product.title}
+              </span>
               <span>—</span>
+
               {selectedPrice ? (
                 <div className="flex items-end gap-x-2 text-ui-fg-base">
                   {selectedPrice.price_type === "sale" && (
-                    <p>
-                      <span className="line-through text-small-regular">
-                        {selectedPrice.original_price}
-                      </span>
-                    </p>
+                    <span className="line-through text-small-regular">
+                      {selectedPrice.original_price}
+                    </span>
                   )}
                   <span
                     className={clx({
@@ -91,43 +107,82 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                     {selectedPrice.calculated_price}
                   </span>
                 </div>
-              ) : (
-                <div></div>
-              )}
+              ) : null}
             </div>
-            <div className="grid grid-cols-2 w-full gap-x-4">
-              <Button
-                onClick={open}
-                variant="secondary"
-                className="w-full"
-                data-testid="mobile-actions-button"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>
-                    {variant
-                      ? Object.values(options).join(" / ")
-                      : "Select Options"}
-                  </span>
-                  <ChevronDown />
+
+            {/* Actions row */}
+            <div
+              className={clx("grid grid-cols-2 w-full gap-x-4", {
+                "!grid-cols-1": isSimple,
+              })}
+            >
+              {!isSimple && (
+                <Button
+                  onClick={open}
+                  variant="secondary"
+                  className="w-full"
+                  data-testid="mobile-actions-button"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="truncate">
+                      {variant
+                        ? Object.values(options).join(" / ")
+                        : "Select Options"}
+                    </span>
+                    <ChevronDown />
+                  </div>
+                </Button>
+              )}
+
+              {/* Qty + Add to cart */}
+              <div className="w-full flex gap-3">
+                {/* ✅ Qty control */}
+                <div className="flex items-center rounded-xl border border-gray-200 bg-white overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={onDecQty}
+                    disabled={!canDec}
+                    className="h-11 w-11 flex items-center justify-center text-lg disabled:opacity-40"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+
+                  <div className="min-w-[34px] text-center text-sm font-semibold">
+                    {quantity}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={onIncQty}
+                    disabled={!canInc}
+                    className="h-11 w-11 flex items-center justify-center text-lg disabled:opacity-40"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
                 </div>
-              </Button>
-              <Button
-                onClick={handleAddToCart}
-                disabled={!inStock || !variant}
-                className="w-full"
-                isLoading={isAdding}
-                data-testid="mobile-cart-button"
-              >
-                {!variant
-                  ? "Select variant"
-                  : !inStock
-                  ? "Out of stock"
-                  : "Add to cart"}
-              </Button>
+
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={!inStock || !variant || isAdding}
+                  className="w-full h-11 rounded-xl"
+                  isLoading={isAdding}
+                  data-testid="mobile-cart-button"
+                >
+                  {!variant
+                    ? "Select variant"
+                    : !inStock
+                    ? "Out of stock"
+                    : "Add to cart"}
+                </Button>
+              </div>
             </div>
           </div>
         </Transition>
       </div>
+
+      {/* Options modal */}
       <Transition appear show={state} as={Fragment}>
         <Dialog as="div" className="relative z-[75]" onClose={close}>
           <Transition.Child
@@ -166,22 +221,21 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                       <X />
                     </button>
                   </div>
+
                   <div className="bg-white px-6 py-12">
                     {(product.variants?.length ?? 0) > 1 && (
                       <div className="flex flex-col gap-y-6">
-                        {(product.options || []).map((option) => {
-                          return (
-                            <div key={option.id}>
-                              <OptionSelect
-                                option={option}
-                                current={options[option.title ?? ""]}
-                                updateOption={updateOptions}
-                                title={option.title ?? ""}
-                                disabled={optionsDisabled}
-                              />
-                            </div>
-                          )
-                        })}
+                        {(product.options || []).map((option) => (
+                          <div key={option.id}>
+                            <OptionSelect
+                              option={option}
+                              current={options[option.id]}
+                              updateOption={updateOptions}
+                              title={option.title ?? ""}
+                              disabled={optionsDisabled}
+                            />
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>

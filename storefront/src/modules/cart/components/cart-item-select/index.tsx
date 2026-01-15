@@ -1,73 +1,59 @@
 "use client"
 
-import { IconBadge, clx } from "@medusajs/ui"
-import {
-  SelectHTMLAttributes,
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react"
+import { clx } from "@medusajs/ui"
+import React from "react"
 
-import ChevronDown from "@modules/common/icons/chevron-down"
+type CartItemSelectProps = {
+  value: number
+  onChange: (value: number) => void
+  max?: number
+  disabled?: boolean
+  className?: string
+}
 
-type NativeSelectProps = {
-  placeholder?: string
-  errors?: Record<string, unknown>
-  touched?: Record<string, unknown>
-} & Omit<SelectHTMLAttributes<HTMLSelectElement>, "size">
+export default function CartItemSelect({
+  value,
+  onChange,
+  max = 10,
+  disabled,
+  className,
+}: CartItemSelectProps) {
+  const decDisabled = disabled || value <= 1
+  const incDisabled = disabled || value >= max
 
-const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
-  ({ placeholder = "Select...", className, children, ...props }, ref) => {
-    const innerRef = useRef<HTMLSelectElement>(null)
-    const [isPlaceholder, setIsPlaceholder] = useState(false)
+  return (
+    <div
+      className={clx(
+        "flex items-center overflow-hidden rounded-full border border-ui-border-base bg-ui-bg-subtle",
+        className
+      )}
+    >
+      {/* - */}
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(1, value - 1))}
+        disabled={decDisabled}
+        className="h-10 w-11 flex items-center justify-center text-ui-fg-base hover:bg-black/[0.04] disabled:opacity-40"
+        aria-label="Decrease quantity"
+      >
+        −
+      </button>
 
-    useImperativeHandle<HTMLSelectElement | null, HTMLSelectElement | null>(
-      ref,
-      () => innerRef.current
-    )
-
-    useEffect(() => {
-      if (innerRef.current && innerRef.current.value === "") {
-        setIsPlaceholder(true)
-      } else {
-        setIsPlaceholder(false)
-      }
-    }, [innerRef.current?.value])
-
-    return (
-      <div>
-        <IconBadge
-          onFocus={() => innerRef.current?.focus()}
-          onBlur={() => innerRef.current?.blur()}
-          className={clx(
-            "relative flex items-center txt-compact-small border text-ui-fg-base group",
-            className,
-            {
-              "text-ui-fg-subtle": isPlaceholder,
-            }
-          )}
-        >
-          <select
-            ref={innerRef}
-            {...props}
-            className="appearance-none bg-transparent border-none px-4 transition-colors duration-150 focus:border-gray-700 outline-none w-16 h-16 items-center justify-center"
-          >
-            <option disabled value="">
-              {placeholder}
-            </option>
-            {children}
-          </select>
-          <span className="absolute flex pointer-events-none justify-end w-8 group-hover:animate-pulse">
-            <ChevronDown />
-          </span>
-        </IconBadge>
+      {/* number */}
+      <div className="h-10 w-12 flex items-center justify-center bg-white text-sm font-semibold text-ui-fg-base border-x border-ui-border-base">
+        {value}
       </div>
-    )
-  }
-)
 
-CartItemSelect.displayName = "CartItemSelect"
-
-export default CartItemSelect
+      {/* + */}
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(max, value + 1))}
+        disabled={incDisabled}
+        className="h-10 w-11 flex items-center justify-center text-ui-fg-base hover:bg-black/[0.04] disabled:opacity-40"
+        aria-label="Increase quantity"
+      >
+        +
+      </button>
+    </div>
+  )
+}

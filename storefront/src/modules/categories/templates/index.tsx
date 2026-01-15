@@ -10,12 +10,12 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { HttpTypes } from "@medusajs/types"
 
 export default function CategoryTemplate({
-  categories,
+  category,
   sortBy,
   page,
   countryCode,
 }: {
-  categories: HttpTypes.StoreProductCategory[]
+  category: HttpTypes.StoreProductCategory
   sortBy?: SortOptions
   page?: string
   countryCode: string
@@ -23,40 +23,63 @@ export default function CategoryTemplate({
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
 
-  const category = categories[categories.length - 1]
-  const parents = categories.slice(0, categories.length - 1)
-
   if (!category || !countryCode) notFound()
+
+  const parents = [] as HttpTypes.StoreProductCategory[]
+
+  const getParents = (category: HttpTypes.StoreProductCategory) => {
+    if (category.parent_category) {
+      parents.push(category.parent_category)
+      getParents(category.parent_category)
+    }
+  }
+
+  getParents(category)
 
   return (
     <div
       className="flex flex-col small:flex-row small:items-start py-6 content-container"
       data-testid="category-container"
     >
-      <RefinementList sortBy={sort} data-testid="sort-by-container" />
+      {/* <RefinementList sortBy={sort} data-testid="sort-by-container" /> */}
       <div className="w-full">
-        <div className="flex flex-row mb-8 text-2xl-semi gap-4">
-          {parents &&
-            parents.map((parent) => (
-              <span key={parent.id} className="text-ui-fg-subtle">
-                <LocalizedClientLink
-                  className="mr-4 hover:text-black"
-                  href={`/categories/${parent.handle}`}
-                  data-testid="sort-by-link"
-                >
-                  {parent.name}
-                </LocalizedClientLink>
-                /
-              </span>
-            ))}
-          <h1 data-testid="category-page-title">{category.name}</h1>
+        <div className="mb-8">
+          {/* Breadcrumb */}
+          {parents?.length > 0 && (
+            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ui-fg-subtle">
+              {parents
+                .slice()
+                .reverse()
+                .map((parent, idx) => (
+                  <span key={parent.id} className="flex items-center gap-x-2">
+                    <LocalizedClientLink
+                      className="hover:text-ui-fg-base transition"
+                      href={`/categories/${parent.handle}`}
+                    >
+                      {parent.name}
+                    </LocalizedClientLink>
+                    {idx !== parents.length - 1 && <span>/</span>}
+                  </span>
+                ))}
+            </div>
+          )}
+
+          {/* Title (same as store page) */}
+          <h1
+            data-testid="category-page-title"
+            className="text-3xl md:text-4xl font-semibold tracking-tight text-ui-fg-base"
+          >
+            {category.name}
+          </h1>
+
+          {/* Description / fallback tagline (same as store page) */}
+          <p className="mt-2 text-sm md:text-base text-ui-fg-subtle max-w-2xl">
+            {category.description ||
+              "Custom-made • Premium carving • Ships worldwide"}
+          </p>
         </div>
-        {category.description && (
-          <div className="mb-8 text-base-regular">
-            <p>{category.description}</p>
-          </div>
-        )}
-        {category.category_children && (
+
+        {/* {category.category_children && (
           <div className="mb-8 text-base-large">
             <ul className="grid grid-cols-1 gap-2">
               {category.category_children?.map((c) => (
@@ -68,8 +91,14 @@ export default function CategoryTemplate({
               ))}
             </ul>
           </div>
-        )}
-        <Suspense fallback={<SkeletonProductGrid />}>
+        )} */}
+        <Suspense
+          fallback={
+            <SkeletonProductGrid
+              numberOfProducts={category.products?.length ?? 8}
+            />
+          }
+        >
           <PaginatedProducts
             sortBy={sort}
             page={pageNumber}
