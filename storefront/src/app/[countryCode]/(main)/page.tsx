@@ -10,9 +10,9 @@ import WhyChooseRuggyLand from "@modules/home/components/why-choose"
 import CustomRugBanner from "@modules/home/components/custom-rug-banner"
 
 export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
+  title: "RuggyLand | Premium Handmade Rugs Made to Order",
   description:
-    "A performant frontend ecommerce starter template with Next.js 15 and Medusa.",
+    "Premium handcrafted rugs made to order. Custom designs, clean carving, and export-quality finishing—delivered worldwide by RuggyLand.",
 }
 
 export default async function Home(props: {
