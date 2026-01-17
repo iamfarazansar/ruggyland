@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: "RuggyLand | Premium Handmade Rugs Made to Order",
   description:
     "Premium handcrafted rugs made to order. Custom designs, clean carving, and export-quality finishing—delivered worldwide by RuggyLand.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 }
 
 export default async function Home(props: {
