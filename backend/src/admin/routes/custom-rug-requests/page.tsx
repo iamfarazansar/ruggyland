@@ -54,15 +54,27 @@ const columns = [
     cell: ({ getValue }) => {
       const imgs = getValue() || [];
       if (!imgs.length) return "—";
+
       return (
-        <a
-          href={imgs[0]}
-          target="_blank"
-          rel="noreferrer"
-          className="underline"
-        >
-          View ({imgs.length})
-        </a>
+        <div className="flex flex-wrap gap-2">
+          {imgs.map((src: string, i: number) => (
+            <a
+              key={src + i}
+              href={src}
+              target="_blank"
+              rel="noreferrer"
+              title="Open image"
+              className="block"
+            >
+              <img
+                src={src}
+                alt={`ref-${i}`}
+                className="h-10 w-10 rounded-md border object-cover"
+                loading="lazy"
+              />
+            </a>
+          ))}
+        </div>
       );
     },
   }),

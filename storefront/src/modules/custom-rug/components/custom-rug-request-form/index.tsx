@@ -1,10 +1,7 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
-import { useEffect } from "react"
-
+import React, { useEffect, useMemo, useState } from "react"
 import { submitCustomRugRequest } from "@lib/data/custom-rug"
-import { log } from "console"
 
 type Shape = "rectangle" | "round" | "oval" | "custom"
 type Unit = "in" | "cm" | "ft"
@@ -23,21 +20,43 @@ function safeNum(v: string) {
 }
 
 export default function CustomRugRequestForm({ className }: Props) {
+  // ✅ Upload limits (PRODUCTION)
+  const MAX_FILES = 3
+  const MAX_FILE_SIZE_MB = 5
+  const MAX_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [fileError, setFileError] = useState<string | null>(null)
+
+  // ✅ prevent memory leak (store blob urls once)
+  const [filePreviews, setFilePreviews] = useState<
+    Array<{ file: File; url: string }>
+  >([])
 
   useEffect(() => {
+    // cleanup old urls
+    filePreviews.forEach((p) => URL.revokeObjectURL(p.url))
+
     if (!selectedFiles.length) {
+      setFilePreviews([])
       setPreviewUrl(null)
       return
     }
 
-    const url = URL.createObjectURL(selectedFiles[0])
-    setPreviewUrl(url)
+    const previews = selectedFiles.map((f) => ({
+      file: f,
+      url: URL.createObjectURL(f),
+    }))
+
+    setFilePreviews(previews)
+    setPreviewUrl(previews[0]?.url || null)
 
     return () => {
-      URL.revokeObjectURL(url)
+      previews.forEach((p) => URL.revokeObjectURL(p.url))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFiles])
 
   const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -83,12 +102,50 @@ export default function CustomRugRequestForm({ className }: Props) {
   const budgetMinN = safeNum(budgetMin)
   const budgetMaxN = safeNum(budgetMax)
 
+  // ✅ Submit disabled if fileError exists
   const canSubmit =
-    !!name.trim() && !!email.trim() && !!widthN && !!heightN && !submitting
+    !!name.trim() &&
+    !!email.trim() &&
+    !!widthN &&
+    !!heightN &&
+    !submitting &&
+    !fileError
+
+  function handleFileChange(files: FileList | null) {
+    const arr = Array.from(files || [])
+
+    setFileError(null)
+    setError(null)
+
+    if (!arr.length) {
+      setSelectedFiles([])
+      return
+    }
+
+    if (arr.length > MAX_FILES) {
+      setFileError(`Maximum ${MAX_FILES} images allowed.`)
+      return
+    }
+
+    const invalid = arr.find((f) => {
+      const okType = ALLOWED_TYPES.includes(f.type)
+      const okSize = f.size <= MAX_BYTES
+      return !okType || !okSize
+    })
+
+    if (invalid) {
+      setFileError(
+        `Invalid file: ${invalid.name}. Only JPG/PNG/WEBP up to ${MAX_FILE_SIZE_MB}MB allowed.`
+      )
+      return
+    }
+
+    setSelectedFiles(arr)
+  }
 
   async function uploadToS3(files: File[]) {
     const fd = new FormData()
-    files.forEach((f) => fd.append("files", f))
+    files.forEach((f) => fd.append("files", f)) // ✅ IMPORTANT
 
     const base = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
     const pk = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -118,6 +175,12 @@ export default function CustomRugRequestForm({ className }: Props) {
     setError(null)
     setSuccess(null)
 
+    // ✅ block submit if file is invalid
+    if (fileError) {
+      setError(fileError)
+      return
+    }
+
     if (!widthN || !heightN) {
       setError("Please enter a valid width and height.")
       return
@@ -131,12 +194,10 @@ export default function CustomRugRequestForm({ className }: Props) {
     try {
       setSubmitting(true)
 
-      // 1) upload selected images
       const uploadedUrls = selectedFiles.length
         ? await uploadToS3(selectedFiles)
         : []
 
-      // 2) submit request with S3 URLs
       const payload = {
         client_request_id: clientRequestId,
         name: name.trim(),
@@ -158,11 +219,6 @@ export default function CustomRugRequestForm({ className }: Props) {
 
       const data = await submitCustomRugRequest(payload)
       setSuccess({ id: data.id, status: data.status })
-
-      // optional reset after success
-      // setSelectedFiles([])
-      // setWidth(""); setHeight(""); setBudgetMin(""); setBudgetMax("");
-      // setName(""); setEmail(""); setPhone(""); setNotes("");
     } catch (err: any) {
       setError(err?.message || "Something went wrong.")
     } finally {
@@ -276,7 +332,7 @@ export default function CustomRugRequestForm({ className }: Props) {
                     Reference Images
                   </span>
                   <span className="text-xs text-ui-fg-subtle">
-                    Upload up to a few images
+                    Upload up to {MAX_FILES} images
                   </span>
                 </div>
 
@@ -284,50 +340,61 @@ export default function CustomRugRequestForm({ className }: Props) {
                   <input
                     type="file"
                     multiple
-                    accept="image/*"
-                    onChange={(e) =>
-                      setSelectedFiles(Array.from(e.target.files || []))
-                    }
-                    className="block w-full text-sm"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => handleFileChange(e.target.files)}
                   />
                 </div>
 
+                {fileError && (
+                  <div className="mt-2 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {fileError}
+                  </div>
+                )}
+
                 {selectedFiles.length > 0 && (
                   <ul className="mt-3 space-y-2">
-                    {selectedFiles.map((file, idx) => (
-                      <li
-                        key={file.name + idx}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-ui-border-base bg-ui-bg-subtle px-4 py-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            className="h-12 w-12 rounded-lg object-cover border"
-                          />
-                          <div className="text-sm">
-                            <p className="truncate text-ui-fg-base">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-ui-fg-subtle">
-                              {(file.size / 1024).toFixed(1)} KB
-                            </p>
-                          </div>
-                        </div>
+                    {selectedFiles.map((file, idx) => {
+                      const p = filePreviews.find((x) => x.file === file)
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSelectedFiles((prev) =>
-                              prev.filter((_, i) => i !== idx)
-                            )
-                          }
-                          className="text-sm text-ui-fg-subtle hover:text-ui-fg-base"
+                      return (
+                        <li
+                          key={file.name + idx}
+                          className="flex items-center justify-between gap-3 rounded-xl border border-ui-border-base bg-ui-bg-subtle px-4 py-3"
                         >
-                          Remove
-                        </button>
-                      </li>
-                    ))}
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={p?.url}
+                              alt={file.name}
+                              className="h-12 w-12 rounded-lg object-cover border"
+                            />
+                            <div className="text-sm">
+                              <p className="truncate text-ui-fg-base">
+                                {file.name}
+                              </p>
+                              <p className="text-xs text-ui-fg-subtle">
+                                {(file.size / 1024).toFixed(1)} KB
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const toRemove = filePreviews[idx]
+                              if (toRemove?.url)
+                                URL.revokeObjectURL(toRemove.url)
+
+                              setSelectedFiles((prev) =>
+                                prev.filter((_, i) => i !== idx)
+                              )
+                            }}
+                            className="text-sm text-ui-fg-subtle hover:text-ui-fg-base"
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      )
+                    })}
                   </ul>
                 )}
               </div>
@@ -481,6 +548,12 @@ export default function CustomRugRequestForm({ className }: Props) {
                 >
                   {submitting ? "Submitting..." : "Submit Request"}
                 </button>
+
+                {!canSubmit && fileError && (
+                  <p className="mt-2 text-xs text-red-600">
+                    Fix image upload issue to enable Submit.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -552,12 +625,6 @@ export default function CustomRugRequestForm({ className }: Props) {
                     </div>
                   )}
                 </div>
-
-                {/* <div className="mt-4 rounded-xl border border-ui-border-base bg-ui-bg-base px-4 py-3 text-xs text-ui-fg-subtle">
-                  <span className="font-medium text-ui-fg-base">Tip:</span> If
-                  your design is copyrighted, share a reference and we’ll
-                  suggest a safe alternative.
-                </div> */}
               </div>
             </div>
           </div>

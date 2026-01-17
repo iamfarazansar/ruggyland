@@ -51,6 +51,7 @@
     "@react-email/preview-server": "^5.1.0",
     "@swc/core": "1.5.7",
     "@swc/jest": "^0.2.39",
+    "@types/express": "^5.0.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.19.25",
     "@types/react": "^18.3.27",
