@@ -131,7 +131,7 @@ export default function ProductActions({
 
   return (
     <div className="flex flex-col gap-y-3" ref={actionsRef}>
-      {(product.variants?.length ?? 0) > 1 && (
+      {(product.variants?.length ?? 0) > 0 && (
         <div className="flex flex-col gap-y-4">
           {(product.options || []).map((option) => (
             <div key={option.id}>
