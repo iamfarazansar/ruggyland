@@ -4,8 +4,8 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import StoreTemplate from "@modules/store/templates"
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+  title: "All Rugs | RuggyLand",
+  description: "Explore our collection of custom-made premium rugs. Handcrafted with care, shipped worldwide.",
 }
 
 type Params = {

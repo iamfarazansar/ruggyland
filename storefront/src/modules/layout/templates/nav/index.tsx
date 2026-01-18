@@ -46,11 +46,11 @@ export default async function Nav() {
         </div>
 
         {/* CENTER NAV */}
-        <div className="hidden md:flex items-center gap-8 font-medium text-black">
+        <div className="hidden tablet:flex items-center gap-4 small:gap-5 medium:gap-6 large:gap-8 font-medium text-black text-sm small:text-base">
           {/* Home */}
           <LocalizedClientLink
             href={NAV_LINKS[0].href}
-            className="font-medium hover:text-ui-fg-base transition"
+            className="font-medium hover:text-ui-fg-base transition whitespace-nowrap"
           >
             {NAV_LINKS[0].name}
           </LocalizedClientLink>
@@ -58,7 +58,7 @@ export default async function Nav() {
           {/* All Rugs */}
           <LocalizedClientLink
             href={NAV_LINKS[1].href}
-            className="font-medium hover:text-ui-fg-base transition"
+            className="font-medium hover:text-ui-fg-base transition whitespace-nowrap"
           >
             {NAV_LINKS[1].name}
           </LocalizedClientLink>
@@ -69,7 +69,7 @@ export default async function Nav() {
           {/* Custom Rug */}
           <LocalizedClientLink
             href={NAV_LINKS[2].href}
-            className="font-medium hover:text-ui-fg-base transition"
+            className="font-medium hover:text-ui-fg-base transition whitespace-nowrap"
           >
             {NAV_LINKS[2].name}
           </LocalizedClientLink>
@@ -77,7 +77,7 @@ export default async function Nav() {
           {/* Contact */}
           <LocalizedClientLink
             href={NAV_LINKS[3].href}
-            className="font-medium hover:text-ui-fg-base transition"
+            className="font-medium hover:text-ui-fg-base transition whitespace-nowrap"
           >
             {NAV_LINKS[3].name}
           </LocalizedClientLink>
@@ -109,7 +109,7 @@ export default async function Nav() {
             <CartButton />
           </Suspense>
 
-          <div className="md:hidden">
+          <div className="tablet:hidden">
             <NavMobile categories={productCategories} />
           </div>
         </div>

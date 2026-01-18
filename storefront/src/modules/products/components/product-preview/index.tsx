@@ -37,15 +37,15 @@ export default async function ProductPreview({
           className="rounded-none"
         />
 
-        {/* ✅ Content */}
-        <div className="p-3">
+        {/* ✅ Content - Compact on mobile, spacious on desktop */}
+        <div className="px-2.5 py-2 small:p-3">
           {/* ✅ Title one line */}
           <p className="text-sm font-semibold text-ui-fg-base truncate">
             {product.title}
           </p>
 
           {/* ✅ Price */}
-          <div className="mt-1 flex items-center justify-between gap-2">
+          <div className="mt-0.5 small:mt-1 flex items-center gap-2">
             <div className="text-sm font-bold text-ui-fg-base">
               {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
             </div>

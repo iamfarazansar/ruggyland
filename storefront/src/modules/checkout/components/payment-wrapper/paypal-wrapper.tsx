@@ -24,7 +24,7 @@ const PayPalWrapper: React.FC<PayPalWrapperProps> = ({
   }
 
   const initialOptions = {
-    clientId,
+    "client-id": clientId,
     currency: paymentSession.currency_code.toUpperCase() || "USD",
     intent: paymentSession.data?.intent === "CAPTURE" ? "capture" : "authorize",
   }

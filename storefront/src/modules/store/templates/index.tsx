@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "./paginated-products"
+import RefinementList from "@modules/store/components/refinement-list"
 
 const StoreTemplate = ({
   sortBy,
@@ -31,11 +32,11 @@ const StoreTemplate = ({
             Explore All Rugs
           </h1>
 
-          <p className="mt-2 text-sm md:text-base text-ui-fg-subtle">
+          <p className="mt-2 text-xs md:text-base text-ui-fg-subtle whitespace-nowrap">
             Custom-made • Premium carving • Ships worldwide
           </p>
         </div>
-
+        <RefinementList sortBy={sort} />
         <Suspense fallback={<SkeletonProductGrid />}>
           <PaginatedProducts
             sortBy={sort}

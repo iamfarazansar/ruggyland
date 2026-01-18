@@ -26,14 +26,14 @@ export default function CategoriesDropdown({
 
   return (
     <div
-      className="relative hidden md:block"
+      className="relative hidden tablet:block"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
       {/* Trigger */}
       <button
         type="button"
-        className="flex items-center gap-2 hover:text-ui-fg-base focus:outline-none"
+        className="flex items-center gap-2 hover:text-ui-fg-base focus:outline-none whitespace-nowrap"
       >
         Categories
         <BsChevronDown

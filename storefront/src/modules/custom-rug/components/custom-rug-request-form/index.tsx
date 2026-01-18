@@ -229,37 +229,37 @@ export default function CustomRugRequestForm({ className }: Props) {
   return (
     <section
       className={cn(
-        "w-full py-10 md:py-14",
-        "bg-[radial-gradient(1200px_circle_at_20%_-10%,rgba(212,175,55,0.10),transparent_55%),radial-gradient(900px_circle_at_85%_0%,rgba(212,175,55,0.08),transparent_55%)]",
+        "w-full py-6 sm:py-8 md:py-14 overflow-x-hidden",
+        "bg-[radial-gradient(600px_circle_at_20%_-10%,rgba(212,175,55,0.10),transparent_55%),radial-gradient(500px_circle_at_85%_0%,rgba(212,175,55,0.08),transparent_55%)] md:bg-[radial-gradient(1200px_circle_at_20%_-10%,rgba(212,175,55,0.10),transparent_55%),radial-gradient(900px_circle_at_85%_0%,rgba(212,175,55,0.08),transparent_55%)]",
         className
       )}
     >
-      <div className="mx-auto w-full max-w-5xl px-4 md:px-6">
-        <div className="mb-8 md:mb-10 text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-ui-fg-base">
+      <div className="mx-auto w-full max-w-5xl px-3 sm:px-4 md:px-6">
+        <div className="mb-6 sm:mb-8 md:mb-10 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-ui-fg-base">
             Create Your Custom Rug
           </h2>
-          <p className="mt-2 text-sm md:text-base text-ui-fg-subtle">
-            Tell us about your dream rug — we’ll craft it for you.
+          <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-base text-ui-fg-subtle px-2">
+            Tell us about your dream rug — we'll craft it for you.
           </p>
         </div>
 
         <form
           onSubmit={onSubmit}
-          className="grid gap-6 lg:grid-cols-5 lg:gap-8"
+          className="grid gap-4 sm:gap-6 lg:grid-cols-5 lg:gap-8"
         >
           {/* Left */}
-          <div className="lg:col-span-3 rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-sm">
-            <div className="p-4 sm:p-5 md:p-7">
+          <div className="lg:col-span-3 rounded-xl sm:rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-sm">
+            <div className="p-3 sm:p-5 md:p-7">
               {/* Rug Details */}
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-ui-fg-base">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-base sm:text-lg font-semibold text-ui-fg-base">
                   Rug Details
                 </h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-ui-fg-subtle">Unit</span>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs text-ui-fg-subtle">Unit</span>
                   <select
-                    className="h-9 rounded-lg border border-ui-border-base bg-ui-bg-base px-3 text-sm text-ui-fg-base outline-none"
+                    className="h-8 sm:h-9 rounded-lg border border-ui-border-base bg-ui-bg-base px-2 sm:px-3 text-xs sm:text-sm text-ui-fg-base outline-none"
                     value={unit}
                     onChange={(e) => setUnit(e.target.value as Unit)}
                   >
@@ -270,33 +270,33 @@ export default function CustomRugRequestForm({ className }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3">
                 <label className="block">
-                  <span className="text-sm text-ui-fg-subtle">Width</span>
+                  <span className="text-xs sm:text-sm text-ui-fg-subtle">Width</span>
                   <input
                     value={width}
                     onChange={(e) => setWidth(e.target.value)}
                     inputMode="decimal"
                     placeholder="e.g. 60"
-                    className="mt-1 h-11 w-full rounded-xl border border-ui-border-base bg-ui-bg-base px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
+                    className="mt-1 h-10 sm:h-11 w-full rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-3 sm:px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="text-sm text-ui-fg-subtle">Height</span>
+                  <span className="text-xs sm:text-sm text-ui-fg-subtle">Height</span>
                   <input
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                     inputMode="decimal"
                     placeholder="e.g. 36"
-                    className="mt-1 h-11 w-full rounded-xl border border-ui-border-base bg-ui-bg-base px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
+                    className="mt-1 h-10 sm:h-11 w-full rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-3 sm:px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
                   />
                 </label>
               </div>
 
-              <div className="mt-5">
-                <span className="text-sm text-ui-fg-subtle">Shape</span>
-                <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-4 sm:mt-5">
+                <span className="text-xs sm:text-sm text-ui-fg-subtle">Shape</span>
+                <div className="mt-2 grid grid-cols-4 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
                   {(
                     [
                       ["rectangle", "Rectangle"],
@@ -312,7 +312,7 @@ export default function CustomRugRequestForm({ className }: Props) {
                         key={key}
                         onClick={() => setShape(key)}
                         className={cn(
-                          "h-10 rounded-xl border px-4 text-sm transition",
+                          "h-9 sm:h-10 rounded-lg sm:rounded-xl border px-2 sm:px-4 text-xs sm:text-sm transition",
                           active
                             ? "border-transparent bg-[rgba(212,175,55,0.18)] text-ui-fg-base"
                             : "border-ui-border-base bg-ui-bg-base text-ui-fg-subtle hover:text-ui-fg-base"
@@ -326,23 +326,27 @@ export default function CustomRugRequestForm({ className }: Props) {
               </div>
 
               {/* Images */}
-              <div className="mt-6">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm text-ui-fg-subtle">
+              <div className="mt-5 sm:mt-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3">
+                  <span className="text-xs sm:text-sm text-ui-fg-subtle">
                     Reference Images
                   </span>
-                  <span className="text-xs text-ui-fg-subtle">
-                    Upload up to {MAX_FILES} images
+                  <span className="text-[10px] sm:text-xs text-ui-fg-subtle">
+                    Upload up to {MAX_FILES} images (JPG, PNG, WEBP)
                   </span>
                 </div>
 
                 <div className="mt-2">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={(e) => handleFileChange(e.target.files)}
-                  />
+                  <label className="flex items-center justify-center h-10 sm:h-11 w-full rounded-lg sm:rounded-xl border border-dashed border-ui-border-base bg-ui-bg-subtle hover:bg-ui-bg-base cursor-pointer transition">
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">Choose files to upload</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => handleFileChange(e.target.files)}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
 
                 {fileError && (
@@ -352,26 +356,26 @@ export default function CustomRugRequestForm({ className }: Props) {
                 )}
 
                 {selectedFiles.length > 0 && (
-                  <ul className="mt-3 space-y-2">
+                  <ul className="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2">
                     {selectedFiles.map((file, idx) => {
                       const p = filePreviews.find((x) => x.file === file)
 
                       return (
                         <li
                           key={file.name + idx}
-                          className="flex items-center justify-between gap-3 rounded-xl border border-ui-border-base bg-ui-bg-subtle px-4 py-3"
+                          className="flex items-center justify-between gap-2 sm:gap-3 rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-subtle px-2.5 sm:px-4 py-2 sm:py-3"
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                             <img
                               src={p?.url}
                               alt={file.name}
-                              className="h-12 w-12 rounded-lg object-cover border"
+                              className="h-10 w-10 sm:h-12 sm:w-12 rounded-md sm:rounded-lg object-cover border flex-shrink-0"
                             />
-                            <div className="text-sm">
-                              <p className="truncate text-ui-fg-base">
+                            <div className="text-xs sm:text-sm min-w-0">
+                              <p className="truncate text-ui-fg-base max-w-[120px] sm:max-w-none">
                                 {file.name}
                               </p>
-                              <p className="text-xs text-ui-fg-subtle">
+                              <p className="text-[10px] sm:text-xs text-ui-fg-subtle">
                                 {(file.size / 1024).toFixed(1)} KB
                               </p>
                             </div>
@@ -388,7 +392,7 @@ export default function CustomRugRequestForm({ className }: Props) {
                                 prev.filter((_, i) => i !== idx)
                               )
                             }}
-                            className="text-sm text-ui-fg-subtle hover:text-ui-fg-base"
+                            className="text-xs sm:text-sm text-ui-fg-subtle hover:text-ui-fg-base flex-shrink-0"
                           >
                             Remove
                           </button>
@@ -400,18 +404,18 @@ export default function CustomRugRequestForm({ className }: Props) {
               </div>
 
               {/* Budget */}
-              <div className="mt-8 border-t border-ui-border-base pt-6">
-                <h3 className="text-lg font-semibold text-ui-fg-base">
+              <div className="mt-6 sm:mt-8 border-t border-ui-border-base pt-5 sm:pt-6">
+                <h3 className="text-base sm:text-lg font-semibold text-ui-fg-base">
                   Budget
                 </h3>
 
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3">
                   <label className="block">
-                    <span className="text-sm text-ui-fg-subtle">
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">
                       Min Budget
                     </span>
-                    <div className="mt-1 flex h-11 items-center rounded-xl border border-ui-border-base bg-ui-bg-base px-3">
-                      <span className="text-sm text-ui-fg-subtle">
+                    <div className="mt-1 flex h-10 sm:h-11 items-center rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-2 sm:px-3">
+                      <span className="text-xs sm:text-sm text-ui-fg-subtle">
                         {CURRENCY_SYMBOLS[currency] ?? currency}
                       </span>
                       <input
@@ -419,17 +423,17 @@ export default function CustomRugRequestForm({ className }: Props) {
                         onChange={(e) => setBudgetMin(e.target.value)}
                         inputMode="numeric"
                         placeholder="e.g. 120"
-                        className="h-full w-full bg-transparent px-2 text-sm text-ui-fg-base outline-none"
+                        className="h-full w-full bg-transparent px-1.5 sm:px-2 text-sm text-ui-fg-base outline-none"
                       />
                     </div>
                   </label>
 
                   <label className="block">
-                    <span className="text-sm text-ui-fg-subtle">
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">
                       Max Budget
                     </span>
-                    <div className="mt-1 flex h-11 items-center rounded-xl border border-ui-border-base bg-ui-bg-base px-3">
-                      <span className="text-sm text-ui-fg-subtle">
+                    <div className="mt-1 flex h-10 sm:h-11 items-center rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-2 sm:px-3">
+                      <span className="text-xs sm:text-sm text-ui-fg-subtle">
                         {CURRENCY_SYMBOLS[currency] ?? currency}
                       </span>
                       <input
@@ -437,17 +441,17 @@ export default function CustomRugRequestForm({ className }: Props) {
                         onChange={(e) => setBudgetMax(e.target.value)}
                         inputMode="numeric"
                         placeholder="e.g. 200"
-                        className="h-full w-full bg-transparent px-2 text-sm text-ui-fg-base outline-none"
+                        className="h-full w-full bg-transparent px-1.5 sm:px-2 text-sm text-ui-fg-base outline-none"
                       />
                     </div>
                   </label>
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-2 sm:mt-3">
                   <label className="block">
-                    <span className="text-sm text-ui-fg-subtle">Currency</span>
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">Currency</span>
                     <select
-                      className="mt-1 h-11 w-full rounded-xl border border-ui-border-base bg-ui-bg-base px-4 text-sm text-ui-fg-base outline-none"
+                      className="mt-1 h-10 sm:h-11 w-full rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-3 sm:px-4 text-sm text-ui-fg-base outline-none"
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
                     >
@@ -463,24 +467,24 @@ export default function CustomRugRequestForm({ className }: Props) {
               </div>
 
               {/* Contact */}
-              <div className="mt-8 border-t border-ui-border-base pt-6">
-                <h3 className="text-lg font-semibold text-ui-fg-base">
+              <div className="mt-6 sm:mt-8 border-t border-ui-border-base pt-5 sm:pt-6">
+                <h3 className="text-base sm:text-lg font-semibold text-ui-fg-base">
                   Contact Info
                 </h3>
 
-                <div className="mt-4 grid gap-3">
+                <div className="mt-3 sm:mt-4 grid gap-2 sm:gap-3">
                   <label className="block">
-                    <span className="text-sm text-ui-fg-subtle">Your Name</span>
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">Your Name</span>
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Full name"
-                      className="mt-1 h-11 w-full rounded-xl border border-ui-border-base bg-ui-bg-base px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
+                      className="mt-1 h-10 sm:h-11 w-full rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-3 sm:px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
                     />
                   </label>
 
                   <label className="block">
-                    <span className="text-sm text-ui-fg-subtle">
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">
                       Email Address
                     </span>
                     <input
@@ -488,45 +492,45 @@ export default function CustomRugRequestForm({ className }: Props) {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@email.com"
                       type="email"
-                      className="mt-1 h-11 w-full rounded-xl border border-ui-border-base bg-ui-bg-base px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
+                      className="mt-1 h-10 sm:h-11 w-full rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-3 sm:px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
                     />
                   </label>
 
                   <label className="block">
-                    <span className="text-sm text-ui-fg-subtle">
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">
                       Phone Number
                     </span>
                     <input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+91..."
-                      className="mt-1 h-11 w-full rounded-xl border border-ui-border-base bg-ui-bg-base px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
+                      className="mt-1 h-10 sm:h-11 w-full rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-3 sm:px-4 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
                     />
                   </label>
 
                   <label className="block">
-                    <span className="text-sm text-ui-fg-subtle">
+                    <span className="text-xs sm:text-sm text-ui-fg-subtle">
                       Additional Notes
                     </span>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Share your idea, colors, theme, deadline, etc."
-                      className="mt-1 min-h-[120px] w-full resize-y rounded-xl border border-ui-border-base bg-ui-bg-base px-4 py-3 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
+                      className="mt-1 min-h-[100px] sm:min-h-[120px] w-full resize-y rounded-lg sm:rounded-xl border border-ui-border-base bg-ui-bg-base px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-ui-fg-base outline-none focus:ring-2 focus:ring-[rgba(212,175,55,0.35)]"
                     />
                   </label>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="mt-6">
+              <div className="mt-5 sm:mt-6">
                 {error && (
-                  <div className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <div className="rounded-lg sm:rounded-xl border border-red-300 bg-red-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-red-700">
                     {error}
                   </div>
                 )}
                 {success && (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                  <div className="rounded-lg sm:rounded-xl border border-emerald-200 bg-emerald-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-emerald-800">
                     Request submitted! <span className="font-medium">ID:</span>{" "}
                     {success.id}
                     {success.status ? ` • ${success.status}` : ""}
@@ -535,12 +539,12 @@ export default function CustomRugRequestForm({ className }: Props) {
               </div>
 
               {/* Submit */}
-              <div className="mt-6">
+              <div className="mt-5 sm:mt-6">
                 <button
                   type="submit"
                   disabled={!canSubmit}
                   className={cn(
-                    "h-12 w-full rounded-2xl px-5 text-sm font-semibold transition",
+                    "h-11 sm:h-12 w-full rounded-xl sm:rounded-2xl px-4 sm:px-5 text-sm font-semibold transition",
                     "bg-[linear-gradient(90deg,rgba(212,175,55,0.92),rgba(168,124,32,0.92))] text-black",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
                     "hover:brightness-[1.03]"
@@ -550,7 +554,7 @@ export default function CustomRugRequestForm({ className }: Props) {
                 </button>
 
                 {!canSubmit && fileError && (
-                  <p className="mt-2 text-xs text-red-600">
+                  <p className="mt-2 text-[10px] sm:text-xs text-red-600">
                     Fix image upload issue to enable Submit.
                   </p>
                 )}
@@ -558,18 +562,18 @@ export default function CustomRugRequestForm({ className }: Props) {
             </div>
           </div>
 
-          {/* Right */}
-          <div className="lg:col-span-2">
-            <div className="rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-sm overflow-hidden lg:sticky lg:top-6">
-              <div className="p-5 md:p-6">
-                <h3 className="text-base font-semibold text-ui-fg-base">
+          {/* Right - Preview Panel (hidden on mobile, shown on lg+) */}
+          <div className="hidden lg:block lg:col-span-2">
+            <div className="rounded-xl sm:rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-sm overflow-hidden lg:sticky lg:top-6">
+              <div className="p-4 sm:p-5 md:p-6">
+                <h3 className="text-sm sm:text-base font-semibold text-ui-fg-base">
                   Preview
                 </h3>
-                <p className="mt-1 text-sm text-ui-fg-subtle">
+                <p className="mt-1 text-xs sm:text-sm text-ui-fg-subtle">
                   Quick summary of your request.
                 </p>
 
-                <div className="mt-4 space-y-3 text-sm">
+                <div className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 text-xs sm:text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-ui-fg-subtle">Size</span>
                     <span className="font-medium text-ui-fg-base">
@@ -604,8 +608,8 @@ export default function CustomRugRequestForm({ className }: Props) {
                 </div>
               </div>
 
-              <div className="border-t border-ui-border-base bg-ui-bg-subtle p-5 md:p-6">
-                <div className="aspect-[4/5] w-full overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-subtle">
+              <div className="border-t border-ui-border-base bg-ui-bg-subtle p-4 sm:p-5 md:p-6">
+                <div className="aspect-[4/5] w-full overflow-hidden rounded-xl sm:rounded-2xl border border-ui-border-base bg-ui-bg-subtle">
                   {previewUrl ? (
                     <img
                       src={previewUrl}
@@ -613,12 +617,12 @@ export default function CustomRugRequestForm({ className }: Props) {
                       className="h-full w-full object-contain"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(600px_circle_at_20%_20%,rgba(212,175,55,0.18),transparent_55%),radial-gradient(700px_circle_at_80%_30%,rgba(212,175,55,0.10),transparent_55%)]">
-                      <div className="text-center px-6">
-                        <p className="text-sm font-semibold text-ui-fg-base">
+                    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(300px_circle_at_20%_20%,rgba(212,175,55,0.18),transparent_55%),radial-gradient(350px_circle_at_80%_30%,rgba(212,175,55,0.10),transparent_55%)] sm:bg-[radial-gradient(600px_circle_at_20%_20%,rgba(212,175,55,0.18),transparent_55%),radial-gradient(700px_circle_at_80%_30%,rgba(212,175,55,0.10),transparent_55%)]">
+                      <div className="text-center px-4 sm:px-6">
+                        <p className="text-xs sm:text-sm font-semibold text-ui-fg-base">
                           Handmade • Premium Carving • Fast Updates
                         </p>
-                        <p className="mt-2 text-xs text-ui-fg-subtle">
+                        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-ui-fg-subtle">
                           Upload an image to preview it here
                         </p>
                       </div>

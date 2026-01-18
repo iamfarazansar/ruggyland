@@ -38,10 +38,9 @@ export default function CategoryTemplate({
 
   return (
     <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
+      className="flex flex-col py-6 content-container"
       data-testid="category-container"
     >
-      {/* <RefinementList sortBy={sort} data-testid="sort-by-container" /> */}
       <div className="w-full">
         <div className="mb-8">
           {/* Breadcrumb */}
@@ -73,25 +72,15 @@ export default function CategoryTemplate({
           </h1>
 
           {/* Description / fallback tagline (same as store page) */}
-          <p className="mt-2 text-sm md:text-base text-ui-fg-subtle max-w-2xl">
+          <p className="mt-2 text-xs md:text-base text-ui-fg-subtle whitespace-nowrap">
             {category.description ||
               "Custom-made • Premium carving • Ships worldwide"}
           </p>
         </div>
 
-        {/* {category.category_children && (
-          <div className="mb-8 text-base-large">
-            <ul className="grid grid-cols-1 gap-2">
-              {category.category_children?.map((c) => (
-                <li key={c.id}>
-                  <InteractiveLink href={`/categories/${c.handle}`}>
-                    {c.name}
-                  </InteractiveLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )} */}
+        {/* Sort */}
+        <RefinementList sortBy={sort} data-testid="sort-by-container" />
+
         <Suspense
           fallback={
             <SkeletonProductGrid
