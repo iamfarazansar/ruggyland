@@ -24,8 +24,7 @@ const Register = ({ setCurrentView }: Props) => {
         Become a RuggyLand Store Member
       </h1>
       <p className="text-center text-base-regular text-ui-fg-base mb-4">
-        Create your RuggyLand Store Member profile, and get access to an
-        enhanced shopping experience.
+        Become a member and discover rugs that tell your story.
       </p>
       <form className="w-full flex flex-col" action={formAction}>
         <div className="flex flex-col w-full gap-y-2">
@@ -70,18 +69,12 @@ const Register = ({ setCurrentView }: Props) => {
         <ErrorMessage error={message} data-testid="register-error" />
         <span className="text-center text-ui-fg-base text-small-regular mt-6">
           By creating an account, you agree to RuggyLand Store&apos;s{" "}
-          <LocalizedClientLink
-            href="/content/privacy-policy"
-            className="underline"
-          >
+          <LocalizedClientLink href="/privacy-policy" className="underline">
             Privacy Policy
           </LocalizedClientLink>{" "}
           and{" "}
-          <LocalizedClientLink
-            href="/content/terms-of-use"
-            className="underline"
-          >
-            Terms of Use
+          <LocalizedClientLink href="/terms-of-service" className="underline">
+            Terms of Service
           </LocalizedClientLink>
           .
         </span>

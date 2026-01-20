@@ -1,4 +1,9 @@
-import { loadEnv, Modules, defineConfig } from "@medusajs/utils";
+import {
+  loadEnv,
+  Modules,
+  defineConfig,
+  ContainerRegistrationKeys,
+} from "@medusajs/utils";
 import {
   ADMIN_CORS,
   AUTH_CORS,
@@ -197,6 +202,28 @@ const medusaConfig = {
           },
         ]
       : []),
+    {
+      resolve: "@medusajs/medusa/auth",
+      dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+      options: {
+        providers: [
+          // other providers...
+          {
+            resolve: "@medusajs/medusa/auth-emailpass",
+            id: "emailpass",
+          },
+          {
+            resolve: "@medusajs/medusa/auth-google",
+            id: "google",
+            options: {
+              clientId: process.env.GOOGLE_CLIENT_ID,
+              clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+              callbackUrl: process.env.GOOGLE_CALLBACK_URL,
+            },
+          },
+        ],
+      },
+    },
   ],
   plugins: [
     ...(MEILISEARCH_HOST && MEILISEARCH_ADMIN_KEY

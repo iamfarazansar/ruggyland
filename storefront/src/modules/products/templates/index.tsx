@@ -1,4 +1,5 @@
 import React, { Suspense } from "react"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 
@@ -59,33 +60,53 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   </Suspense>
 
                   {/* Trust rows under CTA (like screenshot) */}
-                  <div className="mt-5 rounded-xl border border-ui-border-base bg-ui-bg-subtle">
-                    <div className="grid grid-cols-1 sm:grid-cols-2">
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        <span className="text-lg">🚚</span>
-                        <p className="text-sm text-ui-fg-base">
+                  <div className="mt-5 rounded-xl border border-ui-border-base bg-ui-bg-subtle p-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Image
+                          src="/product/Shipsin.svg"
+                          alt="Shipping"
+                          width={80}
+                          height={80}
+                        />
+                        <p className="text-sm text-ui-fg-base text-center">
                           Ships in 7–10 days
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        <span className="text-lg">🧶</span>
-                        <p className="text-sm text-ui-fg-base">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Image
+                          src="/product/handmade.svg"
+                          alt="Handmade"
+                          width={80}
+                          height={80}
+                        />
+                        <p className="text-sm text-ui-fg-base text-center">
                           Handmade by artisans
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        <span className="text-lg">✨</span>
-                        <p className="text-sm text-ui-fg-base">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Image
+                          src="/product/Premium.svg"
+                          alt="Premium"
+                          width={80}
+                          height={80}
+                        />
+                        <p className="text-sm text-ui-fg-base text-center">
                           Premium quality
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        <span className="text-lg">🛡️</span>
-                        <p className="text-sm text-ui-fg-base">
-                          Secure checkout
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Image
+                          src="/product/Crafted.svg"
+                          alt="Secure"
+                          width={80}
+                          height={80}
+                        />
+                        <p className="text-sm text-ui-fg-base text-center">
+                          Crafted with You
                         </p>
                       </div>
                     </div>
