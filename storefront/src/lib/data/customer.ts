@@ -302,24 +302,15 @@ export async function validateGoogleCallback(
   state: string
 ): Promise<{ success: boolean; error?: string; needsReauth?: boolean }> {
   try {
-    console.log("[Google Auth] Validating callback...")
-
     // Validate callback with Medusa
     const token = await sdk.auth.callback("customer", "google", { code, state })
 
-    console.log(
-      "[Google Auth] Token received:",
-      token ? "yes" : "no",
-      typeof token
-    )
-
     if (!token || typeof token !== "string") {
-      console.log("[Google Auth] Invalid token response")
+      console.error("[Google Auth] Invalid token response")
       return { success: false, error: "Failed to validate Google callback" }
     }
 
     await setAuthToken(token)
-    console.log("[Google Auth] Token saved to cookies")
 
     // Decode the token to get user info
     const { decodeToken } = await import("react-jwt")
@@ -335,25 +326,12 @@ export async function validateGoogleCallback(
       }
     }>(token)
 
-    console.log("[Google Auth] Decoded token:", JSON.stringify(decoded))
-
     // Email can be in decoded.email OR decoded.user_metadata.email
     const email = decoded?.email || decoded?.user_metadata?.email
-    const customerId = decoded?.app_metadata?.customer_id
     const actorId = decoded?.actor_id
-
-    console.log(
-      "[Google Auth] Extracted: email=",
-      email,
-      "customerId=",
-      customerId,
-      "actorId=",
-      actorId
-    )
 
     // Check if customer is linked (actor_id has value and is not empty)
     if (actorId && actorId !== "") {
-      console.log("[Google Auth] Customer already linked, proceeding...")
       await transferCart()
       const customerCacheTag = await getCacheTag("customers")
       revalidateTag(customerCacheTag)
@@ -362,8 +340,6 @@ export async function validateGoogleCallback(
 
     // If actor_id is empty, we need to create/link customer
     if (email) {
-      console.log("[Google Auth] Creating new customer for:", email)
-
       // Extract name from Google OAuth user_metadata
       const firstName =
         decoded?.user_metadata?.given_name ||
@@ -373,8 +349,6 @@ export async function validateGoogleCallback(
         decoded?.user_metadata?.family_name ||
         decoded?.user_metadata?.name?.split(" ").slice(1).join(" ") ||
         ""
-
-      console.log("[Google Auth] User name:", firstName, lastName)
 
       try {
         const headers = await getAuthHeaders()
@@ -387,12 +361,8 @@ export async function validateGoogleCallback(
           {},
           headers
         )
-        console.log("[Google Auth] Customer created successfully")
 
-        // CRITICAL: Immediate Server-Side Refresh (from GitHub issue #14251)
-        // We use a direct fetch to the backend's refresh endpoint
-        // This exchanges the Identity Token for a full Customer Token immediately.
-        console.log("[Google Auth] Refreshing token server-side...")
+        // Refresh token to link customer identity
         const backendUrl =
           process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
         const refreshResponse = await fetch(
@@ -406,36 +376,19 @@ export async function validateGoogleCallback(
           }
         )
 
-        console.log(
-          "[Google Auth] Refresh response status:",
-          refreshResponse.status
-        )
-
         if (!refreshResponse.ok) {
-          const errorText = await refreshResponse.text()
-          console.log("[Google Auth] Refresh error:", errorText)
-          throw new Error(`Refresh failed: ${refreshResponse.status}`)
-        }
-
-        const refreshData = await refreshResponse.json()
-        const refreshedToken = refreshData.token
-
-        if (refreshedToken && typeof refreshedToken === "string") {
-          await setAuthToken(refreshedToken)
-          console.log(
-            "[Google Auth] Refreshed token saved - single-step flow complete!"
+          console.error(
+            "[Google Auth] Token refresh failed:",
+            refreshResponse.status
           )
         } else {
-          console.log(
-            "[Google Auth] Refresh didn't return token, keeping original"
-          )
+          const refreshData = await refreshResponse.json()
+          if (refreshData.token && typeof refreshData.token === "string") {
+            await setAuthToken(refreshData.token)
+          }
         }
       } catch (createError: any) {
-        console.log(
-          "[Google Auth] Customer creation error (may already exist):",
-          createError.message
-        )
-        // If customer already exists, still try to refresh the token
+        // Customer might already exist, try to refresh token anyway
         try {
           const backendUrl =
             process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
@@ -456,7 +409,7 @@ export async function validateGoogleCallback(
             }
           }
         } catch (refreshError) {
-          console.log("[Google Auth] Token refresh failed:", refreshError)
+          console.error("[Google Auth] Token refresh failed:", refreshError)
         }
       }
 
@@ -465,14 +418,13 @@ export async function validateGoogleCallback(
       const customerCacheTag = await getCacheTag("customers")
       revalidateTag(customerCacheTag)
 
-      // Single-step flow complete - no more needsReauth!
       return { success: true }
     } else {
-      console.log("[Google Auth] No email found in token!")
+      console.error("[Google Auth] No email found in token")
       return { success: false, error: "No email found in Google account" }
     }
   } catch (error: any) {
-    console.error("[Google Auth] Error:", error)
+    console.error("[Google Auth] Error:", error.message)
     return { success: false, error: error.toString() }
   }
 }

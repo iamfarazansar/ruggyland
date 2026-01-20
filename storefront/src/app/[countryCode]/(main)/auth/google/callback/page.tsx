@@ -25,9 +25,7 @@ export default function GoogleCallbackPage() {
       }
 
       try {
-        console.log("Validating Google callback...")
         const result = await validateGoogleCallback(code, state)
-        console.log("Callback result:", result)
 
         if (result.success) {
           // Refresh to sync server-side cookies, then navigate
@@ -40,7 +38,7 @@ export default function GoogleCallbackPage() {
           setLoading(false)
         }
       } catch (err: any) {
-        console.error("Callback error:", err)
+        console.error("Google auth callback error:", err.message)
         setError(err.message || "An error occurred")
         setLoading(false)
       }
