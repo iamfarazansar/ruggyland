@@ -85,6 +85,9 @@ const medusaConfig = {
       resolve: "./src/modules/custom-rug",
     },
     {
+      resolve: "./src/modules/manufacturing",
+    },
+    {
       resolve: "@medusajs/medusa/file",
       options: {
         providers: [
