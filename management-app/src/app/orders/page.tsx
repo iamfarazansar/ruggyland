@@ -1,6 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+
+interface OrderItem {
+  id: string;
+  title: string;
+  quantity: number;
+}
 
 interface Order {
   id: string;
@@ -16,107 +23,110 @@ interface Order {
   payment_status: string;
   fulfillment_status: string;
   created_at: string;
-  items_count?: number;
+  items?: OrderItem[];
 }
 
-// Mock data - will be replaced with API calls
-const mockOrders: Order[] = [
-  {
-    id: "order_abc123",
-    display_id: 1001,
-    customer: {
-      email: "john@example.com",
-      first_name: "John",
-      last_name: "Doe",
-    },
-    total: 45000,
-    currency_code: "usd",
-    status: "pending",
-    payment_status: "captured",
-    fulfillment_status: "not_fulfilled",
-    created_at: "2026-01-20T10:00:00Z",
-    items_count: 2,
-  },
-  {
-    id: "order_def456",
-    display_id: 1002,
-    customer: {
-      email: "jane@example.com",
-      first_name: "Jane",
-      last_name: "Smith",
-    },
-    total: 82500,
-    currency_code: "usd",
-    status: "pending",
-    payment_status: "captured",
-    fulfillment_status: "partially_fulfilled",
-    created_at: "2026-01-19T14:30:00Z",
-    items_count: 3,
-  },
-  {
-    id: "order_ghi789",
-    display_id: 1003,
-    customer: {
-      email: "bob@example.com",
-      first_name: "Bob",
-      last_name: "Johnson",
-    },
-    total: 125000,
-    currency_code: "usd",
-    status: "completed",
-    payment_status: "captured",
-    fulfillment_status: "fulfilled",
-    created_at: "2026-01-18T09:15:00Z",
-    items_count: 1,
-  },
-  {
-    id: "order_jkl012",
-    display_id: 1004,
-    customer: {
-      email: "alice@example.com",
-      first_name: "Alice",
-      last_name: "Williams",
-    },
-    total: 67500,
-    currency_code: "usd",
-    status: "pending",
-    payment_status: "awaiting",
-    fulfillment_status: "not_fulfilled",
-    created_at: "2026-01-21T08:00:00Z",
-    items_count: 2,
-  },
-];
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 
-const STATUS_COLORS = {
-  pending: "bg-yellow-500/20 text-yellow-400",
-  completed: "bg-green-500/20 text-green-400",
-  cancelled: "bg-red-500/20 text-red-400",
-  archived: "bg-gray-500/20 text-gray-400",
-};
-
-const FULFILLMENT_COLORS = {
+const FULFILLMENT_COLORS: Record<string, string> = {
   not_fulfilled: "bg-gray-500/20 text-gray-400",
   partially_fulfilled: "bg-blue-500/20 text-blue-400",
   fulfilled: "bg-green-500/20 text-green-400",
   shipped: "bg-purple-500/20 text-purple-400",
 };
 
-const PAYMENT_COLORS = {
+const PAYMENT_COLORS: Record<string, string> = {
   awaiting: "bg-yellow-500/20 text-yellow-400",
   captured: "bg-green-500/20 text-green-400",
   refunded: "bg-red-500/20 text-red-400",
   partially_refunded: "bg-orange-500/20 text-orange-400",
+  not_paid: "bg-gray-500/20 text-gray-400",
 };
 
 export default function OrdersPage() {
-  const [orders] = useState<Order[]>(mockOrders);
+  const { token, isAuthenticated } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [creatingWorkOrders, setCreatingWorkOrders] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchOrders();
+    }
+  }, [isAuthenticated, token]);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/admin/orders?limit=50&order=-created_at`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data.orders || []);
+      } else {
+        throw new Error("Failed to fetch orders");
+      }
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setError("Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createWorkOrders = async (orderId: string) => {
+    setCreatingWorkOrders(orderId);
+
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/admin/work-orders/from-order/${orderId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ priority: "normal" }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(
+          `Created ${data.work_orders?.length || 0} work order(s) for this order!`,
+        );
+      } else {
+        alert(data.message || "Failed to create work orders");
+      }
+    } catch (err) {
+      console.error("Error creating work orders:", err);
+      alert("Failed to create work orders");
+    } finally {
+      setCreatingWorkOrders(null);
+    }
+  };
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: currency.toUpperCase(),
+      currency: currency?.toUpperCase() || "USD",
     }).format(amount / 100);
   };
 
@@ -130,8 +140,10 @@ export default function OrdersPage() {
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
-      order.display_id.toString().includes(searchQuery) ||
-      order.customer?.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.display_id?.toString().includes(searchQuery) ||
+      order.customer?.email
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       order.customer?.first_name
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
@@ -145,6 +157,17 @@ export default function OrdersPage() {
     return matchesSearch && matchesStatus;
   });
 
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-400">Loading orders...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -155,7 +178,19 @@ export default function OrdersPage() {
             Manage customer orders and create work orders
           </p>
         </div>
+        <button
+          onClick={fetchOrders}
+          className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition"
+        >
+          ↻ Refresh
+        </button>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 mb-6">
@@ -192,122 +227,133 @@ export default function OrdersPage() {
       </p>
 
       {/* Orders Table */}
-      <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-800/50">
-            <tr>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Order
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Customer
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Payment
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Fulfillment
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Date
-              </th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800">
-            {filteredOrders.map((order) => (
-              <tr
-                key={order.id}
-                className="hover:bg-gray-800/50 transition cursor-pointer"
-              >
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="text-sm font-medium text-white">
-                      #{order.display_id}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {order.items_count} item(s)
-                    </p>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="text-sm text-white">
-                      {order.customer?.first_name} {order.customer?.last_name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {order.customer?.email}
-                    </p>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <p className="text-sm font-medium text-white">
-                    {formatCurrency(order.total, order.currency_code)}
-                  </p>
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${PAYMENT_COLORS[order.payment_status as keyof typeof PAYMENT_COLORS] || "bg-gray-500/20 text-gray-400"}`}
-                  >
-                    {order.payment_status.replace("_", " ")}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${FULFILLMENT_COLORS[order.fulfillment_status as keyof typeof FULFILLMENT_COLORS] || "bg-gray-500/20 text-gray-400"}`}
-                  >
-                    {order.fulfillment_status.replace(/_/g, " ")}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <p className="text-sm text-gray-300">
-                    {formatDate(order.created_at)}
-                  </p>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-black text-xs font-medium rounded-lg transition"
-                      title="Create work orders for this order"
-                    >
-                      + Work Orders
-                    </button>
-                    <button
-                      className="p-2 hover:bg-gray-700 rounded-lg transition"
-                      title="View Details"
-                    >
-                      <svg
-                        className="w-4 h-4 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
+      {orders.length === 0 ? (
+        <div className="bg-gray-900 rounded-xl border border-gray-800 p-12 text-center">
+          <p className="text-gray-400 text-lg mb-2">No orders yet</p>
+          <p className="text-gray-500 text-sm">
+            Orders will appear here when customers place them
+          </p>
+        </div>
+      ) : (
+        <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-800/50">
+              <tr>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Order
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Payment
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Fulfillment
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-gray-800">
+              {filteredOrders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-800/50 transition">
+                  <td className="px-6 py-4">
+                    <div>
+                      <p className="text-sm font-medium text-white">
+                        #{order.display_id}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {order.items?.length || 0} item(s)
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div>
+                      <p className="text-sm text-white">
+                        {order.customer?.first_name || ""}{" "}
+                        {order.customer?.last_name || "Guest"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {order.customer?.email || "N/A"}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm font-medium text-white">
+                      {formatCurrency(order.total || 0, order.currency_code)}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${PAYMENT_COLORS[order.payment_status] || "bg-gray-500/20 text-gray-400"}`}
+                    >
+                      {order.payment_status?.replace("_", " ") || "N/A"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${FULFILLMENT_COLORS[order.fulfillment_status] || "bg-gray-500/20 text-gray-400"}`}
+                    >
+                      {order.fulfillment_status?.replace(/_/g, " ") || "N/A"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-gray-300">
+                      {formatDate(order.created_at)}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => createWorkOrders(order.id)}
+                        disabled={creatingWorkOrders === order.id}
+                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-black text-xs font-medium rounded-lg transition"
+                        title="Create work orders for this order"
+                      >
+                        {creatingWorkOrders === order.id
+                          ? "..."
+                          : "+ Work Orders"}
+                      </button>
+                      <button
+                        className="p-2 hover:bg-gray-700 rounded-lg transition"
+                        title="View Details"
+                      >
+                        <svg
+                          className="w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Info Box */}
       <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
