@@ -80,7 +80,7 @@ export async function POST(
 
     if (currentStageRecords.length > 0) {
       await manufacturingService.updateWorkOrderStages(
-        { id: currentStageRecords[0].id },
+        currentStageRecords[0].id,
         {
           status: "completed",
           completed_at: new Date(),
@@ -98,16 +98,16 @@ export async function POST(
       notes,
     });
 
-    // Update work order - use the ID directly for the update selector
+    // Update work order - use ID directly and the data object
     const isCompleted = nextStage === "ready_to_ship";
-    const updatedWorkOrder = await manufacturingService.updateWorkOrders(
-      { id },
-      {
-        current_stage: nextStage,
-        status: isCompleted ? "completed" : "in_progress",
-        ...(isCompleted && { completed_at: new Date() }),
-      },
-    );
+    await manufacturingService.updateWorkOrders(id, {
+      current_stage: nextStage,
+      status: isCompleted ? "completed" : "in_progress",
+      ...(isCompleted && { completed_at: new Date() }),
+    });
+
+    // Retrieve the updated work order to return
+    const updatedWorkOrder = await manufacturingService.retrieveWorkOrder(id);
 
     res.json({
       work_order: updatedWorkOrder,
