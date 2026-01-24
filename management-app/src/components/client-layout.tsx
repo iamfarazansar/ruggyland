@@ -5,6 +5,9 @@ import { AuthProvider } from "@/lib/auth-context";
 import { ProtectedRoute } from "@/components/protected-route";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
+import { MobileHeader } from "@/components/mobile-header";
+import { BottomNav } from "@/components/bottom-nav";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -29,17 +32,23 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 border-r border-gray-800 p-4 flex flex-col">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Mobile Header */}
+      <MobileHeader />
+
+      {/* Desktop Sidebar - hidden on mobile */}
+      <aside className="hidden md:flex w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 p-4 flex-col">
         <div className="mb-8">
           <h1 className="text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
             RuggyLand
           </h1>
-          <p className="text-xs text-gray-500">Manufacturing Hub</p>
+          <p className="text-xs text-gray-500 dark:text-gray-500">Manufacturing Hub</p>
         </div>
 
         <nav className="space-y-1 flex-1">
@@ -47,8 +56,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             href="/"
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
               isActive("/")
-                ? "bg-gray-800 text-white"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                ? "bg-amber-50 dark:bg-gray-800 text-amber-700 dark:text-amber-400"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <svg
@@ -70,8 +79,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             href="/orders"
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
               isActive("/orders")
-                ? "bg-gray-800 text-white"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                ? "bg-amber-50 dark:bg-gray-800 text-amber-700 dark:text-amber-400"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <svg
@@ -93,8 +102,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             href="/work-orders"
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
               isActive("/work-orders")
-                ? "bg-gray-800 text-white"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                ? "bg-amber-50 dark:bg-gray-800 text-amber-700 dark:text-amber-400"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <svg
@@ -116,8 +125,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             href="/kanban"
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
               isActive("/kanban")
-                ? "bg-gray-800 text-white"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                ? "bg-amber-50 dark:bg-gray-800 text-amber-700 dark:text-amber-400"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <svg
@@ -139,8 +148,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             href="/artisans"
             className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
               isActive("/artisans")
-                ? "bg-gray-800 text-white"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                ? "bg-amber-50 dark:bg-gray-800 text-amber-700 dark:text-amber-400"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <svg
@@ -160,17 +169,20 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           </Link>
         </nav>
 
-        {/* User Info & Logout */}
-        <div className="pt-4 border-t border-gray-800">
-          {user && (
-            <div className="mb-3">
-              <p className="text-sm text-white truncate">{user.email}</p>
-              <p className="text-xs text-gray-500">Admin</p>
-            </div>
-          )}
+        {/* Theme Toggle & User Info */}
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-3">
+            {user && (
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-gray-900 dark:text-white truncate">{user.email}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-500">Admin</p>
+              </div>
+            )}
+            <ThemeToggle />
+          </div>
           <button
             onClick={logout}
-            className="w-full flex items-center gap-2 px-3 py-2 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition"
+            className="w-full flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg transition"
           >
             <svg
               className="w-5 h-5"
@@ -191,7 +203,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-gray-950">{children}</main>
+      <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-950 pb-20 md:pb-0">
+        {children}
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 }
