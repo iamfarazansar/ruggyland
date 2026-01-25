@@ -194,7 +194,9 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Orders</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Orders
+          </h1>
           <p className="text-gray-400 mt-1">
             Manage customer orders and create work orders
           </p>
@@ -256,8 +258,8 @@ export default function OrdersPage() {
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-100 dark:bg-gray-800/50">
               <tr>
                 <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -285,7 +287,10 @@ export default function OrdersPage() {
             </thead>
             <tbody className="divide-y divide-gray-800">
               {filteredOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-100 dark:bg-gray-800/50 transition">
+                <tr
+                  key={order.id}
+                  className="hover:bg-gray-100 dark:bg-gray-800/50 transition"
+                >
                   <td className="px-6 py-4">
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">

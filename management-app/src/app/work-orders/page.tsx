@@ -118,7 +118,9 @@ export default function WorkOrdersPage() {
       <div className="p-8 flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading work orders...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading work orders...
+          </p>
         </div>
       </div>
     );
@@ -129,7 +131,9 @@ export default function WorkOrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Work Orders</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Work Orders
+          </h1>
           <p className="text-gray-400 mt-1">Manage production work orders</p>
         </div>
         <a
@@ -259,8 +263,8 @@ export default function WorkOrdersPage() {
           </a>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[700px]">
             <thead className="bg-gray-100 dark:bg-gray-800/50">
               <tr>
                 <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">
