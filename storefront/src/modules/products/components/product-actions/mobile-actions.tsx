@@ -63,6 +63,11 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   const canDec = quantity > 1 && !isAdding
   const canInc = quantity < maxQuantity && !isAdding
 
+  const handleOptionSelect = (optionId: string, value: string) => {
+    updateOptions(optionId, value)
+    close()
+  }
+
   return (
     <>
       <div
@@ -230,7 +235,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                             <OptionSelect
                               option={option}
                               current={options[option.id]}
-                              updateOption={updateOptions}
+                              updateOption={handleOptionSelect}
                               title={option.title ?? ""}
                               disabled={optionsDisabled}
                             />
