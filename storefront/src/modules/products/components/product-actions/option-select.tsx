@@ -19,15 +19,28 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   "data-testid": dataTestId,
   disabled,
 }) => {
-  const filteredOptions = (option.values ?? []).map((v) => v.value)
+  // Sort size options by numeric dimensions (e.g., "2x3 ft" -> 2*3 = 6)
+  const sortBySize = (values: string[]) => {
+    return [...values].sort((a, b) => {
+      const parseSize = (val: string) => {
+        const match = val.match(/(\d+)\s*[x×]\s*(\d+)/i)
+        if (match) {
+          return parseInt(match[1]) * parseInt(match[2])
+        }
+        return 0
+      }
+      return parseSize(a) - parseSize(b)
+    })
+  }
+
+  const rawOptions = (option.values ?? []).map((v) => v.value)
+  const filteredOptions =
+    option.title?.toLowerCase() === "size" ? sortBySize(rawOptions) : rawOptions
 
   return (
     <div className="flex flex-col gap-y-3">
       <span className="text-sm">Select {title}</span>
-      <div
-        className="flex flex-wrap gap-2"
-        data-testid={dataTestId}
-      >
+      <div className="flex flex-wrap gap-2" data-testid={dataTestId}>
         {filteredOptions.map((v) => {
           return (
             <button
