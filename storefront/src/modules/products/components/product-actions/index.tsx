@@ -84,7 +84,7 @@ export default function ProductActions({
     if (value) params.set("v_id", value)
     else params.delete("v_id")
 
-    router.replace(pathname + "?" + params.toString())
+    router.replace(pathname + "?" + params.toString(), { scroll: false })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVariant, isValidVariant])
 
