@@ -127,6 +127,20 @@ const medusaConfig = {
               webhook_id: process.env.PAYPAL_WEBHOOK_ID,
             },
           },
+          ...(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
+            ? [
+                {
+                  resolve: "./src/modules/razorpay",
+                  id: "razorpay",
+                  options: {
+                    key_id: process.env.RAZORPAY_KEY_ID,
+                    key_secret: process.env.RAZORPAY_KEY_SECRET,
+                    webhook_secret: process.env.RAZORPAY_WEBHOOK_SECRET,
+                    auto_capture: true,
+                  },
+                },
+              ]
+            : []),
         ],
       },
     },
