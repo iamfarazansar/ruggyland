@@ -25,13 +25,12 @@ export default function NavMobile({ categories }: { categories: any[] }) {
         )}
       </button>
 
-      {mobileMenu && (
-        <MenuMobile
-          categories={categories}
-          setMobileMenu={setMobileMenu}
-          toggleButtonRef={toggleButtonRef}
-        />
-      )}
+      <MenuMobile
+        categories={categories}
+        setMobileMenu={setMobileMenu}
+        toggleButtonRef={toggleButtonRef}
+        isOpen={mobileMenu}
+      />
     </div>
   )
 }
