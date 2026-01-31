@@ -125,7 +125,7 @@ const Payment = ({
           <Text>
             <button
               onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="text-ui-fg-base underline underline-offset-4 hover:text-ui-fg-muted"
               data-testid="edit-payment-button"
             >
               Edit

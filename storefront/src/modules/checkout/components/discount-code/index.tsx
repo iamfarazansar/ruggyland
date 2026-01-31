@@ -63,10 +63,10 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               type="button"
-              className="txt-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="txt-medium text-ui-fg-base underline underline-offset-4 hover:text-ui-fg-muted"
               data-testid="add-discount-button"
             >
-              Add Promotion Code(s)
+              Have a coupon?
             </button>
 
             {/* <Tooltip content="You can add multiple promotion codes">

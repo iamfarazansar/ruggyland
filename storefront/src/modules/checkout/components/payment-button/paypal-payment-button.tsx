@@ -5,7 +5,6 @@ import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import React, { useState } from "react"
-import ErrorMessage from "../error-message"
 
 type PayPalPaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -13,13 +12,18 @@ type PayPalPaymentButtonProps = {
   "data-testid"?: string
 }
 
+type MessageType = "error" | "info"
+
 const PayPalPaymentButton: React.FC<PayPalPaymentButtonProps> = ({
   cart,
   notReady,
   "data-testid": dataTestId,
 }) => {
   const [submitting, setSubmitting] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [message, setMessage] = useState<{ text: string; type: MessageType } | null>(null)
+
+  const setErrorMessage = (text: string) => setMessage({ text, type: "error" })
+  const setInfoMessage = (text: string) => setMessage({ text, type: "info" })
   const [{ isResolved }] = usePayPalScriptReducer()
 
   const paymentSession = cart.payment_collection?.payment_sessions?.find(
@@ -56,7 +60,7 @@ const PayPalPaymentButton: React.FC<PayPalPaymentButtonProps> = ({
 
   const createOrder = async () => {
     setSubmitting(true)
-    setErrorMessage(null)
+    setMessage(null)
 
     try {
       if (!paymentSession) {
@@ -85,10 +89,10 @@ const PayPalPaymentButton: React.FC<PayPalPaymentButtonProps> = ({
     }
   }
 
-  const onApprove = async (data: { orderID: string }) => {
+  const onApprove = async (_data: { orderID: string }) => {
     try {
       setSubmitting(true)
-      setErrorMessage(null)
+      setMessage(null)
 
       // After PayPal approval, place the order
       // The Medusa server will handle the payment authorization
@@ -108,7 +112,7 @@ const PayPalPaymentButton: React.FC<PayPalPaymentButtonProps> = ({
 
   const onCancel = () => {
     setSubmitting(false)
-    setErrorMessage("PayPal payment was cancelled")
+    setInfoMessage("No worries! Click the button when you're ready to complete your purchase.")
   }
 
   // TODO: add a return statement
@@ -124,10 +128,16 @@ const PayPalPaymentButton: React.FC<PayPalPaymentButtonProps> = ({
         >
           Loading PayPal...
         </Button>
-        <ErrorMessage
-          error={errorMessage}
-          data-testid="paypal-payment-error-message"
-        />
+        {message && (
+          <div
+            className={`pt-2 text-small-regular ${
+              message.type === "error" ? "text-rose-500" : "text-ui-fg-muted"
+            }`}
+            data-testid="paypal-payment-message"
+          >
+            <span>{message.text}</span>
+          </div>
+        )}
       </>
     )
   }
@@ -149,10 +159,16 @@ const PayPalPaymentButton: React.FC<PayPalPaymentButtonProps> = ({
           disabled={notReady || submitting}
         />
       </div>
-      <ErrorMessage
-        error={errorMessage}
-        data-testid="paypal-payment-error-message"
-      />
+      {message && (
+        <div
+          className={`pt-2 text-small-regular ${
+            message.type === "error" ? "text-rose-500" : "text-ui-fg-muted"
+          }`}
+          data-testid="paypal-payment-message"
+        >
+          <span>{message.text}</span>
+        </div>
+      )}
     </>
   )
 }

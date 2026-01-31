@@ -4,7 +4,6 @@ import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import React, { useState, useCallback, useEffect } from "react"
-import ErrorMessage from "../error-message"
 import { sdk } from "@lib/config"
 
 declare global {
@@ -19,14 +18,23 @@ type RazorpayPaymentButtonProps = {
   "data-testid"?: string
 }
 
+type MessageType = "error" | "info"
+
 const RazorpayPaymentButton: React.FC<RazorpayPaymentButtonProps> = ({
   cart,
   notReady,
   "data-testid": dataTestId,
 }) => {
   const [submitting, setSubmitting] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [message, setMessage] = useState<{ text: string; type: MessageType } | null>(null)
   const [razorpayLoaded, setRazorpayLoaded] = useState(false)
+
+  const setErrorMessage = (text: string) => setMessage({ text, type: "error" })
+  const setInfoMessage = (text: string) => setMessage({ text, type: "info" })
+
+  const paymentSession = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.status === "pending"
+  )
 
   // Load Razorpay script
   useEffect(() => {
@@ -42,18 +50,19 @@ const RazorpayPaymentButton: React.FC<RazorpayPaymentButtonProps> = ({
     }
   }, [])
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.status === "pending"
-  )
-
   const onPaymentCompleted = async () => {
-    await placeOrder()
-      .catch((err) => {
-        setErrorMessage(err.message)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
+    try {
+      await placeOrder()
+    } catch (err: any) {
+      // NEXT_REDIRECT is not an error - it's how Next.js handles redirects
+      if (err?.message === "NEXT_REDIRECT" || err?.digest?.startsWith("NEXT_REDIRECT")) {
+        // This is expected - the redirect will happen automatically
+        return
+      }
+      setErrorMessage(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handlePayment = useCallback(async () => {
@@ -68,7 +77,7 @@ const RazorpayPaymentButton: React.FC<RazorpayPaymentButtonProps> = ({
     }
 
     setSubmitting(true)
-    setErrorMessage(null)
+    setMessage(null)
 
     try {
       const razorpayOrderId = paymentSession.data.razorpay_order_id as string
@@ -133,7 +142,7 @@ const RazorpayPaymentButton: React.FC<RazorpayPaymentButtonProps> = ({
         modal: {
           ondismiss: () => {
             setSubmitting(false)
-            setErrorMessage("Payment was cancelled")
+            setInfoMessage("No worries! Click the button when you're ready to complete your purchase.")
           },
         },
       }
@@ -166,10 +175,16 @@ const RazorpayPaymentButton: React.FC<RazorpayPaymentButtonProps> = ({
       >
         {submitting ? "Processing..." : "Pay with Razorpay"}
       </Button>
-      <ErrorMessage
-        error={errorMessage}
-        data-testid="razorpay-payment-error-message"
-      />
+{message && (
+        <div
+          className={`pt-2 text-small-regular ${
+            message.type === "error" ? "text-rose-500" : "text-ui-fg-muted"
+          }`}
+          data-testid="razorpay-payment-message"
+        >
+          <span>{message.text}</span>
+        </div>
+      )}
     </>
   )
 }

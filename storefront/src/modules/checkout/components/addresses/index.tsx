@@ -8,7 +8,7 @@ import { Heading, Text, useToggleState } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useActionState } from "react"
+import { useActionState, useEffect, useRef } from "react"
 import BillingAddress from "../billing_address"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
@@ -37,7 +37,17 @@ const Addresses = ({
     router.push(pathname + "?step=address")
   }
 
-  const [message, formAction] = useActionState(setAddresses, null)
+  const [message, formAction, isPending] = useActionState(setAddresses, null)
+  const prevPendingRef = useRef(false)
+
+  // Navigate to delivery step after successful form submission
+  useEffect(() => {
+    // Detect transition from pending to not pending with no error
+    if (prevPendingRef.current && !isPending && message === null) {
+      router.push(pathname + "?step=delivery", { scroll: false })
+    }
+    prevPendingRef.current = isPending
+  }, [isPending, message, router, pathname])
 
   return (
     <div className="bg-white">
@@ -53,7 +63,7 @@ const Addresses = ({
           <Text>
             <button
               onClick={handleEdit}
-              className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+              className="text-ui-fg-base underline underline-offset-4 hover:text-ui-fg-muted"
               data-testid="edit-address-button"
             >
               Edit

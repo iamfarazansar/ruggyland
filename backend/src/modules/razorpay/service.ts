@@ -61,6 +61,139 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
     });
   }
 
+  /**
+   * Convert amount to smallest currency unit (e.g., paise for INR).
+   * Handles both primitive numbers and BigNumber-like objects.
+   */
+  private toSmallestUnit(amount: unknown): number {
+    let numericValue: number;
+
+    if (typeof amount === "number") {
+      numericValue = amount;
+    } else if (typeof amount === "string") {
+      numericValue = parseFloat(amount);
+    } else if (amount && typeof amount === "object") {
+      // Handle BigNumber-like objects
+      if ("numeric" in amount) {
+        numericValue = (amount as { numeric: number }).numeric;
+      } else if ("value" in amount) {
+        numericValue = Number((amount as { value: unknown }).value);
+      } else {
+        numericValue = Number(amount);
+      }
+    } else {
+      numericValue = Number(amount);
+    }
+
+    if (isNaN(numericValue)) {
+      this.logger_.error(`Invalid amount value: ${JSON.stringify(amount)}`);
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Invalid payment amount"
+      );
+    }
+
+    return Math.round(numericValue * 100);
+  }
+
+  /**
+   * Build order notes object with both medusa_payment_session_id and legacy session_id
+   */
+  private buildOrderNotes(sessionId?: string): Record<string, string> {
+    const notes: Record<string, string> = {};
+    if (sessionId) {
+      notes.medusa_payment_session_id = sessionId;
+      notes.session_id = sessionId; // Legacy fallback
+    }
+    return notes;
+  }
+
+  /**
+   * Attempt to patch Razorpay order notes via REST API.
+   * Does not throw on failure - logs warning instead.
+   */
+  private async patchOrderNotes(
+    orderId: string,
+    notes: Record<string, string>
+  ): Promise<void> {
+    try {
+      const auth = Buffer.from(
+        `${this.options_.key_id}:${this.options_.key_secret}`
+      ).toString("base64");
+
+      const response = await fetch(
+        `https://api.razorpay.com/v1/orders/${orderId}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Basic ${auth}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ notes }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger_.warn(
+          `Failed to patch Razorpay order notes for ${orderId}: ${response.status} - ${errorText}`
+        );
+      }
+    } catch (error: any) {
+      this.logger_.warn(
+        `Failed to patch Razorpay order notes for ${orderId}: ${error.message}`
+      );
+    }
+  }
+
+  /**
+   * Resolve Medusa session ID from webhook payload, fetching order if needed.
+   * Priority: order notes > payment notes > fetch order notes
+   */
+  private async resolveSessionIdFromWebhook(
+    paymentEntity: any,
+    orderEntity: any
+  ): Promise<string> {
+    // 1. Check order entity notes first (preferred source)
+    const orderNotes = orderEntity?.notes;
+    if (orderNotes?.medusa_payment_session_id) {
+      return orderNotes.medusa_payment_session_id;
+    }
+    if (orderNotes?.session_id) {
+      return orderNotes.session_id;
+    }
+
+    // 2. Fallback to payment entity notes
+    const paymentNotes = paymentEntity?.notes;
+    if (paymentNotes?.medusa_payment_session_id) {
+      return paymentNotes.medusa_payment_session_id;
+    }
+    if (paymentNotes?.session_id) {
+      return paymentNotes.session_id;
+    }
+
+    // 3. If payment has order_id but no notes in payload, fetch the order
+    const razorpayOrderId = paymentEntity?.order_id;
+    if (razorpayOrderId) {
+      try {
+        const fetchedOrder = await this.razorpay_.orders.fetch(razorpayOrderId);
+        const fetchedNotes = fetchedOrder?.notes as Record<string, string>;
+        if (fetchedNotes?.medusa_payment_session_id) {
+          return fetchedNotes.medusa_payment_session_id;
+        }
+        if (fetchedNotes?.session_id) {
+          return fetchedNotes.session_id;
+        }
+      } catch (error: any) {
+        this.logger_.warn(
+          `Failed to fetch Razorpay order ${razorpayOrderId} for session resolution: ${error.message}`
+        );
+      }
+    }
+
+    return "";
+  }
+
   static validateOptions(options: Record<any, any>): void | never {
     if (!options.key_id) {
       throw new MedusaError(
@@ -81,6 +214,7 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
   ): Promise<InitiatePaymentOutput> {
     try {
       const { amount, currency_code } = input;
+      const sessionId = input.data?.session_id as string | undefined;
 
       // If this is an update with Razorpay payment response data, preserve it
       if (input.data?.razorpay_payment_id && input.data?.razorpay_signature) {
@@ -96,28 +230,35 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       // If we already have an order, don't create a new one
       if (input.data?.razorpay_order_id) {
+        const existingOrderId = input.data.razorpay_order_id as string;
         this.logger_.info("Payment session already has Razorpay order ID");
+
+        // If session_id is now available but wasn't before, try to patch order notes
+        const existingSessionId = input.data?.medusa_payment_session_id as string;
+        if (sessionId && !existingSessionId) {
+          await this.patchOrderNotes(existingOrderId, this.buildOrderNotes(sessionId));
+        }
+
         return {
-          id: input.data.razorpay_order_id as string,
+          id: existingOrderId,
           data: {
             ...input.data,
+            medusa_payment_session_id: sessionId,
             key_id: this.options_.key_id,
           },
         };
       }
 
-      // Razorpay expects amount in smallest currency unit (paise for INR)
-      const amountInSmallestUnit = Math.round(
-        new BigNumber(amount).numeric * 100
-      );
+      // Convert amount to smallest currency unit (paise for INR)
+      const amountInSmallestUnit = this.toSmallestUnit(amount);
+
+      this.logger_.info(`Creating Razorpay order: amount=${amountInSmallestUnit}, currency=${currency_code}`);
 
       const orderOptions = {
         amount: amountInSmallestUnit,
         currency: currency_code.toUpperCase(),
         receipt: `receipt_${Date.now()}`,
-        notes: {
-          session_id: input.data?.session_id as string,
-        },
+        notes: this.buildOrderNotes(sessionId),
       };
 
       const order = await this.razorpay_.orders.create(orderOptions);
@@ -136,7 +277,8 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
           amount: order.amount,
           currency: order.currency,
           status: order.status,
-          session_id: input.data?.session_id,
+          medusa_payment_session_id: sessionId,
+          session_id: sessionId, // Legacy
           key_id: this.options_.key_id,
         },
       };
@@ -164,7 +306,7 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
         );
       }
 
-      // Verify the payment signature
+      // Verify the payment signature: HMAC_SHA256(key_secret, order_id|payment_id)
       const generatedSignature = crypto
         .createHmac("sha256", this.options_.key_secret)
         .update(`${razorpayOrderId}|${razorpayPaymentId}`)
@@ -274,8 +416,8 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
         );
       }
 
-      // Amount in smallest currency unit
-      const refundAmount = Math.round(new BigNumber(input.amount).numeric * 100);
+      // Convert amount to smallest currency unit
+      const refundAmount = this.toSmallestUnit(input.amount);
 
       const refund = await this.razorpay_.payments.refund(razorpayPaymentId, {
         amount: refundAmount,
@@ -302,22 +444,23 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
   }
 
   async updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
-    // Razorpay doesn't support updating orders once created
-    // We need to create a new order with updated amount
+    // Razorpay doesn't support updating order amount once created
+    // We must create a new order with the updated amount
     try {
       const { amount, currency_code } = input;
+      const sessionId = (input.data?.medusa_payment_session_id ||
+        input.data?.session_id) as string | undefined;
 
-      const amountInSmallestUnit = Math.round(
-        new BigNumber(amount).numeric * 100
-      );
+      // Convert amount to smallest currency unit (paise for INR)
+      const amountInSmallestUnit = this.toSmallestUnit(amount);
+
+      this.logger_.info(`Updating Razorpay order: amount=${amountInSmallestUnit}, currency=${currency_code}`);
 
       const orderOptions = {
         amount: amountInSmallestUnit,
         currency: currency_code.toUpperCase(),
         receipt: `receipt_${Date.now()}`,
-        notes: {
-          session_id: input.data?.session_id as string,
-        },
+        notes: this.buildOrderNotes(sessionId),
       };
 
       const order = await this.razorpay_.orders.create(orderOptions);
@@ -329,6 +472,8 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
           amount: order.amount,
           currency: order.currency,
           status: order.status,
+          medusa_payment_session_id: sessionId,
+          session_id: sessionId, // Legacy
         },
       };
     } catch (error: any) {
@@ -494,11 +639,13 @@ class RazorpayPaymentProviderService extends AbstractPaymentProvider<Options> {
       const paymentEntity = event?.payload?.payment?.entity;
       const orderEntity = event?.payload?.order?.entity;
 
-      const sessionId =
-        paymentEntity?.notes?.session_id ||
-        orderEntity?.notes?.session_id ||
-        "";
+      // Resolve session ID: order notes first, then payment notes, then fetch order
+      const sessionId = await this.resolveSessionIdFromWebhook(
+        paymentEntity,
+        orderEntity
+      );
 
+      // Amount comes from Razorpay in smallest unit (paise), convert to major units
       const amount = new BigNumber(
         (paymentEntity?.amount || orderEntity?.amount || 0) / 100
       );
