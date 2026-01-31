@@ -28,17 +28,26 @@ const categoryImages: Record<string, string> = {
 export default function MenuMobile({
   setMobileMenu,
   categories,
+  toggleButtonRef,
 }: {
   setMobileMenu: (value: boolean) => void
   categories: Category[]
+  toggleButtonRef?: React.RefObject<HTMLButtonElement | null>
 }) {
   const [showCatMenu, setShowCatMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu when tapping anywhere outside the menu card
+  // Close menu when tapping anywhere outside the menu card (and not on toggle button)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+
+      // Ignore clicks on the toggle button (let the button handle its own toggle)
+      if (toggleButtonRef?.current?.contains(target)) {
+        return
+      }
+
+      if (menuRef.current && !menuRef.current.contains(target)) {
         setMobileMenu(false)
       }
     }
@@ -51,7 +60,7 @@ export default function MenuMobile({
       document.removeEventListener("mousedown", handleClickOutside)
       document.removeEventListener("touchstart", handleClickOutside)
     }
-  }, [setMobileMenu])
+  }, [setMobileMenu, toggleButtonRef])
 
   const topLevelCats = useMemo(
     () => (categories || []).filter((c) => !c.parent_category),
