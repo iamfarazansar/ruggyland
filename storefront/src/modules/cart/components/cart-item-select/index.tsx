@@ -33,14 +33,14 @@ export default function CartItemSelect({
         type="button"
         onClick={() => onChange(Math.max(1, value - 1))}
         disabled={decDisabled}
-        className="h-10 w-11 flex items-center justify-center text-ui-fg-base hover:bg-black/[0.04] disabled:opacity-40"
+        className="h-8 w-8 flex items-center justify-center text-ui-fg-base hover:bg-black/[0.04] disabled:opacity-40 text-sm"
         aria-label="Decrease quantity"
       >
         −
       </button>
 
       {/* number */}
-      <div className="h-10 w-12 flex items-center justify-center bg-white text-sm font-semibold text-ui-fg-base border-x border-ui-border-base">
+      <div className="h-8 w-8 flex items-center justify-center bg-white text-sm font-semibold text-ui-fg-base border-x border-ui-border-base">
         {value}
       </div>
 
@@ -49,7 +49,7 @@ export default function CartItemSelect({
         type="button"
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={incDisabled}
-        className="h-10 w-11 flex items-center justify-center text-ui-fg-base hover:bg-black/[0.04] disabled:opacity-40"
+        className="h-8 w-8 flex items-center justify-center text-ui-fg-base hover:bg-black/[0.04] disabled:opacity-40 text-sm"
         aria-label="Increase quantity"
       >
         +

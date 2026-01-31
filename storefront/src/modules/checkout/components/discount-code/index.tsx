@@ -17,7 +17,6 @@ type DiscountCodeProps = {
 }
 
 const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState("")
 
   const { promotions = [] } = cart
@@ -58,47 +57,35 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   return (
     <div className="w-full bg-white flex flex-col">
       <div className="txt-medium">
-        <form action={(a) => addPromotionCode(a)} className="w-full mb-5">
-          <Label className="flex gap-x-1 my-2 items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              type="button"
-              className="txt-medium text-ui-fg-base underline underline-offset-4 hover:text-ui-fg-muted"
-              data-testid="add-discount-button"
-            >
+        <form action={(a) => addPromotionCode(a)} className="w-full mb-2">
+          <Label className="flex gap-x-1 mb-2 items-center">
+            <span className="txt-medium text-ui-fg-base underline underline-offset-4">
               Have a coupon?
-            </button>
-
-            {/* <Tooltip content="You can add multiple promotion codes">
-              <InformationCircleSolid color="var(--fg-muted)" />
-            </Tooltip> */}
+            </span>
           </Label>
 
-          {isOpen && (
-            <>
-              <div className="flex w-full gap-x-2">
-                <Input
-                  className="size-full"
-                  id="promotion-input"
-                  name="code"
-                  type="text"
-                  autoFocus={false}
-                  data-testid="discount-input"
-                />
-                <SubmitButton
-                  variant="secondary"
-                  data-testid="discount-apply-button"
-                >
-                  Apply
-                </SubmitButton>
-              </div>
+          <div className="flex w-full gap-x-2">
+            <Input
+              className="size-full"
+              id="promotion-input"
+              name="code"
+              type="text"
+              autoFocus={false}
+              placeholder="Enter code"
+              data-testid="discount-input"
+            />
+            <SubmitButton
+              variant="secondary"
+              data-testid="discount-apply-button"
+            >
+              Apply
+            </SubmitButton>
+          </div>
 
-              <ErrorMessage
-                error={errorMessage}
-                data-testid="discount-error-message"
-              />
-            </>
-          )}
+          <ErrorMessage
+            error={errorMessage}
+            data-testid="discount-error-message"
+          />
         </form>
 
         {promotions.length > 0 && (

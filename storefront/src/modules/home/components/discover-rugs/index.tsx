@@ -13,7 +13,7 @@ export default function DiscoverRugs({ categories }: Props) {
   const imageByHandle: Record<string, string> = {
     "anime-rugs": "/discover/anime.jpg",
     "modern-rugs": "/discover/modern-rugs.jpg",
-    "floral-rugs": "/discover/floral-rugs.png",
+    "botanical-rugs": "/discover/floral-rugs.png",
     abstract: "/discover/abstract.png",
   }
 
