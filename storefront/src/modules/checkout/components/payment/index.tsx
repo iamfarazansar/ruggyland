@@ -185,18 +185,21 @@ const Payment = ({
           />
 
           <Button
-            size="large"
-            className="mt-6"
             onClick={handleSubmit}
-            isLoading={isLoading}
             disabled={
+              isLoading ||
               (isStripeLike(selectedPaymentMethod) && !cardComplete) ||
               (!selectedPaymentMethod && !paidByGiftcard)
             }
+            size="large"
+            isLoading={isLoading}
+            className="mt-6 w-full"
             data-testid="submit-payment-button"
           >
-            {!activeSession && isStripeLike(selectedPaymentMethod)
-              ? " Enter card details"
+            {isLoading
+              ? "Processing..."
+              : !activeSession && isStripeLike(selectedPaymentMethod)
+              ? "Enter card details"
               : "Continue to review"}
           </Button>
         </div>
