@@ -66,6 +66,7 @@ export async function POST(
             item.quantity > 1 ? `${title} (${i + 1}/${item.quantity})` : title,
           size,
           sku,
+          thumbnail: item.thumbnail || null, // Store product thumbnail
           priority,
           current_stage: "design_approved",
           status: "pending",

@@ -38,6 +38,14 @@ export interface WorkOrder {
   started_at: string | null;
   completed_at: string | null;
   notes: string | null;
+  thumbnail?: string | null;
+  metadata?: {
+    thumbnail?: string;
+    color?: string;
+    material?: string;
+    pattern?: string;
+    customizations?: Record<string, any>;
+  };
   created_at: string;
   updated_at: string;
   stages?: WorkOrderStage[];
@@ -78,6 +86,90 @@ export interface Artisan {
   completed_orders: number;
   average_rating: number | null;
 }
+
+/**
+ * Type definitions for Inventory/Raw Materials module
+ */
+
+export type MaterialCategory =
+  | "yarn"
+  | "backing"
+  | "supplies"
+  | "tools"
+  | "chemicals";
+export type MaterialUnit = "kg" | "meters" | "pieces" | "liters" | "rolls";
+export type MovementType = "in" | "out" | "adjust";
+
+export interface Material {
+  id: string;
+  name: string;
+  sku: string | null;
+  description: string | null;
+  category: MaterialCategory;
+  unit: MaterialUnit;
+  current_stock: number;
+  min_stock_level: number;
+  cost_per_unit: number;
+  color: string | null;
+  weight_type: string | null;
+  supplier_id: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contact_person: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  country: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StockMovement {
+  id: string;
+  material_id: string;
+  type: MovementType;
+  quantity: number;
+  reason: string | null;
+  notes: string | null;
+  work_order_id: string | null;
+  created_by: string | null;
+  stock_before: number;
+  stock_after: number;
+  created_at: string;
+}
+
+export const MATERIAL_CATEGORY_LABELS: Record<MaterialCategory, string> = {
+  yarn: "Yarn",
+  backing: "Backing",
+  supplies: "Supplies",
+  tools: "Tools",
+  chemicals: "Chemicals",
+};
+
+export const MATERIAL_CATEGORY_COLORS: Record<MaterialCategory, string> = {
+  yarn: "bg-purple-500",
+  backing: "bg-orange-500",
+  supplies: "bg-blue-500",
+  tools: "bg-gray-500",
+  chemicals: "bg-yellow-500",
+};
+
+export const MATERIAL_UNIT_LABELS: Record<MaterialUnit, string> = {
+  kg: "Kilograms",
+  meters: "Meters",
+  pieces: "Pieces",
+  liters: "Liters",
+  rolls: "Rolls",
+};
 
 export const STAGE_LABELS: Record<ManufacturingStage, string> = {
   design_approved: "Design Approved",

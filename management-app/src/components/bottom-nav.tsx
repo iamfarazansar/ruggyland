@@ -161,7 +161,55 @@ const navItems: NavItem[] = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={1.5}
-          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+        />
+      </svg>
+    ),
+    activeIcon: (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/inventory",
+    label: "Inventory",
+    icon: (
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+        />
+      </svg>
+    ),
+    activeIcon: (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/purchase-orders",
+    label: "POs",
+    icon: (
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
         />
       </svg>
     ),
@@ -169,10 +217,37 @@ const navItems: NavItem[] = [
       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
         <path
           fillRule="evenodd"
-          d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372-.568 6.787 6.787 0 011.019-4.38z"
+          d="M10.5 3A1.501 1.501 0 009 4.5h6A1.5 1.5 0 0013.5 3h-3zm-2.693.178A3 3 0 0110.5 1.5h3a3 3 0 012.694 1.678c.497.042.98.152 1.435.328a4.5 4.5 0 012.871 4.202V18.5a3 3 0 01-3 3h-11a3 3 0 01-3-3V7.708a4.5 4.5 0 012.871-4.202 5.006 5.006 0 011.435-.328zM10.5 9a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 0110.5 9zm.75 2.25a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5h-1.5zM9 12a.75.75 0 01-.75.75h-.001a.75.75 0 010-1.5H8.25A.75.75 0 019 12zm-.75 2.25a.75.75 0 000 1.5h-.001a.75.75 0 010-1.5h.001z"
           clipRule="evenodd"
         />
-        <path d="M5.082 14.254a8.287 8.287 0 00-1.308 5.135 9.687 9.687 0 01-1.764-.44l-.115-.04a.563.563 0 01-.373-.487l-.01-.121a3.75 3.75 0 013.57-4.047zM20.226 19.389a8.287 8.287 0 00-1.308-5.135 3.75 3.75 0 013.57 4.047l-.01.121a.563.563 0 01-.373.486l-.115.04c-.567.2-1.156.349-1.764.441z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/finance",
+    label: "Finance",
+    icon: (
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+    activeIcon: (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path
+          fillRule="evenodd"
+          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v.816a3.128 3.128 0 00-1.071.197 2.598 2.598 0 00-1.463 1.462.75.75 0 001.398.544c.082-.21.247-.384.478-.524.243-.148.555-.241.908-.257V10.5l-.239.07c-.404.118-.774.24-1.09.402C9.604 11.262 9 11.843 9 12.75c0 .467.168.854.434 1.158.268.306.642.524 1.054.672.288.103.61.183.962.242v2.42a3.466 3.466 0 01-.985-.29c-.296-.14-.553-.336-.748-.59a.75.75 0 00-1.166.948c.343.422.79.752 1.304.985.514.234 1.074.37 1.595.42v.582a.75.75 0 001.5 0v-.582c.521-.05 1.08-.186 1.595-.42a2.999 2.999 0 001.304-.985.75.75 0 00-1.166-.948 1.968 1.968 0 01-.748.59c-.29.137-.616.243-.985.29V13.5l.239-.07c.404-.118.774-.24 1.09-.402.569-.29 1.171-.872 1.171-1.778 0-.467-.168-.854-.434-1.158a2.598 2.598 0 00-1.054-.672 6.052 6.052 0 00-.962-.242V6z"
+          clipRule="evenodd"
+        />
       </svg>
     ),
   },
@@ -188,27 +263,29 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 safe-bottom z-50">
-      <div className="flex justify-around items-center h-16">
-        {navItems.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-lg transition-colors",
-                active
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
-              )}
-            >
-              {active && item.activeIcon ? item.activeIcon : item.icon}
-              <span className="text-[10px] mt-0.5 font-medium">
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex items-center h-16 px-2 min-w-max">
+          {navItems.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center min-w-[64px] min-h-[44px] py-1 px-3 rounded-lg transition-colors flex-shrink-0",
+                  active
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
+                )}
+              >
+                {active && item.activeIcon ? item.activeIcon : item.icon}
+                <span className="text-[10px] mt-0.5 font-medium">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

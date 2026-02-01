@@ -88,6 +88,12 @@ const medusaConfig = {
       resolve: "./src/modules/manufacturing",
     },
     {
+      resolve: "./src/modules/raw_materials",
+    },
+    {
+      resolve: "./src/modules/finance",
+    },
+    {
       resolve: "@medusajs/medusa/file",
       options: {
         providers: [

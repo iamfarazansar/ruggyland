@@ -52,6 +52,7 @@ export const WorkOrder = model.define("work_order", {
   title: model.text(),
   size: model.text().nullable(), // e.g., "5x7 ft"
   sku: model.text().nullable(),
+  thumbnail: model.text().nullable(), // Product image URL
 
   // Production tracking
   current_stage: model.text().default("design_approved"),

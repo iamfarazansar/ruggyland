@@ -1,8 +1,8 @@
 import { model } from "@medusajs/framework/utils";
 
 /**
- * WorkOrderMedia model - Photos attached to work orders
- * Can be linked to specific stages or general work order photos
+ * WorkOrderMedia model - Photos and files attached to work orders
+ * Can be linked to specific stages or general work order files
  */
 export const WorkOrderMedia = model.define("work_order_media", {
   id: model.id().primaryKey(),
@@ -15,7 +15,8 @@ export const WorkOrderMedia = model.define("work_order_media", {
 
   // Media info
   url: model.text(), // S3/MinIO URL
-  type: model.text().default("image"), // image, video
+  type: model.text().default("image"), // image, video, file
+  category: model.text().default("reference"), // cad, reference, progress, qc
   caption: model.text().nullable(),
 
   // Upload info

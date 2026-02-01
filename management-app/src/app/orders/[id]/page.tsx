@@ -112,6 +112,12 @@ export default function OrderDetailPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [receivedAmountInr, setReceivedAmountInr] = useState<number | null>(
+    null,
+  );
+  const [editingReceivedAmount, setEditingReceivedAmount] = useState(false);
+  const [newReceivedAmount, setNewReceivedAmount] = useState("");
+  const [savingReceivedAmount, setSavingReceivedAmount] = useState(false);
 
   const orderId = params.id as string;
 
@@ -119,6 +125,7 @@ export default function OrderDetailPage() {
     if (isAuthenticated && token && orderId) {
       fetchOrder();
       fetchWorkOrders();
+      fetchReceivedAmount();
     }
   }, [isAuthenticated, token, orderId]);
 
@@ -127,12 +134,38 @@ export default function OrderDetailPage() {
     setError(null);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/admin/orders/${orderId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      // Explicitly request currency_code and other necessary fields
+      const fields = [
+        "id",
+        "display_id",
+        "email",
+        "status",
+        "payment_status",
+        "fulfillment_status",
+        "currency_code",
+        "total",
+        "subtotal",
+        "tax_total",
+        "shipping_total",
+        "discount_total",
+        "created_at",
+        "*customer",
+        "*items",
+        "*shipping_address",
+        "*billing_address",
+        "*shipping_methods",
+        "*fulfillments",
+      ].join(",");
+
+      const response = await fetch(
+        `${BACKEND_URL}/admin/orders/${orderId}?fields=${encodeURIComponent(fields)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -166,6 +199,69 @@ export default function OrderDetailPage() {
       }
     } catch (err) {
       console.error("Error fetching work orders:", err);
+    }
+  };
+
+  const fetchReceivedAmount = async () => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/admin/orders/${orderId}/received-amount`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.received_amount_inr) {
+          setReceivedAmountInr(data.received_amount_inr);
+          setNewReceivedAmount(data.received_amount_inr.toString());
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching received amount:", err);
+    }
+  };
+
+  const saveReceivedAmount = async () => {
+    const amount = parseFloat(newReceivedAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setActionMessage({ type: "error", text: "Please enter a valid amount" });
+      return;
+    }
+
+    setSavingReceivedAmount(true);
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/admin/orders/${orderId}/received-amount`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ received_amount_inr: amount }),
+        },
+      );
+
+      if (response.ok) {
+        setReceivedAmountInr(amount);
+        setEditingReceivedAmount(false);
+        setActionMessage({ type: "success", text: "✅ Received amount saved" });
+      } else {
+        throw new Error("Failed to save");
+      }
+    } catch (err) {
+      console.error("Error saving received amount:", err);
+      setActionMessage({
+        type: "error",
+        text: "Failed to save received amount",
+      });
+    } finally {
+      setSavingReceivedAmount(false);
     }
   };
 
@@ -672,6 +768,77 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Finance Panel - Track received amount for foreign currency orders only */}
+          {order && order.currency_code?.toLowerCase() !== "inr" && (
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                💰 Finance
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-gray-500">Order Total</p>
+                  <p className="text-lg font-medium text-gray-900 dark:text-white">
+                    {formatCurrency(order.total, order.currency_code)}
+                  </p>
+                </div>
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-gray-500">
+                      Received in INR (after PayPal fees)
+                    </p>
+                    {!editingReceivedAmount && (
+                      <button
+                        onClick={() => setEditingReceivedAmount(true)}
+                        className="text-xs text-amber-500 hover:text-amber-400"
+                      >
+                        {receivedAmountInr ? "Edit" : "Add"}
+                      </button>
+                    )}
+                  </div>
+                  {editingReceivedAmount ? (
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        value={newReceivedAmount}
+                        onChange={(e) => setNewReceivedAmount(e.target.value)}
+                        placeholder="Enter INR amount"
+                        className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm"
+                      />
+                      <button
+                        onClick={saveReceivedAmount}
+                        disabled={savingReceivedAmount}
+                        className="px-3 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm rounded-lg"
+                      >
+                        {savingReceivedAmount ? "..." : "Save"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingReceivedAmount(false);
+                          setNewReceivedAmount(
+                            receivedAmountInr?.toString() || "",
+                          );
+                        }}
+                        className="px-3 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-lg font-bold text-green-500">
+                      {receivedAmountInr
+                        ? `₹${receivedAmountInr.toLocaleString()}`
+                        : "Not set"}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-2">
+                    This is the actual INR received after PayPal conversion and
+                    fees. Used for accurate revenue reporting.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Customer */}
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">

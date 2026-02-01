@@ -3,12 +3,14 @@ import { WorkOrder, MANUFACTURING_STAGES } from "./models/work-order";
 import { WorkOrderStage } from "./models/work-order-stage";
 import { WorkOrderMedia } from "./models/work-order-media";
 import { Artisan } from "./models/artisan";
+import { WorkOrderArtisan } from "./models/work-order-artisan";
 
 class ManufacturingService extends MedusaService({
   WorkOrder,
   WorkOrderStage,
   WorkOrderMedia,
   Artisan,
+  WorkOrderArtisan,
 }) {
   /**
    * Get the next stage in the manufacturing process
