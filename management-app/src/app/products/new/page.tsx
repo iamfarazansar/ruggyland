@@ -62,6 +62,9 @@ export default function CreateProductPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [tags, setTags] = useState<string>("");
   const [shippingProfileId, setShippingProfileId] = useState("");
+  const [availableShippingProfiles, setAvailableShippingProfiles] = useState<
+    { id: string; name: string }[]
+  >([]);
   const [salesChannels, setSalesChannels] = useState<SalesChannel[]>([]);
   const [availableSalesChannels, setAvailableSalesChannels] = useState<
     SalesChannel[]
@@ -126,6 +129,7 @@ export default function CreateProductPage() {
         salesChannelsRes,
         storeRes,
         regionsRes,
+        shippingProfilesRes,
       ] = await Promise.all([
         fetch(`${BACKEND_URL}/admin/product-categories?limit=100`, {
           headers,
@@ -143,6 +147,9 @@ export default function CreateProductPage() {
           headers,
         }).catch(() => null),
         fetch(`${BACKEND_URL}/admin/regions?limit=100`, {
+          headers,
+        }).catch(() => null),
+        fetch(`${BACKEND_URL}/admin/shipping-profiles?limit=100`, {
           headers,
         }).catch(() => null),
       ]);
@@ -221,6 +228,18 @@ export default function CreateProductPage() {
           currency_code: r.currency_code,
         }));
         setRegions(regionsList);
+      }
+
+      // Parse shipping profiles
+      if (shippingProfilesRes?.ok) {
+        const shippingProfilesData = await shippingProfilesRes.json();
+        const profiles = (shippingProfilesData.shipping_profiles || []).map(
+          (sp: any) => ({
+            id: sp.id,
+            name: sp.name,
+          }),
+        );
+        setAvailableShippingProfiles(profiles);
       }
 
       // Initialize default variant with prices for all currencies
@@ -758,6 +777,7 @@ export default function CreateProductPage() {
               .map((t) => t.trim())
               .filter((t) => t)
           : undefined,
+        shipping_profile_id: shippingProfileId || undefined,
         sales_channels:
           salesChannels.length > 0
             ? salesChannels.map((sc) => sc.id)
@@ -896,7 +916,9 @@ export default function CreateProductPage() {
         {currentTab === Tab.DETAILS && (
           <div className="flex flex-col items-center p-8 md:p-16">
             <div className="w-full max-w-[720px] flex flex-col gap-y-8">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">General</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                General
+              </h2>
 
               {/* General info */}
               <div className="flex flex-col gap-y-6">
@@ -1068,7 +1090,9 @@ export default function CreateProductPage() {
 
               {/* Variants toggle */}
               <div className="flex flex-col gap-y-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Variants</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Variants
+                </h2>
                 <div className="flex items-start gap-4 p-4 bg-gray-800 rounded-lg">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -1099,7 +1123,9 @@ export default function CreateProductPage() {
         {currentTab === Tab.ORGANIZE && (
           <div className="flex flex-col items-center p-8 md:p-16">
             <div className="w-full max-w-[720px] flex flex-col gap-y-8">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Organize</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Organize
+              </h2>
 
               {/* Discountable toggle */}
               <div className="flex items-start gap-4 p-4 bg-gray-800 rounded-lg">
@@ -1200,6 +1226,33 @@ export default function CreateProductPage() {
                   <p className="text-xs text-gray-500 mt-1">
                     Comma-separated tags
                   </p>
+                </div>
+              </div>
+
+              {/* Shipping Profile */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Shipping profile{" "}
+                    <span className="text-gray-500">(Optional)</span>
+                  </label>
+                  <p className="text-xs text-gray-500">
+                    Connect the product to a shipping profile
+                  </p>
+                </div>
+                <div>
+                  <select
+                    value={shippingProfileId}
+                    onChange={(e) => setShippingProfileId(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select shipping profile</option>
+                    {availableShippingProfiles.map((sp) => (
+                      <option key={sp.id} value={sp.id}>
+                        {sp.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -1446,7 +1499,10 @@ export default function CreateProductPage() {
                 </thead>
                 <tbody>
                   {variants.map((variant, index) => (
-                    <tr key={index} className="border-b border-gray-200 dark:border-gray-700">
+                    <tr
+                      key={index}
+                      className="border-b border-gray-200 dark:border-gray-700"
+                    >
                       <td className="px-4 py-3 w-32">
                         <input
                           type="text"
