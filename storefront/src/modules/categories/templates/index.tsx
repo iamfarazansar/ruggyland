@@ -7,6 +7,7 @@ import RefinementList from "@modules/store/components/refinement-list"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import MobileBackButton from "@modules/common/components/mobile-back-button"
 import { HttpTypes } from "@medusajs/types"
 
 export default function CategoryTemplate({
@@ -41,6 +42,9 @@ export default function CategoryTemplate({
       className="flex flex-col py-6 content-container"
       data-testid="category-container"
     >
+      {/* Mobile Back Button */}
+      <MobileBackButton />
+
       <div className="w-full">
         <div className="mb-8">
           {/* Breadcrumb */}

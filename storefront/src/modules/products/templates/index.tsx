@@ -8,6 +8,7 @@ import ProductInfo from "@modules/products/templates/product-info"
 import ProductActions from "@modules/products/components/product-actions"
 import RelatedProducts from "@modules/products/components/related-products"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
+import MobileBackButton from "@modules/common/components/mobile-back-button"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 
@@ -30,6 +31,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
     <>
       {/* TOP GRID */}
       <div className="content-container py-6" data-testid="product-container">
+        {/* Mobile Back Button */}
+        <MobileBackButton />
+
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
           {/* LEFT: Gallery */}
           <div className="lg:col-span-7">
