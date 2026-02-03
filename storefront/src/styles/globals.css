@@ -88,6 +88,9 @@ body {
   .productCarousel.carousel-root {
     flex-direction: column;
   }
+  .productCarousel.carousel-root .carousel .thumbs {
+    padding-right: 20px; /* Prevents last thumbnail from being cut off */
+  }
   .productCarousel.carousel-root .carousel .thumb {
     border: 0;
     padding: 0;
