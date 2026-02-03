@@ -1,5 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import generateProductFeedWorkflow from "../../workflows/generate-product-feed";
+import { generateProductFeedWorkflow } from "../../workflows/generate-product-feed";
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const { currency_code, country_code } = req.validatedQuery as {
@@ -15,5 +15,5 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   });
 
   res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
-  res.status(200).send(result.xml);
+  res.status(200).send(result);
 }
