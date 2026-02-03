@@ -2,7 +2,9 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import {
   defineMiddlewares,
   validateAndTransformBody,
+  validateAndTransformQuery,
 } from "@medusajs/framework/http";
+import { z } from "@medusajs/framework/zod";
 import type { NextFunction } from "express";
 import multer from "multer";
 
@@ -116,6 +118,20 @@ export default defineMiddlewares({
       bodyParser: {
         sizeLimit: 50 * 1024 * 1024, // 50MB limit
       },
+    },
+    {
+      // Product feed for Meta/Google
+      matcher: "/product-feed",
+      method: "GET",
+      middlewares: [
+        validateAndTransformQuery(
+          z.object({
+            currency_code: z.string(),
+            country_code: z.string(),
+          }),
+          {},
+        ),
+      ],
     },
   ],
 });
