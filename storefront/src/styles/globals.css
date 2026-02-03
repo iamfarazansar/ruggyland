@@ -81,7 +81,6 @@ body {
 .productCarousel.carousel-root .carousel .thumb.selected:after {
   opacity: 0.2;
 }
-/* Hide arrows on desktop, show on mobile */
 .productCarousel .control-arrow {
   display: none;
 }
@@ -92,53 +91,6 @@ body {
   .productCarousel.carousel-root .carousel .thumb {
     border: 0;
     padding: 0;
-  }
-  /* Make the main slider swipeable */
-  .productCarousel.carousel-root .carousel.carousel-slider {
-    touch-action: pan-y pinch-zoom;
-  }
-  .productCarousel.carousel-root .carousel.carousel-slider .slider-wrapper {
-    overflow: hidden;
-  }
-  .productCarousel.carousel-root .carousel.carousel-slider .slider {
-    touch-action: pan-x;
-  }
-  /* Thumbnail scrolling on mobile */
-  .productCarousel.carousel-root .carousel .thumbs-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .productCarousel.carousel-root .carousel .thumbs-wrapper::-webkit-scrollbar {
-    display: none;
-  }
-  .productCarousel.carousel-root .carousel .thumbs {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    transform: none !important;
-    padding: 8px 0;
-  }
-  .productCarousel.carousel-root .carousel .thumb {
-    flex-shrink: 0;
-    width: 60px !important;
-    height: 60px;
-  }
-  /* Show arrows on mobile for navigation */
-  .productCarousel .control-arrow {
-    display: flex !important;
-    background: rgba(0, 0, 0, 0.4) !important;
-    opacity: 1 !important;
-    width: 40px;
-    height: 40px;
-    top: 50%;
-    transform: translateY(-50%);
-    border-radius: 50%;
-    margin: 0 8px;
-  }
-  .productCarousel .control-arrow:hover {
-    background: rgba(0, 0, 0, 0.6) !important;
   }
 }
 @media screen and (min-width: 768px) {
