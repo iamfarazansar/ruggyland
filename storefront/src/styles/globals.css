@@ -33,6 +33,23 @@ body {
   max-width: 100vw;
 }
 
+/* EMBLA HERO CAROUSEL STYLING START */
+.embla-hero {
+  overflow: hidden;
+}
+
+.embla-hero__container {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+}
+
+.embla-hero__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  position: relative;
+}
+/* EMBLA HERO CAROUSEL STYLING END */
+
 /* EMBLA PRODUCT CAROUSEL STYLING START */
 .embla-product {
   --thumb-size: 60px;

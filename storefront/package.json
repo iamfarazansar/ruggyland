@@ -46,6 +46,7 @@
     "@vercel/analytics": "^1.6.1",
     "algoliasearch": "^4.20.0",
     "axios": "^1.12.0",
+    "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "lodash": "^4.17.21",
     "medusajs-launch-utils": "0.0.18",
