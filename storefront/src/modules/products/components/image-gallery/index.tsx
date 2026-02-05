@@ -32,6 +32,21 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
     }
   }, [selectedIndex, isMobile])
 
+  // Custom render for carousel thumbnails to use Next.js Image
+  const renderThumbs = () => {
+    return images.map((img) => (
+      <div key={img.id} style={{ width: 60, height: 60, position: "relative" }}>
+        <Image
+          src={img.url}
+          alt="Thumbnail"
+          fill
+          sizes="60px"
+          style={{ objectFit: "cover" }}
+        />
+      </div>
+    ))
+  }
+
   return (
     <div className="text-white text-[20px] w-full max-w-[1360px] mx-auto sticky top-[50px]">
       <Carousel
@@ -43,9 +58,22 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
         showThumbs={!isMobile}
         selectedItem={selectedIndex}
         onChange={(index) => setSelectedIndex(index)}
+        renderThumbs={renderThumbs}
       >
         {images.map((img) => (
-          <img key={img.id} src={img.url} alt="Product image" />
+          <div
+            key={img.id}
+            style={{ position: "relative", aspectRatio: "1/1" }}
+          >
+            <Image
+              src={img.url}
+              alt="Product image"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority={images.indexOf(img) === 0}
+              style={{ objectFit: "contain" }}
+            />
+          </div>
         ))}
       </Carousel>
 
@@ -81,16 +109,15 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
                 padding: 0,
                 background: "none",
                 cursor: "pointer",
+                position: "relative",
               }}
             >
-              <img
+              <Image
                 src={img.url}
                 alt={`Thumbnail ${index + 1}`}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
+                fill
+                sizes="60px"
+                style={{ objectFit: "cover" }}
               />
             </button>
           ))}
