@@ -57,6 +57,9 @@ importers:
       axios:
         specifier: ^1.12.0
         version: 1.13.2
+      embla-carousel-react:
+        specifier: ^8.6.0
+        version: 8.6.0(react@18.2.0)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -96,9 +99,6 @@ importers:
       react-razorpay:
         specifier: ^3.0.1
         version: 3.0.1(react@18.2.0)
-      react-responsive-carousel:
-        specifier: ^3.2.23
-        version: 3.2.23
       react-swipeable:
         specifier: ^7.0.2
         version: 7.0.2(react@18.2.0)
@@ -2391,9 +2391,6 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
-  classnames@2.5.1:
-    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
-
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
 
@@ -2544,6 +2541,19 @@ packages:
 
   electron-to-chromium@1.5.75:
     resolution: {integrity: sha512-Lf3++DumRE/QmweGjU+ZcKqQ+3bKkU/qjaKYhIJKEOhgIO9Xs6IiAQFkfFoj+RhgDk4LUeNsLo6plExHqSyu6Q==}
+
+  embla-carousel-react@8.6.0:
+    resolution: {integrity: sha512-0/PjqU7geVmo6F734pmPqpyHqiM99olvyecY7zdweCw+6tKEXnrE90pBiBbMMU8s5tICemzpQ3hi5EpxzGW+JA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.1 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+
+  embla-carousel-reactive-utils@8.6.0:
+    resolution: {integrity: sha512-fMVUDUEx0/uIEDM0Mz3dHznDhfX+znCCDCeIophYb1QGVM7YThSWX+wz11zlYwWFOr74b4QLGg0hrGPJeG2s4A==}
+    peerDependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel@8.6.0:
+    resolution: {integrity: sha512-SjWyZBHJPbqxHOzckOfo8lHisEaJWmwd23XppYFYVh10bU66/Pn5tkVkbkCMZVdbUE5eTCI2nD8OyIP4Z+uwkA==}
 
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
@@ -3630,10 +3640,6 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  react-easy-swipe@0.0.21:
-    resolution: {integrity: sha512-OeR2jAxdoqUMHIn/nS9fgreI5hSpgGoL5ezdal4+oO7YSSgJR8ga+PkYGJrSrJ9MKlPcQjMQXnketrD7WNmNsg==}
-    engines: {node: '>= 6'}
-
   react-hook-form@7.54.2:
     resolution: {integrity: sha512-eHpAUgUjWbZocoQYUHposymRb4ZP6d0uwUnooL2uOybA9/3tPUvoAKqEWK1WaSiTxxOfTpffNZP7QwlnM3/gEg==}
     engines: {node: '>=18.0.0'}
@@ -3702,9 +3708,6 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
-
-  react-responsive-carousel@3.2.23:
-    resolution: {integrity: sha512-pqJLsBaKHWJhw/ItODgbVoziR2z4lpcJg+YwmRlSk4rKH32VE633mAtZZ9kDXjy4wFO+pgUZmDKPsPe1fPmHCg==}
 
   react-stately@3.34.0:
     resolution: {integrity: sha512-0N9tZ8qQ/CxpJH7ao0O6gr+8955e7VrOskg9N+TIxkFknPetwOCtgppMYhnTfteBV8WfM/vv4OC1NbkgYTqXJA==}
@@ -6970,8 +6973,6 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
-  classnames@2.5.1: {}
-
   client-only@0.0.1: {}
 
   clsx@1.2.1: {}
@@ -7100,6 +7101,18 @@ snapshots:
       gopd: 1.2.0
 
   electron-to-chromium@1.5.75: {}
+
+  embla-carousel-react@8.6.0(react@18.2.0):
+    dependencies:
+      embla-carousel: 8.6.0
+      embla-carousel-reactive-utils: 8.6.0(embla-carousel@8.6.0)
+      react: 18.2.0
+
+  embla-carousel-reactive-utils@8.6.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel@8.6.0: {}
 
   emoji-regex@9.2.2: {}
 
@@ -8380,10 +8393,6 @@ snapshots:
       react: 18.2.0
       scheduler: 0.23.2
 
-  react-easy-swipe@0.0.21:
-    dependencies:
-      prop-types: 15.8.1
-
   react-hook-form@7.54.2(react@18.2.0):
     dependencies:
       react: 18.2.0
@@ -8446,12 +8455,6 @@ snapshots:
       use-sidecar: 1.1.3(@types/react@18.3.18)(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.3.18
-
-  react-responsive-carousel@3.2.23:
-    dependencies:
-      classnames: 2.5.1
-      prop-types: 15.8.1
-      react-easy-swipe: 0.0.21
 
   react-stately@3.34.0(react@18.2.0):
     dependencies:

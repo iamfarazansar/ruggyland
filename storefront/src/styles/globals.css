@@ -33,100 +33,152 @@ body {
   max-width: 100vw;
 }
 
-/* PRODUCT DETAILS CAROUSEL STYLING CUSTOMIZATION START */
-.productCarousel.carousel-root {
+/* EMBLA PRODUCT CAROUSEL STYLING START */
+.embla-product {
+  --thumb-size: 60px;
+  --thumb-height: 48px; /* 5:4 ratio for thumbnails */
+}
+
+.embla-product__wrapper {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: column;
   gap: 15px;
 }
-.productCarousel.carousel-root .carousel {
-  width: auto;
+
+@media screen and (min-width: 768px) {
+  .embla-product__wrapper {
+    flex-direction: row;
+  }
 }
-.productCarousel.carousel-root .carousel.carousel-slider {
-  width: 100%;
-}
-.productCarousel.carousel-root .carousel.carousel-slider .slider-wrapper {
+
+/* Main carousel */
+.embla-product__main {
+  overflow: hidden;
+  flex: 1;
   border-radius: 10px;
 }
-.productCarousel.carousel-root .carousel .thumbs-wrapper {
-  margin: 0;
+
+.embla-product__main-container {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
 }
-.productCarousel.carousel-root .carousel .thumb {
-  height: 60px;
+
+.embla-product__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.embla-product__slide-wrapper {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.embla-product__slide-image {
+  object-fit: cover;
+}
+
+/* Desktop thumbnails - vertical on left (hidden on mobile) */
+.embla-product__thumbs {
+  display: none;
+  width: var(--thumb-size);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+@media screen and (min-width: 768px) {
+  .embla-product__thumbs {
+    display: block;
+  }
+}
+
+.embla-product__thumbs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.embla-product__thumb {
+  width: var(--thumb-size);
+  height: var(--thumb-height);
   border-radius: 6px;
   overflow: hidden;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  background: none;
   position: relative;
+  flex-shrink: 0;
+  outline: none;
 }
-.productCarousel.carousel-root .carousel .thumb img {
+
+.embla-product__thumb::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.embla-product__thumb:hover::after,
+.embla-product__thumb--selected::after {
+  opacity: 0.2;
+}
+
+.embla-product__thumb-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
 }
-.productCarousel.carousel-root .carousel .thumb:after {
-  content: "";
+
+/* Mobile thumbnails - horizontal below (hidden on desktop) */
+.embla-product__thumbs-mobile {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  padding-right: 20px;
+}
+
+@media screen and (min-width: 768px) {
+  .embla-product__thumbs-mobile {
+    display: none;
+  }
+}
+
+.embla-product__thumb-mobile {
+  flex-shrink: 0;
+  width: var(--thumb-size);
+  height: var(--thumb-height);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  outline: none;
+}
+
+.embla-product__thumb-mobile--selected {
+  border-color: #000;
+}
+
+.embla-product__thumb-mobile-image {
   width: 100%;
   height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: black;
-  opacity: 0;
+  object-fit: cover;
 }
-.productCarousel.carousel-root .carousel .thumb.selected,
-.productCarousel.carousel-root .carousel .thumb:hover {
-  border: 0;
-}
-.productCarousel.carousel-root .carousel .thumb:hover:after,
-.productCarousel.carousel-root .carousel .thumb.selected:after {
-  opacity: 0.2;
-}
-.productCarousel .control-arrow {
-  display: none;
-}
-@media screen and (max-width: 767px) {
-  .productCarousel.carousel-root {
-    flex-direction: column;
-  }
-  .productCarousel.carousel-root .carousel .thumbs-wrapper {
-    overflow: visible;
-  }
-  .productCarousel.carousel-root .carousel .thumbs {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto !important;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
-    scroll-behavior: smooth;
-    scroll-snap-type: x mandatory;
-    padding-right: 20px; /* Prevents last thumbnail from being cut off */
-    padding-bottom: 10px; /* Space for scroll indicator if visible */
-    transform: none !important; /* Prevent library from overriding scroll position */
-    touch-action: pan-x !important; /* Force native horizontal scroll, prevent JS hijacking */
-  }
-  .productCarousel.carousel-root .carousel .thumb {
-    border: 0;
-    padding: 0;
-    flex-shrink: 0; /* Prevent thumbnails from shrinking */
-    scroll-snap-align: start;
-    touch-action: pan-x !important; /* Allow horizontal scroll on thumbs */
-    pointer-events: auto; /* Ensure clicks work */
-  }
-}
-@media screen and (min-width: 768px) {
-  .productCarousel.carousel-root .carousel .thumbs {
-    transform: none !important;
-    flex-direction: column;
-    display: flex;
-    gap: 10px;
-  }
-  .productCarousel.carousel-root .carousel .thumb {
-    border: 0;
-    padding: 0;
-    margin: 0;
-  }
-}
-/* PRODUCT DETAILS CAROUSEL STYLING CUSTOMIZATION END */
+/* EMBLA PRODUCT CAROUSEL STYLING END */
 
 .markdown ul {
   margin: 0;
