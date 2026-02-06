@@ -129,7 +129,25 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           </div>
 
           {/* BOTTOM CARDS (same row on desktop) */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 flex flex-col gap-6">
+            {product.description && (
+              <div className="rounded-2xl border border-ui-border-base bg-white shadow-sm">
+                <div className="border-b border-ui-border-base px-6 py-4">
+                  <h3 className="text-lg font-semibold text-ui-fg-base">
+                    Description
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <p
+                    className="text-sm text-ui-fg-subtle leading-relaxed"
+                    data-testid="product-description"
+                  >
+                    {product.description}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="rounded-2xl border border-ui-border-base bg-white shadow-sm">
               <div className="border-b border-ui-border-base px-6 py-4">
                 <h3 className="text-lg font-semibold text-ui-fg-base">
