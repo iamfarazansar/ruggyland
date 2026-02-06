@@ -21,7 +21,7 @@ export default function DiscoverRugs({ categories }: Props) {
     <section className="w-full">
       {/* textured background strip */}
       <div className="bg-[url('/paper-texture.png')] bg-cover bg-center">
-        <div className="mx-auto w-full max-w-[1360px] px-4 py-10 md:py-14">
+        <div className="mx-auto w-full max-w-6xl px-4 py-10 md:py-14">
           {/* Heading */}
           <div className="text-center">
             <h2 className="text-xl md:text-3xl font-medium tracking-wide">

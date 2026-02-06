@@ -64,56 +64,61 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   </Suspense>
 
                   {/* Trust rows under CTA */}
-                  <div className="mt-5 rounded-xl border border-ui-border-base bg-ui-bg-subtle p-4">
+                  <div className="mt-5 border-t border-ui-border-base pt-5">
                     <div className="flex flex-wrap justify-between gap-y-4">
-                      <div className="flex flex-col items-center justify-center gap-1.5 w-1/2 lg:w-auto lg:flex-1">
-                        <Image
-                          src="/product/Shipsin.svg"
-                          alt="Shipping"
-                          width={40}
-                          height={40}
-                        />
-                        <p className="text-xs text-ui-fg-base text-center leading-tight">
-                          Ships in
-                          <br className="lg:hidden" /> 7–10 days
+                      <div className="flex flex-col items-center justify-center gap-2 w-1/2 lg:w-auto lg:flex-1">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#fbf8f2]">
+                          <Image
+                            src="/product/Shipsin.svg"
+                            alt="Shipping"
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <p className="text-xs text-[#574b45] text-center leading-tight font-medium">
+                          Ships in 7–10 days
                         </p>
                       </div>
 
-                      <div className="flex flex-col items-center justify-center gap-1.5 w-1/2 lg:w-auto lg:flex-1">
-                        <Image
-                          src="/product/handmade.svg"
-                          alt="Handmade"
-                          width={40}
-                          height={40}
-                        />
-                        <p className="text-xs text-ui-fg-base text-center leading-tight">
-                          Handmade
+                      <div className="flex flex-col items-center justify-center gap-2 w-1/2 lg:w-auto lg:flex-1">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#fbf8f2]">
+                          <Image
+                            src="/product/handmade.svg"
+                            alt="Handmade"
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <p className="text-xs text-[#574b45] text-center leading-tight font-medium">
+                          Handmade with love
                         </p>
                       </div>
 
-                      <div className="flex flex-col items-center justify-center gap-1.5 w-1/2 lg:w-auto lg:flex-1">
-                        <Image
-                          src="/product/Premium.svg"
-                          alt="Premium"
-                          width={40}
-                          height={40}
-                        />
-                        <p className="text-xs text-ui-fg-base text-center leading-tight">
-                          Premium
-                          <br className="lg:hidden" /> quality
+                      <div className="flex flex-col items-center justify-center gap-2 w-1/2 lg:w-auto lg:flex-1">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#fbf8f2]">
+                          <Image
+                            src="/product/Premium.svg"
+                            alt="Premium"
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <p className="text-xs text-[#574b45] text-center leading-tight font-medium">
+                          Premium quality
                         </p>
                       </div>
 
-                      <div className="flex flex-col items-center justify-center gap-1.5 w-1/2 lg:w-auto lg:flex-1">
-                        <Image
-                          src="/product/Crafted.svg"
-                          alt="Secure"
-                          width={40}
-                          height={40}
-                        />
-                        <p className="text-xs text-ui-fg-base text-center leading-tight">
-                          Crafted
-                          <br className="lg:hidden" /> with You
+                      <div className="flex flex-col items-center justify-center gap-2 w-1/2 lg:w-auto lg:flex-1">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#fbf8f2]">
+                          <Image
+                            src="/product/Crafted.svg"
+                            alt="Secure"
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <p className="text-xs text-[#574b45] text-center leading-tight font-medium">
+                          Crafted with You
                         </p>
                       </div>
                     </div>

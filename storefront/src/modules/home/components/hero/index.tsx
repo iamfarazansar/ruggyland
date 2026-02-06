@@ -3,6 +3,7 @@
 import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
 import { BiArrowBack } from "react-icons/bi"
+import Image from "next/image"
 import Link from "next/link"
 import { useCallback } from "react"
 
@@ -26,16 +27,21 @@ const Hero = () => {
   ]
 
   return (
-    <div className="relative text-white text-[20px] w-full max-w-[1360px] mx-auto">
+    <div className="relative text-white text-[20px] w-full max-w-6xl mx-auto">
       <div className="embla-hero" ref={emblaRef}>
         <div className="embla-hero__container">
           {slides.map((slide, index) => (
             <div className="embla-hero__slide" key={index}>
-              <img
-                src={slide.src}
-                alt={slide.alt}
-                className="aspect-[16/10] md:aspect-auto object-cover w-full"
-              />
+              <div className="relative aspect-[16/10] md:aspect-[21/9] w-full">
+                <Image
+                  src={slide.src}
+                  alt={slide.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 1152px"
+                  priority={index === 0}
+                />
+              </div>
               <Link href="/store">
                 <div className="px-[15px] md:px-[40px] py-[10px] md:py-[25px] font-oswald bg-white absolute bottom-[25px] md:bottom-[75px] left-0 text-black/[0.9] text-[15px] md:text-[30px] uppercase font-medium cursor-pointer hover:opacity-90">
                   Shop now
