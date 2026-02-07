@@ -35,7 +35,7 @@ function StoriesCarousel({ stories }: { stories: RugStory[] }) {
               className="group flex-shrink-0 w-[320px] sm:w-[380px] overflow-hidden rounded-2xl bg-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.06)] ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]"
             >
               {/* Image */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
+              <div className="relative aspect-square w-full overflow-hidden">
                 {story.thumbnail ? (
                   <Image
                     src={story.thumbnail}
