@@ -1,6 +1,9 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework";
 import { RUG_STORIES_MODULE } from "../../../modules/rug-stories";
 
+// Disable authentication and publishable API key requirement for this public endpoint
+export const AUTHENTICATE = false;
+
 // GET /store/rug-stories - List all published stories
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   try {

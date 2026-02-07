@@ -169,7 +169,7 @@ export default defineMiddlewares({
         ),
       ],
     },
-    // Rug Stories - public endpoints (no API key required)
+    // Rug Stories - public endpoints (no API key required via route exports)
     {
       matcher: "/store/rug-stories",
       method: "GET",
