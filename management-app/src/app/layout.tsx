@@ -12,6 +12,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "RuggyLand Management",
   description: "Manufacturing & Order Management for RuggyLand",
+  icons: {
+    icon: "/management-app-favi.ico",
+  },
 };
 
 export default function RootLayout({

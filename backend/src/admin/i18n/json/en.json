@@ -1,0 +1,10 @@
+{
+  "login": {
+    "title": "Welcome to RuggyLand",
+    "hint": "Sign in to access the admin panel"
+  },
+  "invite": {
+    "title": "Welcome to RuggyLand",
+    "hint": "Create your account below"
+  }
+}

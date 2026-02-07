@@ -1,3 +1,4 @@
+import path from "path";
 import {
   loadEnv,
   Modules,
@@ -54,6 +55,32 @@ const medusaConfig = {
   admin: {
     backendUrl: BACKEND_URL,
     disable: SHOULD_DISABLE_ADMIN,
+    vite: () => ({
+      publicDir: path.resolve(process.cwd(), "src/admin/public"),
+      plugins: [
+        {
+          name: "custom-admin-branding",
+          transformIndexHtml(html) {
+            return html
+              .replace(
+                /<link rel="icon" href="data:," data-placeholder-favicon\s*\/>/,
+                '<link rel="icon" type="image/x-icon" href="ruggyland-admin-favi.ico" />'
+              )
+              .replace(
+                "</head>",
+                `<style>
+                  svg[viewBox="0 0 400 400"] { display: none; }
+                  [class*="rounded-xl"][class*="mb-4"] {
+                    background: url("ruggyland-admin-favi.svg") center/contain no-repeat !important;
+                    width: 80px !important;
+                    height: 80px !important;
+                  }
+                </style></head>`
+              );
+          },
+        },
+      ],
+    }),
   },
   modules: [
     // {
