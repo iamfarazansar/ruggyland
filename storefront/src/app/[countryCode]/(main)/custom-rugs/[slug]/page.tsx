@@ -73,7 +73,7 @@ export default async function RugStoryPage({ params }: Props) {
           {/* Title Section */}
           <div className="text-center mb-10">
             <h1
-              className="text-[36px] sm:text-[48px] text-zinc-800"
+              className="text-[28px] sm:text-[48px] text-zinc-800 whitespace-nowrap"
               style={{
                 fontFamily: "'Dancing Script', cursive",
                 fontWeight: 600,
