@@ -18,7 +18,7 @@ export type RugStory = {
   size: string | null
   material: string | null
   intro_text: string | null
-  steps: StoryStep[]
+  steps: StoryStep[] | null
   published: boolean
   created_at: string
   updated_at: string
