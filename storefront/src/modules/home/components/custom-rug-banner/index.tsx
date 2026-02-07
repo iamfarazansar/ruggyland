@@ -26,7 +26,7 @@ export default function CustomRugBanner({
   primaryCtaHref = "/custom-rug",
   secondaryCtaText = "How it works →",
   howItWorksImageSrc = "/custom/how-it-works.jpg",
-  chips = ["Free mockup", "Worldwide shipping", "Handcrafted"],
+  chips = ["Free quotation", "Worldwide shipping", "Handcrafted"],
   // ✅ set these to your actual paths
   originalImageSrc = "/custom/original.JPG",
   rugImageSrc = "/custom/rug.JPG",
@@ -176,7 +176,7 @@ export default function CustomRugBanner({
               </div>
 
               <p className="mt-3 text-xs text-[#8b7d74]">
-                Upload an image • Get a free mockup in 24–48h
+                Upload an image • Get a free quotation in 24–48h
               </p>
             </div>
 
