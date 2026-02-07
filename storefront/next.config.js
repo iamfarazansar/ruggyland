@@ -67,6 +67,15 @@ const nextConfig = {
             },
           ]
         : []),
+      // S3 buckets for uploaded images (rug stories, products, etc.)
+      {
+        protocol: "https",
+        hostname: "**.s3.**.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.s3.amazonaws.com",
+      },
     ],
   },
   serverRuntimeConfig: {

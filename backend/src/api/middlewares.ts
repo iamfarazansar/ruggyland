@@ -133,5 +133,24 @@ export default defineMiddlewares({
         ),
       ],
     },
+    // Rug Stories - public endpoints (no API key required)
+    {
+      matcher: "/store/rug-stories",
+      method: "GET",
+      additionalDataValidator: false,
+    },
+    {
+      matcher: "/store/rug-stories/*",
+      method: "GET",
+      additionalDataValidator: false,
+    },
+    // Rug Stories - admin upload endpoint with large file support
+    {
+      matcher: "/admin/rug-stories/upload",
+      method: "POST",
+      bodyParser: {
+        sizeLimit: 50 * 1024 * 1024, // 50MB limit for base64 images
+      },
+    },
   ],
 });

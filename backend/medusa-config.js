@@ -85,6 +85,9 @@ const medusaConfig = {
       resolve: "./src/modules/custom-rug",
     },
     {
+      resolve: "./src/modules/rug-stories",
+    },
+    {
       resolve: "./src/modules/manufacturing",
     },
     {

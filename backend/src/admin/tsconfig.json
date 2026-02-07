@@ -1,7 +1,23 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "esnext"
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@medusajs/ui": ["../../node_modules/@medusajs/ui"],
+      "@medusajs/icons": ["../../node_modules/@medusajs/icons"]
+    }
   },
   "include": ["."],
   "exclude": ["**/*.spec.js"]
