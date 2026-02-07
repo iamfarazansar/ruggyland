@@ -29,7 +29,7 @@ export const listRugStories = async (): Promise<{
   count: number
 }> => {
   try {
-    const response = await fetch(`${BACKEND_URL}/store/rug-stories`, {
+    const response = await fetch(`${BACKEND_URL}/rug-stories`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -59,7 +59,7 @@ export const listRugStories = async (): Promise<{
 
 export const getRugStory = async (slug: string): Promise<RugStory | null> => {
   try {
-    const response = await fetch(`${BACKEND_URL}/store/rug-stories/${slug}`, {
+    const response = await fetch(`${BACKEND_URL}/rug-stories/${slug}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
