@@ -32,7 +32,7 @@ function StoriesCarousel({ stories }: { stories: RugStory[] }) {
             <LocalizedClientLink
               key={story.id}
               href={`/custom-rugs/${story.slug}`}
-              className="group flex-shrink-0 w-[320px] sm:w-[380px] overflow-hidden rounded-2xl bg-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.06)] ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]"
+              className="group flex-shrink-0 w-[260px] sm:w-[300px] overflow-hidden rounded-2xl bg-white/80 shadow-[0_12px_40px_rgba(0,0,0,0.06)] ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]"
             >
               {/* Image */}
               <div className="relative aspect-square w-full overflow-hidden">
@@ -42,7 +42,7 @@ function StoriesCarousel({ stories }: { stories: RugStory[] }) {
                     alt={story.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 320px, 380px"
+                    sizes="(max-width: 640px) 260px, 300px"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-zinc-100">
@@ -134,7 +134,7 @@ export default function StoriesTufted({ stories }: { stories: RugStory[] }) {
         <div className="absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-zinc-100/50 blur-[120px]" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:py-20">
+      <div className="relative mx-auto max-w-6xl px-4 py-16 sm:py-20">
         {/* Header */}
         <div className="text-center">
           <h2
