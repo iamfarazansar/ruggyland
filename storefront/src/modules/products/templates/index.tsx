@@ -137,13 +137,47 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                     Description
                   </h3>
                 </div>
-                <div className="p-6">
-                  <p
-                    className="text-sm text-ui-fg-subtle leading-relaxed"
-                    data-testid="product-description"
-                  >
-                    {product.description}
-                  </p>
+                <div
+                  className="p-6 space-y-4 text-sm text-ui-fg-subtle leading-relaxed"
+                  data-testid="product-description"
+                >
+                  {product.description?.split(/\n\n+/).map((block, i) => {
+                    const isBlockquote = block.startsWith("> ")
+                    const text = isBlockquote ? block.slice(2) : block
+
+                    const renderInline = (str: string) => {
+                      const parts: React.ReactNode[] = []
+                      const regex = /(\*\*(.+?)\*\*|\*(.+?)\*)/g
+                      let lastIndex = 0
+                      let match
+
+                      while ((match = regex.exec(str)) !== null) {
+                        if (match.index > lastIndex) {
+                          parts.push(str.slice(lastIndex, match.index))
+                        }
+                        if (match[2]) {
+                          parts.push(<strong key={match.index} className="font-semibold text-ui-fg-base">{match[2]}</strong>)
+                        } else if (match[3]) {
+                          parts.push(<em key={match.index}>{match[3]}</em>)
+                        }
+                        lastIndex = regex.lastIndex
+                      }
+                      if (lastIndex < str.length) {
+                        parts.push(str.slice(lastIndex))
+                      }
+                      return parts
+                    }
+
+                    if (isBlockquote) {
+                      return (
+                        <blockquote key={i} className="border-l-2 border-ui-border-base pl-4 italic text-ui-fg-muted">
+                          {renderInline(text)}
+                        </blockquote>
+                      )
+                    }
+
+                    return <p key={i}>{renderInline(text)}</p>
+                  })}
                 </div>
               </div>
             )}
