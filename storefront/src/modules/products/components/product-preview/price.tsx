@@ -5,7 +5,7 @@ export default function PreviewPrice({ price }: { price: VariantPrice }) {
   if (!price) return null
 
   return (
-    <div className="flex items-baseline gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
       <Text className="text-sm font-semibold text-ui-fg-base">
         {price.calculated_price}/-
       </Text>

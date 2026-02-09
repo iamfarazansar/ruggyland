@@ -89,12 +89,14 @@ const MobileActions: React.FC<MobileActionsProps> = ({
             className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
             data-testid="mobile-actions"
           >
-            {/* Title + Price */}
-            <div className="flex items-center gap-x-2">
-              <span data-testid="mobile-title" className="line-clamp-1">
+            {/* Title + Price - stacked vertically */}
+            <div className="flex flex-col items-center gap-y-1">
+              <span
+                data-testid="mobile-title"
+                className="line-clamp-1 text-center"
+              >
                 {product.title}
               </span>
-              <span>—</span>
 
               {selectedPrice ? (
                 <div className="flex items-baseline gap-x-2">
@@ -104,7 +106,9 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   {selectedPrice.price_type === "sale" && (
                     <>
                       <span className="line-through text-xs text-ui-fg-muted">
-                        {selectedPrice.currency_code === "inr" ? "M.R.P.:" : "was"}{" "}
+                        {selectedPrice.currency_code === "inr"
+                          ? "M.R.P.:"
+                          : "was"}{" "}
                         {selectedPrice.original_price}
                       </span>
                       <span className="text-xs font-bold text-ui-fg-base bg-ui-bg-base-pressed px-1.5 py-0.5 rounded">

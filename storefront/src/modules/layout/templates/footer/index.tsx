@@ -9,7 +9,7 @@ import FooterSocialIcons from "@modules/layout/components/footer-social-icons"
 export default async function Footer() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
   return (
-    <footer className="bg-black text-white pt-14 pb-32 lg:pb-3">
+    <footer className="bg-black text-white pt-8 lg:pt-14 pb-48 lg:pb-3">
       <Wrapper className="flex justify-between flex-col md:flex-row gap-[50px] md:gap-0 md:flex-wrap">
         {/* LEFT START */}
         <div className="flex gap-[50px] md:gap-[75px] lg:gap-[100px] flex-col md:flex-row">
