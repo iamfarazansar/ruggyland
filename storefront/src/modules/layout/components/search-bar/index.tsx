@@ -28,15 +28,21 @@ export default function SearchBar() {
   const inputRefMobile = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const mobileContainerRef = useRef<HTMLDivElement>(null)
+  const proxyInputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout>()
 
   // Focus input when search opens
   useEffect(() => {
     if (isOpen) {
+      // Desktop: simple delayed focus
+      setTimeout(() => inputRef.current?.focus(), 200)
+      // Mobile: transfer focus from proxy to real input
+      // The proxy already has the keyboard open from the tap event
       setTimeout(() => {
-        inputRef.current?.focus()
-        inputRefMobile.current?.focus()
-      }, 200)
+        if (inputRefMobile.current) {
+          inputRefMobile.current.focus()
+        }
+      }, 100)
     }
   }, [isOpen])
 
@@ -270,13 +276,25 @@ export default function SearchBar() {
       {/* Mobile search icon */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            // Focus proxy input SYNCHRONOUSLY on tap to trigger iOS keyboard
+            proxyInputRef.current?.focus()
+            setIsOpen(true)
+          }}
           className="md:hidden w-8 h-8 rounded-full flex justify-center items-center hover:bg-black/[0.05] cursor-pointer transition"
           aria-label="Search"
         >
           <BsSearch className="text-[15px] text-black" />
         </button>
       )}
+
+      {/* Hidden proxy input to capture iOS keyboard on first tap */}
+      <input
+        ref={proxyInputRef}
+        className="absolute opacity-0 w-0 h-0 pointer-events-none"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
 
       {/* Mobile overlay */}
       {isOpen && (
