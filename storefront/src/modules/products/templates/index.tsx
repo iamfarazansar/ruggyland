@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 
 import ImageGallery from "@modules/products/components/image-gallery"
+import ProductViewTracker from "@modules/products/components/product-view-tracker"
 import ProductInfo from "@modules/products/templates/product-info"
 import ProductActions from "@modules/products/components/product-actions"
 import RelatedProducts from "@modules/products/components/related-products"
@@ -29,6 +30,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <>
+      <ProductViewTracker product={product} />
       {/* TOP GRID */}
       <div className="content-container py-6" data-testid="product-container">
         {/* Mobile Back Button */}
@@ -60,6 +62,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                       />
                     }
                   >
+                    {/* @ts-expect-error Async Server Component */}
                     <ProductActionsWrapper id={product.id} region={region} />
                   </Suspense>
 
@@ -298,6 +301,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>
+          {/* @ts-expect-error Async Server Component */}
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>
       </div>

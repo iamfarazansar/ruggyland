@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { login, loginWithGoogle } from "@lib/data/customer"
+import { trackLogin } from "@lib/posthog/events"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
@@ -16,6 +17,17 @@ const Login = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(login, null)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [googleError, setGoogleError] = useState<string | null>(null)
+  const hasSubmitted = useRef(false)
+
+  // Track successful email login (message becomes undefined after success)
+  useEffect(() => {
+    if (hasSubmitted.current && message === undefined) {
+      trackLogin("email")
+    }
+    if (message !== null) {
+      hasSubmitted.current = true
+    }
+  }, [message])
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true)
@@ -31,10 +43,10 @@ const Login = ({ setCurrentView }: Props) => {
       }
 
       if (result.location) {
-        // Redirect to Google for authentication
+        trackLogin("google")
         window.location.href = result.location
       } else {
-        // User is already authenticated, refresh the page
+        trackLogin("google")
         window.location.reload()
       }
     } catch (error: any) {

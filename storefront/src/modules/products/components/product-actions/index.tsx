@@ -1,6 +1,7 @@
 "use client"
 
 import { addToCart } from "@lib/data/cart"
+import { trackAddToCart } from "@lib/posthog/events"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
@@ -124,6 +125,7 @@ export default function ProductActions({
       quantity,
       countryCode,
     })
+    trackAddToCart(product, selectedVariant.id, quantity)
     setIsAdding(false)
 
     // Show the nav bar so user can see cart count updated
