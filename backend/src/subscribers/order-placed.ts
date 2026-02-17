@@ -92,7 +92,7 @@ export default async function orderPlacedHandler({
           subtotal: Number(order.summary?.current_order_total || 0),
           shipping_total: shippingTotal,
           discount_total: 0,
-          tax_total: Number(order.summary?.current_order_tax_total || 0),
+          tax_total: Number((order.summary as any)?.current_order_tax_total || 0),
           total: Number(order.summary?.current_order_total || 0),
           shipping_address: shippingAddress,
           items: order.items?.map((item) => ({
