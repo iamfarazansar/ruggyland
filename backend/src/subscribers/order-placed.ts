@@ -76,6 +76,38 @@ export default async function orderPlacedHandler({
   } catch (error) {
     console.error('Error sending order confirmation notification:', error)
   }
+
+  // Send Slack notification
+  try {
+    await notificationModuleService.createNotifications({
+      to: 'slack-channel',
+      channel: 'slack',
+      template: 'order-created',
+      data: {
+        order: {
+          id: order.id,
+          display_id: order.display_id,
+          email: order.email,
+          currency_code: order.currency_code,
+          subtotal: Number(order.summary?.current_order_total || 0),
+          shipping_total: shippingTotal,
+          discount_total: 0,
+          tax_total: Number(order.summary?.current_order_tax_total || 0),
+          total: Number(order.summary?.current_order_total || 0),
+          shipping_address: shippingAddress,
+          items: order.items?.map((item) => ({
+            title: item.title,
+            quantity: item.quantity,
+            unit_price: Number(item.unit_price),
+            thumbnail: item.thumbnail,
+          })),
+        },
+      },
+    })
+    console.log(`Slack notification sent for order #${order.display_id}`)
+  } catch (error) {
+    console.error('Error sending Slack notification:', error)
+  }
 }
 
 export const config: SubscriberConfig = {

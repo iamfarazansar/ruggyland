@@ -62,6 +62,9 @@ importers:
       '@tanstack/react-query':
         specifier: 5.64.2
         version: 5.64.2(react@18.3.1)
+      axios:
+        specifier: ^1.13.5
+        version: 1.13.5
       medusajs-launch-utils:
         specifier: 0.0.18
         version: 0.0.18
@@ -4541,8 +4544,8 @@ packages:
   axios-retry@3.9.1:
     resolution: {integrity: sha512-8PJDLJv7qTTMMwdnbMvrLYuvB47M81wRtxQmEdV5w4rgbTXTt+vtPkXwajOfOdSyv/wZICJOC+/UhXH4aQ/R+w==}
 
-  axios@1.13.2:
-    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
@@ -7920,7 +7923,7 @@ snapshots:
       '@apimatic/http-query': 0.3.9
       '@apimatic/json-bigint': 1.2.0
       '@apimatic/proxy': 0.1.4
-      axios: 1.13.2
+      axios: 1.13.5
       detect-browser: 5.3.0
       detect-node: 2.1.0
       form-data: 4.0.5
@@ -10176,7 +10179,7 @@ snapshots:
   '@medusajs/telemetry@2.13.1':
     dependencies:
       '@babel/runtime': 7.28.6
-      axios: 1.13.2
+      axios: 1.13.5
       axios-retry: 3.9.1
       boxen: 5.1.2
       ci-info: 3.9.0
@@ -10191,7 +10194,7 @@ snapshots:
     dependencies:
       '@medusajs/framework': 2.13.1(@medusajs/cli@2.13.1(@types/node@20.19.30))(@types/node@20.19.30)(ioredis@5.9.2)(vite@5.4.21(@types/node@20.19.30))(zod@3.25.76)
       '@types/express': 4.17.25
-      axios: 1.13.2
+      axios: 1.13.5
       express: 4.22.1
       get-port: 5.1.1
       ulid: 2.4.0
@@ -12996,7 +12999,7 @@ snapshots:
   '@sendgrid/client@8.1.6':
     dependencies:
       '@sendgrid/helpers': 8.0.0
-      axios: 1.13.2
+      axios: 1.13.5
     transitivePeerDependencies:
       - debug
 
@@ -13783,7 +13786,7 @@ snapshots:
       '@babel/runtime': 7.28.6
       is-retry-allowed: 2.2.0
 
-  axios@1.13.2:
+  axios@1.13.5:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
@@ -15838,7 +15841,7 @@ snapshots:
 
   medusajs-launch-utils@0.0.18:
     dependencies:
-      axios: 1.13.2
+      axios: 1.13.5
       dotenv: 10.0.0
       pg: 8.17.2
     transitivePeerDependencies:
@@ -16520,7 +16523,7 @@ snapshots:
 
   razorpay@2.9.6:
     dependencies:
-      axios: 1.13.2
+      axios: 1.13.5
     transitivePeerDependencies:
       - debug
 

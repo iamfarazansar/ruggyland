@@ -97,6 +97,13 @@ export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
 export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 
 /**
+ * (optional) Slack webhook for order notifications
+ */
+export const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+export const SLACK_ADMIN_URL =
+  process.env.SLACK_ADMIN_URL || "http://localhost:9000/app";
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =

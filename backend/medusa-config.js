@@ -29,6 +29,8 @@ import {
   MINIO_BUCKET,
   MEILISEARCH_HOST,
   MEILISEARCH_ADMIN_KEY,
+  SLACK_WEBHOOK_URL,
+  SLACK_ADMIN_URL,
 } from "lib/constants";
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -201,7 +203,8 @@ const medusaConfig = {
         ]
       : []),
     ...((SENDGRID_API_KEY && SENDGRID_FROM_EMAIL) ||
-    (RESEND_API_KEY && RESEND_FROM_EMAIL)
+    (RESEND_API_KEY && RESEND_FROM_EMAIL) ||
+    SLACK_WEBHOOK_URL
       ? [
           {
             key: Modules.NOTIFICATION,
@@ -231,6 +234,19 @@ const medusaConfig = {
                           api_key: RESEND_API_KEY,
                           from: RESEND_FROM_EMAIL,
                           reply_to: RESEND_REPLY_TO,
+                        },
+                      },
+                    ]
+                  : []),
+                ...(SLACK_WEBHOOK_URL
+                  ? [
+                      {
+                        resolve: "./src/modules/slack",
+                        id: "slack",
+                        options: {
+                          channels: ["slack"],
+                          webhook_url: SLACK_WEBHOOK_URL,
+                          admin_url: SLACK_ADMIN_URL,
                         },
                       },
                     ]
