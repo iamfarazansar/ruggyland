@@ -40,6 +40,12 @@ interface Order {
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 
+const ORDER_STATUS_COLORS: Record<string, string> = {
+  canceled: "bg-red-500/20 text-red-400",
+  cancelled: "bg-red-500/20 text-red-400",
+  requires_action: "bg-yellow-500/20 text-yellow-400",
+};
+
 const FULFILLMENT_COLORS: Record<string, string> = {
   not_fulfilled: "bg-gray-500/20 text-gray-600 dark:text-gray-400",
   partially_fulfilled: "bg-blue-500/20 text-blue-400",
@@ -304,9 +310,16 @@ export default function OrdersPage() {
                 >
                   <td className="px-6 py-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        #{order.display_id}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          #{order.display_id}
+                        </p>
+                        {(order.status === "canceled" || order.status === "cancelled") && (
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
+                            cancelled
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-500">
                         {order.items?.length || 0} item(s)
                       </p>
