@@ -50,6 +50,8 @@ export default function AnalyticsPage() {
   const { token, isAuthenticated } = useAuth();
   const [dateRange, setDateRange] = useState<DateRange>(30);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ChartData>({
     pageviews: [],
@@ -63,9 +65,10 @@ export default function AnalyticsPage() {
     devices: [],
   });
 
-  const fetchAllData = useCallback(async () => {
+  const fetchAllData = useCallback(async (isRefresh = false) => {
     if (!token) return;
-    setLoading(true);
+    if (!isRefresh) setLoading(true);
+    else setRefreshing(true);
     setError(null);
 
     const queries: { key: keyof ChartData; type: QueryType }[] = [
@@ -100,16 +103,20 @@ export default function AnalyticsPage() {
       }
 
       setData(newData);
+      setLastUpdated(new Date());
     } catch (err: any) {
       setError(err.message || "Failed to load analytics");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [token, dateRange]);
 
   useEffect(() => {
     if (isAuthenticated && token) {
       fetchAllData();
+      const interval = setInterval(() => fetchAllData(true), 60_000);
+      return () => clearInterval(interval);
     }
   }, [isAuthenticated, token, fetchAllData]);
 
@@ -163,9 +170,20 @@ export default function AnalyticsPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Analytics
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Storefront performance and visitor insights
-          </p>
+          <div className="flex items-center gap-3 mt-1">
+            <p className="text-gray-600 dark:text-gray-400">
+              Storefront performance and visitor insights
+            </p>
+            <span className="inline-flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+              <span className={`w-2 h-2 rounded-full bg-green-500 ${refreshing ? "animate-pulse" : ""}`}></span>
+              Live
+              {lastUpdated && (
+                <span className="text-gray-400 dark:text-gray-500 ml-1">
+                  · {lastUpdated.toLocaleTimeString()}
+                </span>
+              )}
+            </span>
+          </div>
         </div>
         <div className="flex gap-2">
           {([7, 30, 90] as DateRange[]).map((d) => (
