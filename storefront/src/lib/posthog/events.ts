@@ -47,3 +47,21 @@ export function trackOrderCompleted(order: {
     item_count: order.items?.length ?? 0,
   })
 }
+
+export function identifyCustomer(customer: {
+  id: string
+  email: string
+  first_name?: string | null
+  last_name?: string | null
+}) {
+  posthog.identify(customer.id, {
+    email: customer.email,
+    first_name: customer.first_name,
+    last_name: customer.last_name,
+    name: [customer.first_name, customer.last_name].filter(Boolean).join(" ") || undefined,
+  })
+}
+
+export function resetIdentity() {
+  posthog.reset()
+}

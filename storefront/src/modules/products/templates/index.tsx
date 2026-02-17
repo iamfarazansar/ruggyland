@@ -62,7 +62,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                       />
                     }
                   >
-                    {/* @ts-expect-error Async Server Component */}
                     <ProductActionsWrapper id={product.id} region={region} />
                   </Suspense>
 
@@ -301,7 +300,6 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>
-          {/* @ts-expect-error Async Server Component */}
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>
       </div>

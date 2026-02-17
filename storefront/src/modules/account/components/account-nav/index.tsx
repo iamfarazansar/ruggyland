@@ -11,6 +11,7 @@ import Package from "@modules/common/icons/package"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { signout } from "@lib/data/customer"
+import { resetIdentity } from "@lib/posthog/events"
 
 const AccountNav = ({
   customer,
@@ -21,6 +22,7 @@ const AccountNav = ({
   const { countryCode } = useParams() as { countryCode: string }
 
   const handleLogout = async () => {
+    resetIdentity()
     await signout(countryCode)
   }
 
