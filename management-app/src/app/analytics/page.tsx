@@ -81,19 +81,23 @@ export default function AnalyticsPage() {
     ];
 
     try {
-      const results = await Promise.allSettled(
-        queries.map((q) => fetchAnalytics(token, q.type, dateRange))
-      );
-
       const newData: ChartData = { ...data };
-      results.forEach((result, i) => {
-        if (result.status === "fulfilled") {
-          newData[queries[i].key] = result.value.results;
-        } else {
-          console.warn(`Failed to fetch ${queries[i].type}:`, result.reason);
-          newData[queries[i].key] = [];
-        }
-      });
+
+      // Batch queries in groups of 3 to stay under PostHog's concurrency limit
+      for (let i = 0; i < queries.length; i += 3) {
+        const batch = queries.slice(i, i + 3);
+        const results = await Promise.allSettled(
+          batch.map((q) => fetchAnalytics(token, q.type, dateRange))
+        );
+        results.forEach((result, j) => {
+          if (result.status === "fulfilled") {
+            newData[batch[j].key] = result.value.results;
+          } else {
+            console.warn(`Failed to fetch ${batch[j].type}:`, result.reason);
+            newData[batch[j].key] = [];
+          }
+        });
+      }
 
       setData(newData);
     } catch (err: any) {
