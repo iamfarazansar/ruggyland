@@ -24,6 +24,9 @@ importers:
       '@hookform/error-message':
         specifier: ^2.0.0
         version: 2.0.1(react-dom@18.2.0(react@18.2.0))(react-hook-form@7.54.2(react@18.2.0))(react@18.2.0)
+      '@medusajs/icons':
+        specifier: ^2.13.1
+        version: 2.13.1(react@18.2.0)
       '@medusajs/js-sdk':
         specifier: preview
         version: 2.13.2-preview-20260202180818
@@ -636,6 +639,11 @@ packages:
 
   '@medusajs/client-types@0.2.12-preview-20240505115807':
     resolution: {integrity: sha512-f7T/7WUAGOFfsNsjdCcVoWLlAqryaQB+hF0v/Dzst2hv+PdJGqHfHwTNdeK3ZYhUwzSQ8YdnCYsj9OEJR9SPiQ==}
+
+  '@medusajs/icons@2.13.1':
+    resolution: {integrity: sha512-A0j+C4jURXSWARbxjEOXh3get9N7dY7n3TNTdmpOeY0XPZeDfKaL1yVBD2EC90jVTWY045whrMBCJUuV7kjYPg==}
+    peerDependencies:
+      react: ^18.3.1
 
   '@medusajs/icons@2.13.2-preview-20260202180818':
     resolution: {integrity: sha512-u/Da35jh05HGad4E8hMo/vLc1QdKQPm5PIPOudyqoTEjTT1LFWuQa5fIBgdkdqjVc6IoaCTwoyLnsfLbTbz5+A==}
@@ -4842,6 +4850,10 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.0
 
   '@medusajs/client-types@0.2.12-preview-20240505115807': {}
+
+  '@medusajs/icons@2.13.1(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
 
   '@medusajs/icons@2.13.2-preview-20260202180818(react@18.2.0)':
     dependencies:

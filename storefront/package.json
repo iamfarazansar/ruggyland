@@ -35,6 +35,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@hookform/error-message": "^2.0.0",
+    "@medusajs/icons": "^2.13.1",
     "@medusajs/js-sdk": "preview",
     "@medusajs/types": "preview",
     "@medusajs/ui": "preview",

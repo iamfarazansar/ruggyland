@@ -31,6 +31,19 @@ type Props = {
   regions: HttpTypes.StoreRegion[]
 }
 
+function RegionFlag({ option, size = 16 }: { option: RegionOption; size?: number }) {
+  if (option.regionName.toLowerCase().includes("rest of world")) {
+    return <span style={{ fontSize: size, lineHeight: 1 }}>🌍</span>
+  }
+  return (
+    <ReactCountryFlag
+      svg
+      style={{ width: size, height: size }}
+      countryCode={option.representativeCountry}
+    />
+  )
+}
+
 export default function CountrySelect({ toggleState, regions }: Props) {
   const { countryCode } = useParams<{ countryCode: string }>()
   const pathname = usePathname()
@@ -41,7 +54,7 @@ export default function CountrySelect({ toggleState, regions }: Props) {
     return (
       regions?.map((r) => {
         const code = r.currency_code?.toLowerCase() ?? "usd"
-        const countries = r.countries?.map((c) => c.iso_2) ?? []
+        const countries = (r.countries?.map((c) => c.iso_2).filter(Boolean) as string[]) ?? []
         return {
           regionId: r.id,
           regionName: r.name ?? "Region",
@@ -94,11 +107,7 @@ export default function CountrySelect({ toggleState, regions }: Props) {
         <BsTruck className="text-[18px]" />
 
         <span className="flex items-center gap-2 text-sm font-medium min-w-0">
-          <ReactCountryFlag
-            svg
-            style={{ width: 16, height: 16 }}
-            countryCode={selected.representativeCountry}
-          />
+          <RegionFlag option={selected} size={16} />
 
           {/* Mobile = short label */}
           <span className="md:hidden">
@@ -157,11 +166,7 @@ export default function CountrySelect({ toggleState, regions }: Props) {
                   o.regionId === selected.regionId && "bg-gray-100"
                 )}
               >
-                <ReactCountryFlag
-                  svg
-                  style={{ width: "16px", height: "16px" }}
-                  countryCode={o.representativeCountry}
-                />
+                <RegionFlag option={o} size={16} />
                 <span className="truncate text-sm">
                   {o.regionName} ({o.currencySymbol})
                 </span>
