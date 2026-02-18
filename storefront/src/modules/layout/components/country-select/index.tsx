@@ -10,10 +10,20 @@ import { HttpTypes } from "@medusajs/types"
 import { BsTruck } from "react-icons/bs"
 import type { StateType } from "@lib/hooks/use-toggle-state"
 
-type CountryOption = {
-  country: string
-  region: string
-  label: string
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  usd: "$",
+  eur: "€",
+  inr: "₹",
+  gbp: "£",
+}
+
+type RegionOption = {
+  regionId: string
+  regionName: string
+  currencyCode: string
+  currencySymbol: string
+  representativeCountry: string
+  countries: string[]
 }
 
 type Props = {
@@ -27,24 +37,26 @@ export default function CountrySelect({ toggleState, regions }: Props) {
 
   const { state, open, close } = toggleState
 
-  const options = useMemo<CountryOption[]>(() => {
+  const options = useMemo<RegionOption[]>(() => {
     return (
-      regions
-        ?.flatMap((r) =>
-          r.countries?.map((c) => ({
-            country: c.iso_2,
-            region: r.id,
-            label: c.display_name,
-          }))
-        )
-        .filter(Boolean)
-        .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? "")) || []
+      regions?.map((r) => {
+        const code = r.currency_code?.toLowerCase() ?? "usd"
+        const countries = r.countries?.map((c) => c.iso_2) ?? []
+        return {
+          regionId: r.id,
+          regionName: r.name ?? "Region",
+          currencyCode: code,
+          currencySymbol: CURRENCY_SYMBOLS[code] ?? code.toUpperCase(),
+          representativeCountry: countries[0] ?? "us",
+          countries,
+        }
+      }) ?? []
     )
   }, [regions])
 
   const selected = useMemo(() => {
     if (!countryCode || !options.length) return null
-    return options.find((o) => o.country === countryCode) ?? null
+    return options.find((o) => o.countries.includes(countryCode)) ?? null
   }, [options, countryCode])
 
   const currentPath = useMemo(() => {
@@ -53,8 +65,8 @@ export default function CountrySelect({ toggleState, regions }: Props) {
     return after?.length ? after : "/"
   }, [pathname, countryCode])
 
-  const handleChange = (option: CountryOption) => {
-    updateRegion(option.country, currentPath)
+  const handleChange = (option: RegionOption) => {
+    updateRegion(option.representativeCountry, currentPath)
     close()
   }
 
@@ -85,15 +97,17 @@ export default function CountrySelect({ toggleState, regions }: Props) {
           <ReactCountryFlag
             svg
             style={{ width: 16, height: 16 }}
-            countryCode={selected.country}
+            countryCode={selected.representativeCountry}
           />
 
-          {/* Mobile = show code */}
-          <span className="md:hidden">{selected.country.toUpperCase()}</span>
+          {/* Mobile = short label */}
+          <span className="md:hidden">
+            {selected.currencySymbol}
+          </span>
 
-          {/* Desktop = show full */}
-          <span className="hidden md:inline max-w-[140px] truncate">
-            {selected.label}
+          {/* Desktop = full label */}
+          <span className="hidden md:inline max-w-[180px] truncate">
+            {selected.regionName} ({selected.currencySymbol})
           </span>
         </span>
 
@@ -106,55 +120,51 @@ export default function CountrySelect({ toggleState, regions }: Props) {
       </button>
 
       {/* Dropdown */}
-      {/* Dropdown */}
       {state && (
         <div
           className="
-      absolute top-full left-0
-      md:right-0 md:left-auto
-      z-[900]
-      pt-2
-    "
+            absolute top-full left-0
+            md:right-0 md:left-auto
+            z-[900]
+            pt-2
+          "
           onMouseEnter={open}
           onMouseLeave={close}
           onClick={(e) => e.stopPropagation()}
         >
           <div
             className="
-        w-fit
-        min-w-[170px]
-        max-w-[220px]
-        max-h-[420px]
-        overflow-y-scroll
-        bg-white
-        drop-shadow-md
-        text-small-regular
-        uppercase
-        text-black
-        no-scrollbar
-        rounded-rounded
-        focus:outline-none
-      "
+              w-fit
+              min-w-[200px]
+              max-w-[260px]
+              overflow-y-auto
+              bg-white
+              drop-shadow-md
+              text-small-regular
+              text-black
+              no-scrollbar
+              rounded-rounded
+              focus:outline-none
+            "
           >
             {options.map((o) => (
               <button
-                key={o.country}
+                key={o.regionId}
                 type="button"
                 onClick={() => handleChange(o)}
-                className="
-            w-full text-left
-            py-2 px-3
-            hover:bg-gray-200
-            cursor-pointer
-            flex items-center gap-x-2
-          "
+                className={clx(
+                  "w-full text-left py-2.5 px-3 hover:bg-gray-200 cursor-pointer flex items-center gap-x-2",
+                  o.regionId === selected.regionId && "bg-gray-100"
+                )}
               >
                 <ReactCountryFlag
                   svg
                   style={{ width: "16px", height: "16px" }}
-                  countryCode={o.country}
+                  countryCode={o.representativeCountry}
                 />
-                <span className="truncate">{o.label}</span>
+                <span className="truncate text-sm">
+                  {o.regionName} ({o.currencySymbol})
+                </span>
               </button>
             ))}
           </div>

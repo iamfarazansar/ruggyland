@@ -9,10 +9,20 @@ import { updateRegion } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import type { StateType } from "@lib/hooks/use-toggle-state"
 
-type CountryOption = {
-  country: string
-  region: string
-  label: string
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  usd: "$",
+  eur: "€",
+  inr: "₹",
+  gbp: "£",
+}
+
+type RegionOption = {
+  regionId: string
+  regionName: string
+  currencyCode: string
+  currencySymbol: string
+  representativeCountry: string
+  countries: string[]
 }
 
 type Props = {
@@ -26,24 +36,26 @@ export default function CountrySelectFooter({ toggleState, regions }: Props) {
 
   const { state, open, close } = toggleState
 
-  const options = useMemo<CountryOption[]>(() => {
+  const options = useMemo<RegionOption[]>(() => {
     return (
-      regions
-        ?.flatMap((r) =>
-          r.countries?.map((c) => ({
-            country: c.iso_2,
-            region: r.id,
-            label: c.display_name,
-          }))
-        )
-        .filter(Boolean)
-        .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? "")) || []
+      regions?.map((r) => {
+        const code = r.currency_code?.toLowerCase() ?? "usd"
+        const countries = r.countries?.map((c) => c.iso_2) ?? []
+        return {
+          regionId: r.id,
+          regionName: r.name ?? "Region",
+          currencyCode: code,
+          currencySymbol: CURRENCY_SYMBOLS[code] ?? code.toUpperCase(),
+          representativeCountry: countries[0] ?? "us",
+          countries,
+        }
+      }) ?? []
     )
   }, [regions])
 
   const selected = useMemo(() => {
     if (!countryCode || !options.length) return null
-    return options.find((o) => o.country === countryCode) ?? null
+    return options.find((o) => o.countries.includes(countryCode)) ?? null
   }, [options, countryCode])
 
   const currentPath = useMemo(() => {
@@ -52,8 +64,8 @@ export default function CountrySelectFooter({ toggleState, regions }: Props) {
     return after?.length ? after : "/"
   }, [pathname, countryCode])
 
-  const handleChange = (option: CountryOption) => {
-    updateRegion(option.country, currentPath)
+  const handleChange = (option: RegionOption) => {
+    updateRegion(option.representativeCountry, currentPath)
     close()
   }
 
@@ -84,9 +96,11 @@ export default function CountrySelectFooter({ toggleState, regions }: Props) {
           <ReactCountryFlag
             svg
             style={{ width: 18, height: 18 }}
-            countryCode={selected.country}
+            countryCode={selected.representativeCountry}
           />
-          <span className="max-w-[160px] truncate">{selected.label}</span>
+          <span className="max-w-[200px] truncate">
+            {selected.regionName} ({selected.currencySymbol})
+          </span>
         </span>
 
         <ChevronUpMini
@@ -112,9 +126,8 @@ export default function CountrySelectFooter({ toggleState, regions }: Props) {
           <div
             className="
               w-fit
-              min-w-[180px]
-              max-w-[240px]
-              max-h-[300px]
+              min-w-[200px]
+              max-w-[260px]
               overflow-y-auto
               bg-neutral-900
               border border-white/10
@@ -128,20 +141,22 @@ export default function CountrySelectFooter({ toggleState, regions }: Props) {
           >
             {options.map((o) => (
               <button
-                key={o.country}
+                key={o.regionId}
                 type="button"
                 onClick={() => handleChange(o)}
                 className={clx(
                   "w-full text-left py-2.5 px-3 hover:bg-white/10 cursor-pointer flex items-center gap-x-2 transition",
-                  o.country === selected.country && "bg-white/5"
+                  o.regionId === selected.regionId && "bg-white/5"
                 )}
               >
                 <ReactCountryFlag
                   svg
                   style={{ width: "18px", height: "18px" }}
-                  countryCode={o.country}
+                  countryCode={o.representativeCountry}
                 />
-                <span className="truncate text-sm">{o.label}</span>
+                <span className="truncate text-sm">
+                  {o.regionName} ({o.currencySymbol})
+                </span>
               </button>
             ))}
           </div>
