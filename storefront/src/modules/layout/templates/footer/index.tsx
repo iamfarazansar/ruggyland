@@ -9,7 +9,7 @@ import FooterSocialIcons from "@modules/layout/components/footer-social-icons"
 export default async function Footer() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
   return (
-    <footer className="bg-black text-white pt-8 lg:pt-14 pb-48 lg:pb-3">
+    <footer className="bg-black text-white pt-8 lg:pt-14 pb-3">
       <Wrapper className="flex justify-between flex-col md:flex-row gap-[50px] md:gap-0 md:flex-wrap">
         {/* LEFT START */}
         <div className="flex gap-[50px] md:gap-[75px] lg:gap-[100px] flex-col md:flex-row">
@@ -102,40 +102,79 @@ export default async function Footer() {
         <FooterSocialIcons />
         {/* RIGHT END */}
       </Wrapper>
-      <Wrapper className="flex justify-between items-center mt-10 flex-col md:flex-row gap-4 md:gap-0">
-        {/* LEFT START */}
-        <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer text-center md:text-left">
-          © {new Date().getFullYear()} RuggyLand, All Rights Reserved
-        </div>
-        {/* LEFT END */}
 
-        {/* CENTER - Policy Links */}
-        <div className="flex gap-2 md:gap-5 text-center md:text-left flex-wrap justify-center">
-          <LocalizedClientLink href="/terms-of-service">
-            <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
-              Terms of Service
-            </div>
-          </LocalizedClientLink>
-          <LocalizedClientLink href="/privacy-policy">
-            <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
-              Privacy Policy
-            </div>
-          </LocalizedClientLink>
-          <LocalizedClientLink href="/cancellation-refund-policy">
-            <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
-              Cancellation & Refund Policy
-            </div>
-          </LocalizedClientLink>
-          <LocalizedClientLink href="/shipping-return-policy">
-            <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
-              Shipping & Return Policy
-            </div>
-          </LocalizedClientLink>
+      {/* BOTTOM SECTION */}
+      <Wrapper className="mt-10 mb-[env(safe-area-inset-bottom)]">
+        {/* Disclaimer - desktop: above copyright row / mobile: after country toggle */}
+        <div className="hidden md:block border-t border-white/10 pt-6 pb-4">
+          <p className="text-[11px] leading-relaxed text-white/40 text-center max-w-4xl mx-auto">
+            All artworks posted on this website is intended as fan art and are
+            submitted by independent artist from around the world and is not
+            purported to be official merchandise unless indicated otherwise. If
+            you have any issues regarding the artwork do write in to us at{" "}
+            <a
+              href="mailto:info@ruggyland.com"
+              className="text-white/60 hover:text-white underline"
+            >
+              info@ruggyland.com
+            </a>
+          </p>
         </div>
 
-        {/* RIGHT - Country Selector */}
-        <div className="flex justify-center md:justify-end">
-          <CountrySelectFooterNav regions={regions} />
+        {/* Copyright + Policies + Country */}
+        <div className="flex justify-between items-center flex-col md:flex-row gap-4 md:gap-0 pt-2 md:pt-2 pb-4 md:pb-0 border-t border-white/10 md:border-0">
+          {/* Country Selector - mobile only */}
+          <div className="flex justify-center md:hidden w-full pt-4">
+            <CountrySelectFooterNav regions={regions} />
+          </div>
+
+          {/* Disclaimer - mobile only, below country toggle */}
+          <div className="md:hidden pb-2 pt-4">
+            <p className="text-[11px] leading-relaxed text-white/40 text-center max-w-4xl mx-auto">
+              All artworks posted on this website is intended as fan art and are
+              submitted by independent artist from around the world and is not
+              purported to be official merchandise unless indicated otherwise. If
+              you have any issues regarding the artwork do write in to us at{" "}
+              <a
+                href="mailto:info@ruggyland.com"
+                className="text-white/60 hover:text-white underline"
+              >
+                info@ruggyland.com
+              </a>
+            </p>
+          </div>
+
+          <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer text-center md:text-left">
+            © {new Date().getFullYear()} RuggyLand, All Rights Reserved
+          </div>
+
+          <div className="flex gap-2 md:gap-5 text-center md:text-left flex-wrap justify-center">
+            <LocalizedClientLink href="/terms-of-service">
+              <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
+                Terms of Service
+              </div>
+            </LocalizedClientLink>
+            <LocalizedClientLink href="/privacy-policy">
+              <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
+                Privacy Policy
+              </div>
+            </LocalizedClientLink>
+            <LocalizedClientLink href="/cancellation-refund-policy">
+              <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
+                Cancellation & Refund Policy
+              </div>
+            </LocalizedClientLink>
+            <LocalizedClientLink href="/shipping-return-policy">
+              <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
+                Shipping & Return Policy
+              </div>
+            </LocalizedClientLink>
+          </div>
+
+          {/* Country Selector - desktop only, right-aligned */}
+          <div className="hidden md:flex justify-end">
+            <CountrySelectFooterNav regions={regions} />
+          </div>
         </div>
       </Wrapper>
     </footer>
