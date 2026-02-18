@@ -33,7 +33,7 @@ type Props = {
 
 function RegionFlag({ option, size = 16 }: { option: RegionOption; size?: number }) {
   if (option.regionName.toLowerCase().includes("rest of world")) {
-    return <span style={{ fontSize: size, lineHeight: 1 }}>🌍</span>
+    return <img src="/World.svg" alt="Rest of World" width={size} height={size} style={{ display: "inline-block" }} />
   }
   return (
     <ReactCountryFlag
