@@ -15,6 +15,9 @@ type Props = {
   }>
 }
 
+// Pre-generate only one representative country per region to keep builds fast.
+const STATIC_COUNTRY_CODES = ["in", "us", "gb", "de", "ae"]
+
 export async function generateStaticParams() {
   const product_categories = await listCategories()
 
@@ -22,24 +25,16 @@ export async function generateStaticParams() {
     return []
   }
 
-  const countryCodes = await listRegions().then((regions: StoreRegion[]) =>
-    regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
-  )
-
   const categoryHandles = product_categories.map(
     (category: any) => category.handle
   )
 
-  const staticParams = countryCodes
-    ?.map((countryCode: string | undefined) =>
-      categoryHandles.map((handle: any) => ({
-        countryCode,
-        category: [handle],
-      }))
-    )
-    .flat()
-
-  return staticParams
+  return STATIC_COUNTRY_CODES.flatMap((countryCode) =>
+    categoryHandles.map((handle: any) => ({
+      countryCode,
+      category: [handle],
+    }))
+  )
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
