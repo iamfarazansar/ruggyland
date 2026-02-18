@@ -47,19 +47,12 @@ export async function POST(
     req.scope.resolve(MANUFACTURING_MODULE);
 
   const { id } = req.params;
-  const updates = req.body as {
-    name?: string;
-    email?: string;
-    phone?: string;
-    role?: string;
-    specialties?: string[];
-    active?: boolean;
-  };
+  const updates = req.body as Record<string, unknown>;
 
-  const artisan = await manufacturingService.updateArtisans({
-    id,
-    ...updates,
-  });
+  const artisan = await manufacturingService.updateArtisans(
+    { id },
+    updates as any,
+  );
 
   res.json({ artisan });
 }
@@ -78,7 +71,7 @@ export async function DELETE(
   const { id } = req.params;
 
   // Soft delete - just deactivate
-  await manufacturingService.updateArtisans({ id, active: false });
+  await manufacturingService.updateArtisans({ id }, { active: false } as any);
 
   res.status(204).send();
 }
