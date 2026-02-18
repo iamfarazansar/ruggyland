@@ -36,10 +36,10 @@ export async function GET(
 }
 
 /**
- * PATCH /admin/artisans/:id
+ * POST /admin/artisans/:id
  * Update an artisan
  */
-export async function PATCH(
+export async function POST(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
@@ -56,7 +56,10 @@ export async function PATCH(
     active?: boolean;
   };
 
-  const artisan = await manufacturingService.updateArtisans({ id }, updates);
+  const artisan = await manufacturingService.updateArtisans({
+    id,
+    ...updates,
+  });
 
   res.json({ artisan });
 }
@@ -75,7 +78,7 @@ export async function DELETE(
   const { id } = req.params;
 
   // Soft delete - just deactivate
-  await manufacturingService.updateArtisans({ id }, { active: false });
+  await manufacturingService.updateArtisans({ id, active: false });
 
   res.status(204).send();
 }

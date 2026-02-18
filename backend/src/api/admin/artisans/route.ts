@@ -24,6 +24,7 @@ export async function GET(
 
   const artisans = await manufacturingService.listArtisans(filters);
 
+  res.setHeader("Cache-Control", "no-store");
   res.json({ artisans });
 }
 
