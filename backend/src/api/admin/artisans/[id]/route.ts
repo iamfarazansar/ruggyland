@@ -49,10 +49,10 @@ export async function POST(
   const { id } = req.params;
   const updates = req.body as Record<string, unknown>;
 
-  const artisan = await manufacturingService.updateArtisans(
-    { id },
-    updates as any,
-  );
+  const artisan = await (manufacturingService as any).updateArtisans({
+    id,
+    ...updates,
+  });
 
   res.json({ artisan });
 }
@@ -71,7 +71,7 @@ export async function DELETE(
   const { id } = req.params;
 
   // Soft delete - just deactivate
-  await manufacturingService.updateArtisans({ id }, { active: false } as any);
+  await (manufacturingService as any).updateArtisans({ id, active: false });
 
   res.status(204).send();
 }
