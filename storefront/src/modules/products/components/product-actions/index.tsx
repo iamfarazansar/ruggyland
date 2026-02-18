@@ -2,6 +2,7 @@
 
 import { addToCart } from "@lib/data/cart"
 import { trackAddToCart } from "@lib/posthog/events"
+import { trackMetaAddToCart } from "@lib/meta-pixel/events"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
@@ -126,6 +127,15 @@ export default function ProductActions({
       countryCode,
     })
     trackAddToCart(product, selectedVariant.id, quantity)
+    trackMetaAddToCart(
+      product,
+      selectedVariant.id,
+      quantity,
+      selectedVariant.calculated_price?.calculated_amount
+        ? Number(selectedVariant.calculated_price.calculated_amount)
+        : undefined,
+      selectedVariant.calculated_price?.currency_code ?? undefined
+    )
     setIsAdding(false)
 
     // Show the nav bar so user can see cart count updated

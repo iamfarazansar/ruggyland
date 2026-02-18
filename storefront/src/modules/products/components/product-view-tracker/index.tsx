@@ -1,6 +1,7 @@
 "use client"
 
 import { trackProductViewed } from "@lib/posthog/events"
+import { trackMetaViewContent } from "@lib/meta-pixel/events"
 import { useEffect } from "react"
 
 export default function ProductViewTracker({
@@ -15,6 +16,7 @@ export default function ProductViewTracker({
 }) {
   useEffect(() => {
     trackProductViewed(product)
+    trackMetaViewContent(product)
   }, [product.id])
 
   return null
