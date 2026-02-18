@@ -299,7 +299,7 @@ export default function AnalyticsPage() {
         {data.countries.length > 0 && (
           <ChartCard title="Visitors by Country">
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+              <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                 <Pie
                   data={data.countries.map((c) => ({
                     name: c.country,
@@ -307,12 +307,12 @@ export default function AnalyticsPage() {
                   }))}
                   cx="50%"
                   cy="50%"
-                  outerRadius={100}
+                  outerRadius={80}
                   dataKey="value"
                   label={({ name, percent }: { name?: string; percent?: number }) =>
                     `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`
                   }
-                  labelLine={false}
+                  labelLine={true}
                 >
                   {data.countries.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -369,7 +369,7 @@ export default function AnalyticsPage() {
         {data.devices.length > 0 && (
           <ChartCard title="Visitors by Device">
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+              <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                 <Pie
                   data={data.devices.map((d) => ({
                     name: d.device || "Unknown",
@@ -377,12 +377,12 @@ export default function AnalyticsPage() {
                   }))}
                   cx="50%"
                   cy="50%"
-                  outerRadius={100}
+                  outerRadius={80}
                   dataKey="value"
                   label={({ name, percent }: { name?: string; percent?: number }) =>
                     `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`
                   }
-                  labelLine={false}
+                  labelLine={true}
                 >
                   {data.devices.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
