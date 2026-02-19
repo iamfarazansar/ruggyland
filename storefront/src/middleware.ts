@@ -5,6 +5,28 @@ const BACKEND_URL = process.env.MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 
+/**
+ * Look up country from IP using a third-party geolocation API.
+ * Only called on first visit when no country code is in the URL.
+ */
+async function getCountryFromIP(request: NextRequest): Promise<string | null> {
+  try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip")
+    if (!ip) return null
+
+    const res = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`, {
+      signal: AbortSignal.timeout(2000),
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.countryCode?.toLowerCase() || null
+  } catch {
+    return null
+  }
+}
+
 const regionMapCache = {
   regionMap: new Map<string, HttpTypes.StoreRegion>(),
   regionMapUpdated: Date.now(),
@@ -84,10 +106,13 @@ async function getCountryCode(
 
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
 
-    console.log("[middleware] cfCountryCode:", cfCountryCode, "vercelCountryCode:", vercelCountryCode, "urlCountryCode:", urlCountryCode, "DEFAULT_REGION:", DEFAULT_REGION)
+    // Try IP geolocation API as primary source (most accurate for Indian IPs)
+    const ipApiCountryCode = await getCountryFromIP(request)
 
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode
+    } else if (ipApiCountryCode && regionMap.has(ipApiCountryCode)) {
+      countryCode = ipApiCountryCode
     } else if (cfCountryCode && cfCountryCode !== "xx" && regionMap.has(cfCountryCode)) {
       countryCode = cfCountryCode
     } else if (vercelCountryCode && regionMap.has(vercelCountryCode)) {
