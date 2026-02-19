@@ -109,21 +109,22 @@ async function getCountryCode(
 
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
 
-    // Try IP geolocation API as primary source (most accurate for Indian IPs)
-    const ipApiCountryCode = await getCountryFromIP(request)
-
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode
-    } else if (ipApiCountryCode && regionMap.has(ipApiCountryCode)) {
-      countryCode = ipApiCountryCode
-    } else if (cfCountryCode && cfCountryCode !== "xx" && regionMap.has(cfCountryCode)) {
-      countryCode = cfCountryCode
-    } else if (vercelCountryCode && regionMap.has(vercelCountryCode)) {
-      countryCode = vercelCountryCode
-    } else if (regionMap.has(DEFAULT_REGION)) {
-      countryCode = DEFAULT_REGION
-    } else if (regionMap.keys().next().value) {
-      countryCode = regionMap.keys().next().value
+    } else {
+      // Only call external API when no valid country in URL (first visit only)
+      const ipApiCountryCode = await getCountryFromIP(request)
+      if (ipApiCountryCode && regionMap.has(ipApiCountryCode)) {
+        countryCode = ipApiCountryCode
+      } else if (cfCountryCode && cfCountryCode !== "xx" && regionMap.has(cfCountryCode)) {
+        countryCode = cfCountryCode
+      } else if (vercelCountryCode && regionMap.has(vercelCountryCode)) {
+        countryCode = vercelCountryCode
+      } else if (regionMap.has(DEFAULT_REGION)) {
+        countryCode = DEFAULT_REGION
+      } else if (regionMap.keys().next().value) {
+        countryCode = regionMap.keys().next().value
+      }
     }
 
     return countryCode
