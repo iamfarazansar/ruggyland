@@ -46,6 +46,97 @@ const PIE_COLORS = [
   "#6366f1",
 ];
 
+const RADIAN = Math.PI / 180;
+
+function renderCurvedLabel(props: any) {
+  const { cx, cy, midAngle, outerRadius, fill, percent, name, viewBox } = props;
+  const pct = Math.round(percent * 100);
+  if (pct < 3) return null;
+
+  const chartW = viewBox?.width || cx * 2;
+  const chartX = viewBox?.x || 0;
+  const chartH = viewBox?.height || cy * 2;
+  const chartY = viewBox?.y || 0;
+  const pad = 4;
+
+  const sin = Math.sin(-midAngle * RADIAN);
+  const cos = Math.cos(-midAngle * RADIAN);
+  const isLeftSide = cos < 0;
+
+  // P1: on outer edge of pie
+  const sx = cx + outerRadius * cos;
+  const sy = cy + outerRadius * sin;
+
+  // P2: elbow — pushed well out from pie
+  const elbowR = outerRadius + 24;
+  const mx = cx + elbowR * cos;
+  const my = cy + elbowR * sin;
+
+  // Determine available space from elbow to container edge
+  const rightEdge = chartX + chartW - pad;
+  const leftEdge = chartX + pad;
+  const availableW = isLeftSide ? mx - leftEdge : rightEdge - mx;
+
+  // Try full name first, abbreviate if it doesn't fit
+  const fullLabel = `${name} ${pct}%`;
+  const fullW = fullLabel.length * 6.5;
+
+  // Abbreviation map for long names
+  let label = fullLabel;
+  const horizontalLineLen = 16; // minimum horizontal line length
+  const textGap = 4;
+  const neededSpace = horizontalLineLen + textGap + fullW;
+
+  if (neededSpace > availableW) {
+    // Try abbreviating
+    let shortName = name;
+    if (name === "United Kingdom") shortName = "UK";
+    else if (name === "United States") shortName = "US";
+    else if (name.length > 8) shortName = name.slice(0, 7) + "…";
+    label = `${shortName} ${pct}%`;
+  }
+
+  // P3: horizontal endpoint — extend toward edge, leaving room for text
+  const textW = label.length * 6.5;
+  let ex: number;
+  if (isLeftSide) {
+    ex = Math.max(mx - horizontalLineLen, leftEdge + textW + textGap);
+  } else {
+    ex = Math.min(mx + horizontalLineLen, rightEdge - textW - textGap);
+  }
+
+  // Clamp vertical
+  const ey = Math.max(chartY + pad + 8, Math.min(chartY + chartH - pad - 8, my));
+
+  const textAnchor = isLeftSide ? "end" : "start";
+  const textX = isLeftSide ? ex - textGap : ex + textGap;
+
+  return (
+    <g>
+      {/* Smooth curve from pie edge to label */}
+      <path
+        d={`M ${sx},${sy} C ${mx},${my} ${mx},${ey} ${ex},${ey}`}
+        fill="none"
+        stroke={fill}
+        strokeWidth={1.5}
+        opacity={0.5}
+      />
+      <circle cx={ex} cy={ey} r={2} fill={fill} />
+      <text
+        x={textX}
+        y={ey}
+        fill={fill}
+        textAnchor={textAnchor}
+        dominantBaseline="central"
+        fontSize={11}
+        fontWeight={600}
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
 export default function AnalyticsPage() {
   const { token, isAuthenticated } = useAuth();
   const [dateRange, setDateRange] = useState<DateRange>(30);
@@ -296,40 +387,50 @@ export default function AnalyticsPage() {
         )}
 
         {/* Visitors by Country */}
-        {data.countries.length > 0 && (
-          <ChartCard title="Visitors by Country">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
-                <Pie
-                  data={data.countries.map((c) => ({
-                    name: c.country,
-                    value: c.count,
-                  }))}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  dataKey="value"
-                  label={({ name, percent }: { name?: string; percent?: number }) =>
-                    `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`
-                  }
-                  labelLine={true}
-                >
-                  {data.countries.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1f2937",
-                    border: "1px solid #374151",
-                    borderRadius: "8px",
-                    color: "#f3f4f6",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        )}
+        {data.countries.length > 0 && (() => {
+          const countryData = data.countries.map((c) => ({
+            name: c.country,
+            value: c.count,
+          }));
+          const countryTotal = countryData.reduce((s, d) => s + d.value, 0);
+          return (
+            <ChartCard title="Visitors by Country">
+              <ResponsiveContainer width="100%" height={320}>
+                <PieChart>
+                  <Pie
+                    data={countryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={75}
+                    paddingAngle={2}
+                    dataKey="value"
+                    labelLine={false}
+                    label={renderCurvedLabel}
+                  >
+                    {countryData.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} stroke="transparent" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1f2937",
+                      border: "1px solid #374151",
+                      borderRadius: "8px",
+                      color: "#f3f4f6",
+                    }}
+                  />
+                  <text x="50%" y="46%" textAnchor="middle" fontSize="12" fill="#9ca3af">
+                    Total Visitors
+                  </text>
+                  <text x="50%" y="56%" textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor" className="fill-gray-900 dark:fill-gray-100">
+                    {countryTotal.toLocaleString()}
+                  </text>
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          );
+        })()}
 
         {/* Top Pages */}
         {data.topPages.length > 0 && (
@@ -366,40 +467,50 @@ export default function AnalyticsPage() {
         )}
 
         {/* Visitors by Device */}
-        {data.devices.length > 0 && (
-          <ChartCard title="Visitors by Device">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
-                <Pie
-                  data={data.devices.map((d) => ({
-                    name: d.device || "Unknown",
-                    value: d.count,
-                  }))}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  dataKey="value"
-                  label={({ name, percent }: { name?: string; percent?: number }) =>
-                    `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`
-                  }
-                  labelLine={true}
-                >
-                  {data.devices.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1f2937",
-                    border: "1px solid #374151",
-                    borderRadius: "8px",
-                    color: "#f3f4f6",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        )}
+        {data.devices.length > 0 && (() => {
+          const deviceData = data.devices.map((d) => ({
+            name: d.device || "Unknown",
+            value: d.count,
+          }));
+          const deviceTotal = deviceData.reduce((s, d) => s + d.value, 0);
+          return (
+            <ChartCard title="Visitors by Device">
+              <ResponsiveContainer width="100%" height={320}>
+                <PieChart>
+                  <Pie
+                    data={deviceData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={75}
+                    paddingAngle={2}
+                    dataKey="value"
+                    labelLine={false}
+                    label={renderCurvedLabel}
+                  >
+                    {deviceData.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} stroke="transparent" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1f2937",
+                      border: "1px solid #374151",
+                      borderRadius: "8px",
+                      color: "#f3f4f6",
+                    }}
+                  />
+                  <text x="50%" y="46%" textAnchor="middle" fontSize="12" fill="#9ca3af">
+                    Total
+                  </text>
+                  <text x="50%" y="56%" textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor" className="fill-gray-900 dark:fill-gray-100">
+                    {deviceTotal.toLocaleString()}
+                  </text>
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          );
+        })()}
       </div>
 
       {/* Empty state */}
