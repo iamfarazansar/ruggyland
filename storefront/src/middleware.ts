@@ -12,16 +12,19 @@ const DEFAULT_REGION = process.env.NEXT_PUBLIC_DEFAULT_REGION || "us"
 async function getCountryFromIP(request: NextRequest): Promise<string | null> {
   try {
     const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip")
+      request.headers.get("cf-connecting-ip") ||
+      request.headers.get("x-real-ip") ||
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
     if (!ip) return null
 
-    const res = await fetch(`http://ip-api.com/json/${ip}?fields=countryCode`, {
+    const res = await fetch(`https://ipapi.co/${ip}/country_code/`, {
       signal: AbortSignal.timeout(2000),
+      headers: { "User-Agent": "nodejs-ipapi-v1.02" },
     })
     if (!res.ok) return null
-    const data = await res.json()
-    return data.countryCode?.toLowerCase() || null
+    const code = (await res.text()).trim()
+    if (!code || code === "Undefined") return null
+    return code.toLowerCase()
   } catch {
     return null
   }
