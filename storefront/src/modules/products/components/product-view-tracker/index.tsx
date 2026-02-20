@@ -2,24 +2,13 @@
 
 import { trackProductViewed } from "@lib/posthog/events"
 import { trackMetaViewContent } from "@lib/meta-pixel/events"
+import { HttpTypes } from "@medusajs/types"
 import { useEffect } from "react"
 
 export default function ProductViewTracker({
   product,
 }: {
-  product: {
-    id: string
-    title?: string
-    handle?: string
-    thumbnail?: string | null
-    variants?: Array<{
-      id: string
-      calculated_price?: {
-        calculated_amount?: number
-        currency_code?: string
-      }
-    }>
-  }
+  product: HttpTypes.StoreProduct
 }) {
   useEffect(() => {
     trackProductViewed(product)

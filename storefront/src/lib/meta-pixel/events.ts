@@ -21,10 +21,10 @@ export function trackMetaViewContent(product: {
   variants?: Array<{
     id: string
     calculated_price?: {
-      calculated_amount?: number
-      currency_code?: string
+      calculated_amount?: number | null
+      currency_code?: string | null
     }
-  }>
+  }> | null
 }) {
   const variant = product.variants?.[0]
   const price = variant?.calculated_price
