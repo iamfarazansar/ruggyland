@@ -2,7 +2,8 @@ import { Modules } from '@medusajs/framework/utils'
 import { INotificationModuleService, IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
 import { EmailTemplates } from '../modules/email-notifications/templates'
-import { RESEND_REPLY_TO } from '../lib/constants'
+import { RESEND_REPLY_TO, META_PIXEL_ID, META_CAPI_ACCESS_TOKEN } from '../lib/constants'
+import { sendMetaCapiEvent, hashUserData } from '../lib/meta-capi'
 
 export default async function orderPlacedHandler({
   event: { data },
@@ -75,6 +76,47 @@ export default async function orderPlacedHandler({
     console.log(`Order confirmation email sent to ${order.email} for order #${order.display_id}`)
   } catch (error) {
     console.error('Error sending order confirmation notification:', error)
+  }
+
+  // Send Meta Conversions API (CAPI) Purchase event
+  if (META_PIXEL_ID && META_CAPI_ACCESS_TOKEN) {
+    try {
+      const addr = shippingAddress || billingAddress
+      const userData = hashUserData({
+        email: order.email,
+        phone: addr?.phone ?? undefined,
+        firstName: addr?.first_name ?? undefined,
+        lastName: addr?.last_name ?? undefined,
+        city: addr?.city ?? undefined,
+        state: addr?.province ?? undefined,
+        zip: addr?.postal_code ?? undefined,
+        countryCode: addr?.country_code ?? undefined,
+        externalId: order.customer_id ?? undefined,
+      })
+
+      await sendMetaCapiEvent(META_PIXEL_ID, META_CAPI_ACCESS_TOKEN, {
+        event_name: 'Purchase',
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: `order_${order.id}`,
+        action_source: 'website',
+        event_source_url: `https://ruggyland.com/order/confirmed/${order.id}`,
+        user_data: userData,
+        custom_data: {
+          currency: order.currency_code?.toUpperCase() || 'USD',
+          value: Number(order.summary?.current_order_total || 0),
+          content_ids: order.items?.map((item: any) => item.variant_id || item.id) || [],
+          content_type: 'product',
+          contents: order.items?.map((item: any) => ({
+            id: item.variant_id || item.id,
+            quantity: item.quantity,
+          })) || [],
+          num_items: order.items?.length || 0,
+        },
+      })
+      console.log(`Meta CAPI Purchase event sent for order #${order.display_id}`)
+    } catch (error) {
+      console.error('Error sending Meta CAPI event:', error)
+    }
   }
 
   // Send Slack notification

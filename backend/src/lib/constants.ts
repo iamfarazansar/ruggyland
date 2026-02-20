@@ -117,3 +117,9 @@ export const WORKER_MODE =
  * Disable Admin
  */
 export const SHOULD_DISABLE_ADMIN = process.env.MEDUSA_DISABLE_ADMIN === "true";
+
+/**
+ * (optional) Meta Conversions API for server-side event tracking
+ */
+export const META_PIXEL_ID = process.env.META_PIXEL_ID;
+export const META_CAPI_ACCESS_TOKEN = process.env.META_CAPI_ACCESS_TOKEN;

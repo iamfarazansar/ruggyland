@@ -81,13 +81,14 @@ export function trackMetaPurchase(order: {
   currency_code?: string
   items?: any[]
 }) {
+  const eventId = `order_${order.id}`
   fbq("track", "Purchase", {
     content_ids: order.items?.map((item: any) => item.variant_id || item.id) || [],
     content_type: "product",
     num_items: order.items?.length || 0,
     value: order.total || 0,
     currency: order.currency_code?.toUpperCase() || "USD",
-  })
+  }, { eventID: eventId })
 }
 
 export function trackMetaSearch(query: string) {
