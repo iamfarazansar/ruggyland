@@ -34,7 +34,7 @@ export function trackMetaViewContent(product: {
     content_type: "product",
     contents: [{ id: variant?.id || product.id, quantity: 1 }],
     ...(price?.calculated_amount && {
-      value: price.calculated_amount / 100,
+      value: price.calculated_amount,
       currency: price.currency_code?.toUpperCase() || "USD",
     }),
   })
@@ -54,7 +54,7 @@ export function trackMetaAddToCart(
     contents: [{ id: variantId, quantity }],
     num_items: quantity,
     ...(price && {
-      value: price / 100,
+      value: price,
       currency: currencyCode?.toUpperCase() || "USD",
     }),
   })
@@ -70,7 +70,7 @@ export function trackMetaInitiateCheckout(cart: {
     content_ids: cart.items?.map((item: any) => item.variant_id) || [],
     content_type: "product",
     num_items: cart.items?.length || 0,
-    value: cart.total ? cart.total / 100 : 0,
+    value: cart.total || 0,
     currency: cart.currency_code?.toUpperCase() || "USD",
   })
 }
@@ -85,7 +85,7 @@ export function trackMetaPurchase(order: {
     content_ids: order.items?.map((item: any) => item.variant_id || item.id) || [],
     content_type: "product",
     num_items: order.items?.length || 0,
-    value: order.total ? order.total / 100 : 0,
+    value: order.total || 0,
     currency: order.currency_code?.toUpperCase() || "USD",
   })
 }
