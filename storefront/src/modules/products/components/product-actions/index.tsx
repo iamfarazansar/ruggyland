@@ -2,7 +2,7 @@
 
 import { addToCart } from "@lib/data/cart"
 import { trackAddToCart } from "@lib/posthog/events"
-import { trackMetaAddToCart } from "@lib/meta-pixel/events"
+import { trackMetaAddToCart, trackMetaViewContent } from "@lib/meta-pixel/events"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
@@ -89,6 +89,16 @@ export default function ProductActions({
     router.replace(pathname + "?" + params.toString(), { scroll: false })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVariant, isValidVariant])
+
+  // Fire ViewContent when variant selection changes
+  useEffect(() => {
+    if (selectedVariant) {
+      trackMetaViewContent({
+        ...product,
+        variants: [selectedVariant],
+      })
+    }
+  }, [selectedVariant?.id])
 
   // Reset qty when variant changes
   useEffect(() => {
