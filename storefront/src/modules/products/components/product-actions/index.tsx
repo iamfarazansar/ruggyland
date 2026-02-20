@@ -90,13 +90,22 @@ export default function ProductActions({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVariant, isValidVariant])
 
-  // Fire ViewContent when variant selection changes
+  // Fire ViewContent on page load (first variant) and on variant change
+  const hasTrackedInitial = useRef(false)
   useEffect(() => {
     if (selectedVariant) {
       trackMetaViewContent({
         ...product,
         variants: [selectedVariant],
       })
+      hasTrackedInitial.current = true
+    } else if (!hasTrackedInitial.current && product.variants?.length) {
+      // No variant selected yet (multi-variant product) — fire with first variant
+      trackMetaViewContent({
+        ...product,
+        variants: [product.variants[0]],
+      })
+      hasTrackedInitial.current = true
     }
   }, [selectedVariant?.id])
 
