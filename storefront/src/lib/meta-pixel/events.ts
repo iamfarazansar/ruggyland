@@ -18,19 +18,21 @@ export function trackMetaViewContent(product: {
   id: string
   title?: string
   handle?: string
-  variant?: {
+  variants?: Array<{
     id: string
     calculated_price?: {
       calculated_amount?: number
       currency_code?: string
     }
-  }
+  }>
 }) {
-  const price = product.variant?.calculated_price
+  const variant = product.variants?.[0]
+  const price = variant?.calculated_price
   fbq("track", "ViewContent", {
-    content_ids: [product.id],
+    content_ids: [variant?.id || product.id],
     content_name: product.title,
     content_type: "product",
+    contents: [{ id: variant?.id || product.id, quantity: 1 }],
     ...(price?.calculated_amount && {
       value: price.calculated_amount / 100,
       currency: price.currency_code?.toUpperCase() || "USD",
@@ -49,6 +51,7 @@ export function trackMetaAddToCart(
     content_ids: [variantId],
     content_name: product.title,
     content_type: "product",
+    contents: [{ id: variantId, quantity }],
     num_items: quantity,
     ...(price && {
       value: price / 100,

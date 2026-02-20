@@ -12,6 +12,13 @@ export default function ProductViewTracker({
     title?: string
     handle?: string
     thumbnail?: string | null
+    variants?: Array<{
+      id: string
+      calculated_price?: {
+        calculated_amount?: number
+        currency_code?: string
+      }
+    }>
   }
 }) {
   useEffect(() => {
