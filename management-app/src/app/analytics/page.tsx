@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import { fetchAnalytics, type QueryType } from "@/lib/analytics";
 import {
   LineChart,
@@ -139,6 +140,8 @@ function renderCurvedLabel(props: any) {
 
 export default function AnalyticsPage() {
   const { token, isAuthenticated } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [dateRange, setDateRange] = useState<DateRange>(30);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -240,6 +243,20 @@ export default function AnalyticsPage() {
     };
   });
 
+  const tooltipTextColor = isDark ? "#f3f4f6" : "#111827";
+  const tooltipStyle = {
+    backgroundColor: isDark ? "#1f2937" : "#ffffff",
+    border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
+    borderRadius: "8px",
+    color: tooltipTextColor,
+  };
+  const tooltipItemStyle = { color: tooltipTextColor };
+  const tooltipLabelStyle = { color: tooltipTextColor };
+  const gridStroke = isDark ? "#374151" : "#e5e7eb";
+  const axisStroke = isDark ? "#9ca3af" : "#6b7280";
+  const centerTextFill = isDark ? "#9ca3af" : "#6b7280";
+  const centerValueFill = isDark ? "#f3f4f6" : "#111827";
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
@@ -312,16 +329,11 @@ export default function AnalyticsPage() {
         <ChartCard title="Traffic & Conversions">
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={conversionData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#9ca3af" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#9ca3af" />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.3} />
+              <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke={axisStroke} />
+              <YAxis tick={{ fontSize: 12 }} stroke={axisStroke} />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f2937",
-                  border: "1px solid #374151",
-                  borderRadius: "8px",
-                  color: "#f3f4f6",
-                }}
+                contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle}
               />
               <Legend />
               <Line
@@ -363,22 +375,17 @@ export default function AnalyticsPage() {
                 }))}
                 layout="vertical"
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis type="number" tick={{ fontSize: 12 }} stroke="#9ca3af" />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.3} />
+                <XAxis type="number" tick={{ fontSize: 12 }} stroke={axisStroke} />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={140}
                   tick={{ fontSize: 11 }}
-                  stroke="#9ca3af"
+                  stroke={axisStroke}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1f2937",
-                    border: "1px solid #374151",
-                    borderRadius: "8px",
-                    color: "#f3f4f6",
-                  }}
+                  contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle}
                 />
                 <Bar dataKey="count" fill="#f59e0b" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -413,17 +420,12 @@ export default function AnalyticsPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1f2937",
-                      border: "1px solid #374151",
-                      borderRadius: "8px",
-                      color: "#f3f4f6",
-                    }}
+                    contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle}
                   />
-                  <text x="50%" y="46%" textAnchor="middle" fontSize="12" fill="#9ca3af">
+                  <text x="50%" y="46%" textAnchor="middle" fontSize="12" fill={centerTextFill}>
                     Total Visitors
                   </text>
-                  <text x="50%" y="56%" textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor" className="fill-gray-900 dark:fill-gray-100">
+                  <text x="50%" y="56%" textAnchor="middle" fontSize="22" fontWeight="700" fill={centerValueFill}>
                     {countryTotal.toLocaleString()}
                   </text>
                 </PieChart>
@@ -443,22 +445,17 @@ export default function AnalyticsPage() {
                 }))}
                 layout="vertical"
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis type="number" tick={{ fontSize: 12 }} stroke="#9ca3af" />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.3} />
+                <XAxis type="number" tick={{ fontSize: 12 }} stroke={axisStroke} />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={160}
                   tick={{ fontSize: 11 }}
-                  stroke="#9ca3af"
+                  stroke={axisStroke}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1f2937",
-                    border: "1px solid #374151",
-                    borderRadius: "8px",
-                    color: "#f3f4f6",
-                  }}
+                  contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle}
                 />
                 <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -493,17 +490,12 @@ export default function AnalyticsPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1f2937",
-                      border: "1px solid #374151",
-                      borderRadius: "8px",
-                      color: "#f3f4f6",
-                    }}
+                    contentStyle={tooltipStyle} itemStyle={tooltipItemStyle} labelStyle={tooltipLabelStyle}
                   />
-                  <text x="50%" y="46%" textAnchor="middle" fontSize="12" fill="#9ca3af">
+                  <text x="50%" y="46%" textAnchor="middle" fontSize="12" fill={centerTextFill}>
                     Total
                   </text>
-                  <text x="50%" y="56%" textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor" className="fill-gray-900 dark:fill-gray-100">
+                  <text x="50%" y="56%" textAnchor="middle" fontSize="22" fontWeight="700" fill={centerValueFill}>
                     {deviceTotal.toLocaleString()}
                   </text>
                 </PieChart>
