@@ -56,54 +56,20 @@ export default function ProductActions({
   useEffect(() => {
     if (!product.variants?.length || !product.options?.length) return
 
-    // If only 1 variant, select it directly
-    if (product.variants.length === 1) {
-      const variantOptions = optionsAsKeymap(product.variants[0].options)
-      setOptions(variantOptions ?? {})
-      return
-    }
-
-    // For multi-variant products, auto-select first value for each option
-    // Sort options: shape first, then size
-    const sortedOptions = [...(product.options || [])].sort((a, b) => {
-      const order = ["shape", "size"]
-      const ai = order.indexOf((a.title || "").toLowerCase())
-      const bi = order.indexOf((b.title || "").toLowerCase())
-      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
-    })
-
-    const initialOptions: Record<string, string> = {}
-
-    for (const option of sortedOptions) {
-      // Find available values for this option given already-selected options
-      const matchingVariants = (product.variants || []).filter((variant) => {
-        const variantOpts = optionsAsKeymap(variant.options) || {}
-        return Object.entries(initialOptions).every(([optId, optVal]) => {
-          return variantOpts[optId] === optVal
-        })
-      })
-
-      const availableVals = new Set<string>()
-      matchingVariants.forEach((variant) => {
-        const variantOpts = optionsAsKeymap(variant.options) || {}
-        if (variantOpts[option.id]) {
-          availableVals.add(variantOpts[option.id])
-        }
-      })
-
-      const vals = Array.from(availableVals)
-      // For size, filter out sample and pick the first non-sample
-      if (option.title?.toLowerCase() === "size") {
-        const nonSample = vals.filter(
-          (v) => !v.toLowerCase().includes("sample")
+    // Find the first non-sample variant (prefer non-sample sizes)
+    const firstVariant =
+      product.variants.find((v) => {
+        const opts = optionsAsKeymap(v.options) || {}
+        // Check if any option value contains "sample"
+        return !Object.values(opts).some((val) =>
+          val?.toLowerCase().includes("sample")
         )
-        initialOptions[option.id] = nonSample[0] || vals[0] || ""
-      } else {
-        initialOptions[option.id] = vals[0] || ""
-      }
-    }
+      }) || product.variants[0]
 
-    setOptions(initialOptions)
+    if (firstVariant) {
+      const variantOptions = optionsAsKeymap(firstVariant.options)
+      setOptions(variantOptions ?? {})
+    }
   }, [product.variants, product.options])
 
   const selectedVariant = useMemo(() => {
