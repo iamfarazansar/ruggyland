@@ -67,7 +67,19 @@ const MobileActions: React.FC<MobileActionsProps> = ({
 
   const handleOptionSelect = (optionId: string, value: string) => {
     updateOptions(optionId, value)
-    close()
+    // Only close when tapping the LAST option (Size after Shape)
+    // So modal stays open after picking Shape to let user pick Size
+    const sortedOpts = [...(product.options || [])].sort((a, b) => {
+      const order = ["shape", "size"]
+      const ai = order.indexOf((a.title || "").toLowerCase())
+      const bi = order.indexOf((b.title || "").toLowerCase())
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+    })
+    const lastOption = sortedOpts[sortedOpts.length - 1]
+    // Close if tapping the last option, or if product only has one option
+    if (sortedOpts.length <= 1 || optionId === lastOption?.id) {
+      close()
+    }
   }
 
   return (
