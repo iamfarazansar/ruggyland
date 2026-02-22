@@ -4,7 +4,9 @@ import { z } from "@medusajs/framework/zod"
 export const UpdateVariantPricesSchema = z.object({
   prices: z.array(
     z.object({
-      id: z.string(),
+      id: z.string().optional(),  // Optional for new prices
+      currency_code: z.string(),
+      region_id: z.string().optional(),
       amount: z.number().int().min(0),
     })
   ),

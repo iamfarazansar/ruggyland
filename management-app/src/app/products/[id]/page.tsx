@@ -299,7 +299,12 @@ export default function EditProductPage() {
   // Handle variant price updates
   const handleSaveVariantPrices = async (
     variantId: string,
-    prices: Array<{ id: string; amount: number }>
+    prices: Array<{
+      id?: string;
+      currency_code: string;
+      region_id?: string;
+      amount: number;
+    }>
   ) => {
     try {
       const response = await fetch(
@@ -319,10 +324,16 @@ export default function EditProductPage() {
         throw new Error(errData.message || "Failed to update prices");
       }
 
-      // Refresh variants to get updated prices
+      const result = await response.json();
+
+      // Refresh variants to get newly created/updated prices
       await loadVariantsPricing();
 
-      setSuccessMessage("Variant prices updated successfully");
+      const message = result.created_count > 0
+        ? `Created ${result.created_count} and updated ${result.updated_count} prices`
+        : `Updated ${result.updated_count} prices`;
+
+      setSuccessMessage(message);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update prices");

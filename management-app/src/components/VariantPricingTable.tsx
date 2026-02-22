@@ -28,7 +28,15 @@ interface PriceContext {
 interface VariantPricingTableProps {
   variants: Variant[];
   priceContexts: PriceContext[];
-  onSave: (variantId: string, prices: Array<{ id: string; amount: number }>) => Promise<void>;
+  onSave: (
+    variantId: string,
+    prices: Array<{
+      id?: string;
+      currency_code: string;
+      region_id?: string;
+      amount: number;
+    }>
+  ) => Promise<void>;
 }
 
 interface CellPosition {
@@ -113,18 +121,23 @@ export default function VariantPricingTable({
     setSavingVariant(variant.id);
 
     try {
-      const priceUpdates: Array<{ id: string; amount: number }> = [];
+      const priceUpdates: Array<{
+        id?: string;
+        currency_code: string;
+        region_id?: string;
+        amount: number;
+      }> = [];
 
       priceContexts.forEach((context) => {
         const price = getPrice(variant, context.key);
-        if (!price?.id) return;
-
-        const editKey = price.id;
+        const editKey = price?.id || context.key;
         const editedAmount = editedPrices[variant.id]?.[editKey];
 
         if (editedAmount !== undefined) {
           priceUpdates.push({
-            id: price.id,
+            id: price?.id,  // undefined for new prices
+            currency_code: context.currency_code,
+            region_id: context.region_id,
             amount: editedAmount,
           });
         }
@@ -156,8 +169,8 @@ export default function VariantPricingTable({
   };
 
   // Handle cell selection start
-  const handleCellMouseDown = (variantId: string, contextKey: string, hasPrice: boolean) => {
-    if (resizingColumn || !hasPrice) return;
+  const handleCellMouseDown = (variantId: string, contextKey: string) => {
+    if (resizingColumn) return;
 
     setIsSelecting(true);
     setSelectionStart({ variantId, contextKey });
@@ -166,8 +179,8 @@ export default function VariantPricingTable({
   };
 
   // Handle cell selection move
-  const handleCellMouseEnter = (variantId: string, contextKey: string, hasPrice: boolean) => {
-    if (!isSelecting || !selectionStart || !hasPrice) return;
+  const handleCellMouseEnter = (variantId: string, contextKey: string) => {
+    if (!isSelecting || !selectionStart) return;
 
     setSelectionEnd({ variantId, contextKey });
 
@@ -187,10 +200,7 @@ export default function VariantPricingTable({
       for (let cIdx = minContextIdx; cIdx <= maxContextIdx; cIdx++) {
         const v = variants[vIdx];
         const c = priceContexts[cIdx];
-        const price = getPrice(v, c.key);
-        if (price?.id) {
-          newSelectedCells.add(`${v.id}|${c.key}`);
-        }
+        newSelectedCells.add(`${v.id}|${c.key}`);
       }
     }
     setSelectedCells(newSelectedCells);
@@ -328,8 +338,9 @@ export default function VariantPricingTable({
               {/* Price Cells */}
               {priceContexts.map((context) => {
                 const price = getPrice(variant, context.key);
+                const editKey = price?.id || context.key;
                 const amount = getPriceAmount(variant, context.key, price?.id);
-                const isEdited = price?.id && editedPrices[variant.id]?.[price.id] !== undefined;
+                const isEdited = editedPrices[variant.id]?.[editKey] !== undefined;
                 const isSelected = isCellSelected(variant.id, context.key);
 
                 return (
@@ -341,8 +352,8 @@ export default function VariantPricingTable({
                         : "bg-inherit"
                     }`}
                     style={{ width: columnWidths[context.key], minWidth: columnWidths[context.key], maxWidth: columnWidths[context.key] }}
-                    onMouseDown={() => handleCellMouseDown(variant.id, context.key, !!price?.id)}
-                    onMouseEnter={() => handleCellMouseEnter(variant.id, context.key, !!price?.id)}
+                    onMouseDown={() => handleCellMouseDown(variant.id, context.key)}
+                    onMouseEnter={() => handleCellMouseEnter(variant.id, context.key)}
                   >
                     <div className="flex items-center gap-1">
                       <span className="text-gray-500 dark:text-gray-400 text-xs flex-shrink-0">
@@ -355,17 +366,16 @@ export default function VariantPricingTable({
                         onChange={(e) =>
                           handlePriceChange(variant.id, context.key, price?.id, e.target.value)
                         }
-                        disabled={!price?.id}
-                        className={`w-full min-w-0 px-1.5 py-1 text-sm rounded text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed transition-all ${
-                          !price?.id
-                            ? "border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700"
-                            : isSelected
+                        className={`w-full min-w-0 px-1.5 py-1 text-sm rounded text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${
+                          isSelected
                             ? "border-2 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm"
                             : isEdited
                             ? "border border-yellow-400 dark:border-yellow-600 bg-white dark:bg-gray-800"
+                            : !price?.id
+                            ? "border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50"
                             : "border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                         }`}
-                        placeholder={!price?.id ? "N/A" : "0.00"}
+                        placeholder={!price?.id ? "0.00" : "0.00"}
                       />
                     </div>
                   </td>

@@ -13,13 +13,19 @@ export async function POST(
     const { result } = await updateVariantPricesWorkflow(req.scope).run({
       input: {
         variant_id: variantId,
-        prices: prices as Array<{ id: string; amount: number }>,
+        prices: prices as Array<{
+          id?: string
+          currency_code: string
+          region_id?: string
+          amount: number
+        }>,
       },
     })
 
     return res.json({
       success: true,
       variant_id: result.variant_id,
+      created_count: result.created_count,
       updated_count: result.updated_count,
     })
   } catch (error) {

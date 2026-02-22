@@ -4,7 +4,9 @@ import { updateVariantPricesStep } from "./steps/update-variant-prices"
 type UpdateVariantPricesWorkflowInput = {
   variant_id: string
   prices: Array<{
-    id: string
+    id?: string  // Optional - undefined for new prices
+    currency_code: string
+    region_id?: string
     amount: number
   }>
 }
