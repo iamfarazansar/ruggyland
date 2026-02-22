@@ -28,6 +28,7 @@ type MobileActionsProps = {
   isAdding?: boolean
   show: boolean
   optionsDisabled: boolean
+  availableValues?: Record<string, string[]>
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
@@ -44,6 +45,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   isAdding,
   show,
   optionsDisabled,
+  availableValues,
 }) => {
   const { state, open, close } = useToggleState()
 
@@ -235,17 +237,30 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   <div className="bg-white px-6 py-12">
                     {(product.variants?.length ?? 0) > 1 && (
                       <div className="flex flex-col gap-y-6">
-                        {(product.options || []).map((option) => (
-                          <div key={option.id}>
-                            <OptionSelect
-                              option={option}
-                              current={options[option.id]}
-                              updateOption={handleOptionSelect}
-                              title={option.title ?? ""}
-                              disabled={optionsDisabled}
-                            />
-                          </div>
-                        ))}
+                        {(product.options || [])
+                          .slice()
+                          .sort((a, b) => {
+                            const order = ["shape", "size"]
+                            const ai = order.indexOf(
+                              (a.title || "").toLowerCase()
+                            )
+                            const bi = order.indexOf(
+                              (b.title || "").toLowerCase()
+                            )
+                            return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+                          })
+                          .map((option) => (
+                            <div key={option.id}>
+                              <OptionSelect
+                                option={option}
+                                current={options[option.id]}
+                                updateOption={handleOptionSelect}
+                                title={option.title ?? ""}
+                                disabled={optionsDisabled}
+                                availableValues={availableValues?.[option.id]}
+                              />
+                            </div>
+                          ))}
                       </div>
                     )}
                   </div>

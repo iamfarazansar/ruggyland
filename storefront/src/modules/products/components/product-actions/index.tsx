@@ -2,7 +2,10 @@
 
 import { addToCart } from "@lib/data/cart"
 import { trackAddToCart } from "@lib/posthog/events"
-import { trackMetaAddToCart, trackMetaViewContent } from "@lib/meta-pixel/events"
+import {
+  trackMetaAddToCart,
+  trackMetaViewContent,
+} from "@lib/meta-pixel/events"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
@@ -65,8 +68,73 @@ export default function ProductActions({
     })
   }, [product.variants, options])
 
+  // Compute available values for each option based on other selected options
+  const getAvailableValues = useMemo(() => {
+    const result: Record<string, string[]> = {}
+
+    ;(product.options || []).forEach((option) => {
+      // Find variants that match all OTHER selected options
+      const matchingVariants = (product.variants || []).filter((variant) => {
+        const variantOpts = optionsAsKeymap(variant.options) || {}
+        return Object.entries(options).every(([optId, optVal]) => {
+          // Skip the current option we're computing for
+          if (optId === option.id) return true
+          // Skip unselected options
+          if (!optVal) return true
+          // Check if this variant matches the selected value for this other option
+          return variantOpts[optId] === optVal
+        })
+      })
+
+      // Collect unique values from matching variants for this option
+      const availableVals = new Set<string>()
+      matchingVariants.forEach((variant) => {
+        const variantOpts = optionsAsKeymap(variant.options) || {}
+        if (variantOpts[option.id]) {
+          availableVals.add(variantOpts[option.id])
+        }
+      })
+
+      result[option.id] = Array.from(availableVals)
+    })
+
+    return result
+  }, [product.options, product.variants, options])
+
   const setOptionValue = (optionId: string, value: string) => {
-    setOptions((prev) => ({ ...prev, [optionId]: value }))
+    setOptions((prev) => {
+      const newOptions = { ...prev, [optionId]: value }
+
+      // When changing an option, clear dependent options if their current value
+      // is no longer available
+      ;(product.options || []).forEach((opt) => {
+        if (opt.id === optionId) return
+        const currentVal = prev[opt.id]
+        if (!currentVal) return
+
+        // Check if the current value of this other option is still valid
+        // given the new selection
+        const matchingVariants = (product.variants || []).filter((variant) => {
+          const variantOpts = optionsAsKeymap(variant.options) || {}
+          return Object.entries(newOptions).every(([oId, oVal]) => {
+            if (oId === opt.id) return true
+            if (!oVal) return true
+            return variantOpts[oId] === oVal
+          })
+        })
+
+        const stillAvailable = matchingVariants.some((variant) => {
+          const variantOpts = optionsAsKeymap(variant.options) || {}
+          return variantOpts[opt.id] === currentVal
+        })
+
+        if (!stillAvailable) {
+          newOptions[opt.id] = undefined
+        }
+      })
+
+      return newOptions
+    })
   }
 
   const isValidVariant = useMemo(() => {
@@ -168,18 +236,28 @@ export default function ProductActions({
     <div className="flex flex-col gap-y-3" ref={actionsRef}>
       {(product.variants?.length ?? 0) > 0 && (
         <div className="flex flex-col gap-y-4">
-          {(product.options || []).map((option) => (
-            <div key={option.id}>
-              <OptionSelect
-                option={option}
-                current={options[option.id]}
-                updateOption={setOptionValue}
-                title={option.title ?? ""}
-                data-testid="product-options"
-                disabled={!!disabled || isAdding}
-              />
-            </div>
-          ))}
+          {(product.options || [])
+            .slice()
+            .sort((a, b) => {
+              // Put Shape before Size so user picks shape first
+              const order = ["shape", "size"]
+              const ai = order.indexOf((a.title || "").toLowerCase())
+              const bi = order.indexOf((b.title || "").toLowerCase())
+              return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+            })
+            .map((option) => (
+              <div key={option.id}>
+                <OptionSelect
+                  option={option}
+                  current={options[option.id]}
+                  updateOption={setOptionValue}
+                  title={option.title ?? ""}
+                  data-testid="product-options"
+                  disabled={!!disabled || isAdding}
+                  availableValues={getAvailableValues[option.id]}
+                />
+              </div>
+            ))}
           <Divider />
         </div>
       )}
@@ -247,6 +325,7 @@ export default function ProductActions({
         isAdding={isAdding}
         show={!inView}
         optionsDisabled={!!disabled || isAdding}
+        availableValues={getAvailableValues}
         quantity={quantity}
         maxQuantity={maxQuantity}
         onDecQty={() => setQuantity((q) => Math.max(1, q - 1))}

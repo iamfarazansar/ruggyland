@@ -9,6 +9,7 @@ type OptionSelectProps = {
   title: string
   disabled: boolean
   "data-testid"?: string
+  availableValues?: string[] // Filter to only show these values
 }
 
 const OptionSelect: React.FC<OptionSelectProps> = ({
@@ -18,14 +19,15 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   title,
   "data-testid": dataTestId,
   disabled,
+  availableValues,
 }) => {
   // Sort size options by numeric dimensions (e.g., "2x3 ft" -> 2*3 = 6)
   const sortBySize = (values: string[]) => {
     return [...values].sort((a, b) => {
       const parseSize = (val: string) => {
-        const match = val.match(/(\d+)\s*[x×]\s*(\d+)/i)
+        const match = val.match(/(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)/i)
         if (match) {
-          return parseInt(match[1]) * parseInt(match[2])
+          return parseFloat(match[1]) * parseFloat(match[2])
         }
         return 0
       }
@@ -34,14 +36,22 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   }
 
   const rawOptions = (option.values ?? []).map((v) => v.value)
-  const filteredOptions =
-    option.title?.toLowerCase() === "size" ? sortBySize(rawOptions) : rawOptions
+
+  // Filter by available values if provided
+  const filteredByAvailability = availableValues
+    ? rawOptions.filter((v) => availableValues.includes(v))
+    : rawOptions
+
+  const sortedOptions =
+    option.title?.toLowerCase() === "size"
+      ? sortBySize(filteredByAvailability)
+      : filteredByAvailability
 
   return (
     <div className="flex flex-col gap-y-3">
       <span className="text-sm">Select {title}</span>
       <div className="flex flex-wrap gap-2" data-testid={dataTestId}>
-        {filteredOptions.map((v) => {
+        {sortedOptions.map((v) => {
           return (
             <button
               onClick={() => updateOption(option.id, v)}
