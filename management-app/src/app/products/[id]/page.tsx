@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import VariantPricingTable from "@/components/VariantPricingTable";
 
 interface UploadedImage {
   id: string;
@@ -23,6 +24,29 @@ interface ProductDetail {
   updated_at: string;
 }
 
+interface Price {
+  id?: string;
+  currency_code: string;
+  amount: number;
+  region_id?: string;
+  region_name?: string;
+  context_key?: string;
+}
+
+interface Variant {
+  id: string;
+  title: string;
+  sku?: string;
+  prices: Price[];
+}
+
+interface PriceContext {
+  key: string;
+  currency_code: string;
+  region_id?: string;
+  region_name?: string;
+}
+
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 
@@ -40,10 +64,16 @@ export default function EditProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Variants & Pricing state
+  const [variants, setVariants] = useState<Variant[]>([]);
+  const [priceContexts, setPriceContexts] = useState<PriceContext[]>([]);
+  const [loadingVariants, setLoadingVariants] = useState(true);
+
   // Fetch product on mount
   useEffect(() => {
     if (isAuthenticated && token && productId) {
       loadProduct();
+      loadVariantsPricing();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, token, productId]);
@@ -81,6 +111,43 @@ export default function EditProductPage() {
       setError(err instanceof Error ? err.message : "Failed to load product");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadVariantsPricing = async () => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/admin/products/${productId}/variants-pricing`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch variants");
+      }
+
+      const data = await response.json();
+      console.log("=== VARIANTS PRICING DEBUG ===");
+      console.log("Price Contexts:", data.priceContexts);
+      console.log("Variants:", data.variants);
+      data.variants?.forEach((v: any, idx: number) => {
+        console.log(`Variant ${idx} (${v.title}):`, v.prices?.map((p: any) => ({
+          currency: p.currency_code,
+          amount: p.amount,
+          region: p.region_name,
+          context_key: p.context_key,
+        })));
+      });
+      setVariants(data.variants || []);
+      setPriceContexts(data.priceContexts || []);
+    } catch (err) {
+      console.error("Failed to load variants pricing:", err);
+    } finally {
+      setLoadingVariants(false);
     }
   };
 
@@ -226,6 +293,40 @@ export default function EditProductPage() {
       );
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Handle variant price updates
+  const handleSaveVariantPrices = async (
+    variantId: string,
+    prices: Array<{ id: string; amount: number }>
+  ) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/admin/products/${productId}/variants/${variantId}/prices`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prices }),
+        }
+      );
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to update prices");
+      }
+
+      // Refresh variants to get updated prices
+      await loadVariantsPricing();
+
+      setSuccessMessage("Variant prices updated successfully");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update prices");
+      throw err;
     }
   };
 
@@ -450,6 +551,30 @@ export default function EditProductPage() {
               <p className="text-gray-500 dark:text-gray-400 text-sm mt-4">
                 No images yet. Upload some above.
               </p>
+            )}
+          </div>
+
+          {/* Variants & Pricing Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Variants & Pricing
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Manage variant prices across different currencies. Prices are stored in cents/smallest currency unit.
+              </p>
+            </div>
+
+            {loadingVariants ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+              </div>
+            ) : (
+              <VariantPricingTable
+                variants={variants}
+                priceContexts={priceContexts}
+                onSave={handleSaveVariantPrices}
+              />
             )}
           </div>
         </div>

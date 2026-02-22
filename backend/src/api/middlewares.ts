@@ -9,6 +9,7 @@ import type { NextFunction } from "express";
 import multer from "multer";
 
 import { CustomRugRequestSchema } from "./store/custom-rug-requests/route";
+import { updateVariantPricesMiddlewares } from "./admin/products/[id]/variants/[variantId]/prices/middlewares";
 
 // ==============================
 // Upload config
@@ -134,6 +135,7 @@ function storyUploadMw(
 
 export default defineMiddlewares({
   routes: [
+    ...updateVariantPricesMiddlewares,
     {
       matcher: "/store/custom-rug-requests",
       method: "POST",
