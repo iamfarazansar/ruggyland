@@ -44,13 +44,32 @@ export function getProductPrice({
     }
 
     const cheapestVariant: any = product.variants
-      .filter((v: any) => !!v.calculated_price)
+      .filter((v: any) => {
+        if (!v.calculated_price) return false
+        // Exclude sample variants from cheapest price
+        const isSample = v.options?.some((opt: any) =>
+          opt.value?.toLowerCase().includes("sample")
+        )
+        return !isSample
+      })
       .sort((a: any, b: any) => {
         return (
           a.calculated_price.calculated_amount -
           b.calculated_price.calculated_amount
         )
       })[0]
+
+    // Fallback to any variant if all are samples
+    if (!cheapestVariant) {
+      const fallback: any = product.variants
+        .filter((v: any) => !!v.calculated_price)
+        .sort(
+          (a: any, b: any) =>
+            a.calculated_price.calculated_amount -
+            b.calculated_price.calculated_amount
+        )[0]
+      return getPricesForVariant(fallback)
+    }
 
     return getPricesForVariant(cheapestVariant)
   }
