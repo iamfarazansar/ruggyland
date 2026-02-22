@@ -23,7 +23,11 @@ const Hero = () => {
   const slides = [
     { src: "/slide-1.png", alt: "Slide 1" },
     { src: "/slide-2.png", alt: "Slide 2" },
-    { src: "/slide-3.png", alt: "Slide 3" },
+    {
+      src: "/slide-4-desktop.jpg",
+      mobileSrc: "/slide-4-mobile.jpg",
+      alt: "Slide 4"
+    },
   ]
 
   return (
@@ -33,12 +37,22 @@ const Hero = () => {
           {slides.map((slide, index) => (
             <div className="embla-hero__slide" key={index}>
               <div className="relative aspect-[16/10] md:aspect-[21/9] w-full">
+                {/* Desktop image */}
                 <Image
                   src={slide.src}
                   alt={slide.alt}
                   fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 1152px"
+                  className="object-cover hidden md:block"
+                  sizes="1152px"
+                  priority={index === 0}
+                />
+                {/* Mobile image */}
+                <Image
+                  src={slide.mobileSrc || slide.src}
+                  alt={slide.alt}
+                  fill
+                  className="object-cover md:hidden"
+                  sizes="100vw"
                   priority={index === 0}
                 />
               </div>
