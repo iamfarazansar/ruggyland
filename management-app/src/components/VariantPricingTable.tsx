@@ -286,6 +286,130 @@ export default function VariantPricingTable({
     };
   }, []);
 
+  // Handle copy/paste for selected cells
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedCells.size === 0) return;
+
+      const isMeta = e.metaKey || e.ctrlKey;
+
+      // Paste: Cmd+V / Ctrl+V
+      if (isMeta && e.key === "v") {
+        e.preventDefault();
+        navigator.clipboard.readText().then((text) => {
+          const trimmed = text.trim();
+          if (!trimmed) return;
+
+          // Parse pasted text - could be a single value or tab/newline grid
+          const rows = trimmed.split(/\r?\n/).map((row) => row.split("\t"));
+
+          // Get selected cells as a sorted grid
+          const selectedArr = Array.from(selectedCells);
+          const selectedVariantIds = [
+            ...new Set(selectedArr.map((c) => c.split("|")[0])),
+          ];
+          const selectedContextKeys = [
+            ...new Set(selectedArr.map((c) => c.split("|").slice(1).join("|"))),
+          ];
+
+          // Sort by variant order and context order
+          selectedVariantIds.sort((a, b) => {
+            const ai = variants.findIndex((v) => v.id === a);
+            const bi = variants.findIndex((v) => v.id === b);
+            return ai - bi;
+          });
+          selectedContextKeys.sort((a, b) => {
+            const ai = priceContexts.findIndex((c) => c.key === a);
+            const bi = priceContexts.findIndex((c) => c.key === b);
+            return ai - bi;
+          });
+
+          setEditedPrices((prev) => {
+            const newState = { ...prev };
+
+            selectedVariantIds.forEach((variantId, rowIdx) => {
+              const variant = variants.find((v) => v.id === variantId);
+              if (!variant) return;
+
+              selectedContextKeys.forEach((contextKey, colIdx) => {
+                // Get the value from the paste grid, or use the single value
+                let pasteValue: string;
+                if (rows.length === 1 && rows[0].length === 1) {
+                  // Single value - apply to all selected cells
+                  pasteValue = rows[0][0];
+                } else {
+                  // Grid paste - map row/col
+                  const row = rows[rowIdx % rows.length];
+                  pasteValue = row ? row[colIdx % row.length] : "";
+                }
+
+                const numValue = parseFloat(pasteValue);
+                if (isNaN(numValue)) return;
+
+                const price = getPrice(variant, contextKey);
+                const editKey = price?.id || contextKey;
+
+                if (!newState[variantId]) newState[variantId] = {};
+                newState[variantId][editKey] = numValue;
+              });
+            });
+
+            return newState;
+          });
+        });
+      }
+
+      // Copy: Cmd+C / Ctrl+C
+      if (isMeta && e.key === "c") {
+        // Only intercept if an input isn't focused (let normal input copy work)
+        const active = document.activeElement;
+        if (active && active.tagName === "INPUT") return;
+
+        e.preventDefault();
+
+        const selectedArr = Array.from(selectedCells);
+        const selectedVariantIds = [
+          ...new Set(selectedArr.map((c) => c.split("|")[0])),
+        ];
+        const selectedContextKeys = [
+          ...new Set(selectedArr.map((c) => c.split("|").slice(1).join("|"))),
+        ];
+
+        selectedVariantIds.sort((a, b) => {
+          const ai = variants.findIndex((v) => v.id === a);
+          const bi = variants.findIndex((v) => v.id === b);
+          return ai - bi;
+        });
+        selectedContextKeys.sort((a, b) => {
+          const ai = priceContexts.findIndex((c) => c.key === a);
+          const bi = priceContexts.findIndex((c) => c.key === b);
+          return ai - bi;
+        });
+
+        const rows: string[] = [];
+        selectedVariantIds.forEach((variantId) => {
+          const variant = variants.find((v) => v.id === variantId);
+          if (!variant) return;
+
+          const cols: string[] = [];
+          selectedContextKeys.forEach((contextKey) => {
+            const price = getPrice(variant, contextKey);
+            const amount = getPriceAmount(variant, contextKey, price?.id);
+            cols.push(amount !== undefined ? amount.toFixed(2) : "");
+          });
+          rows.push(cols.join("\t"));
+        });
+
+        navigator.clipboard.writeText(rows.join("\n"));
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedCells, variants, priceContexts, editedPrices]);
+
   // Handle Escape key to exit fullscreen
   useEffect(() => {
     if (!isFullscreen) return;
