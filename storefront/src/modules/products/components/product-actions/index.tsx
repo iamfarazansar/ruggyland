@@ -169,15 +169,12 @@ export default function ProductActions({
     setOptions((prev) => {
       const newOptions = { ...prev, [optionId]: value }
 
-      // When changing an option, clear dependent options if their current value
-      // is no longer available
+      // When changing shape, auto-select the smallest available size
       ;(product.options || []).forEach((opt) => {
         if (opt.id === optionId) return
         const currentVal = prev[opt.id]
-        if (!currentVal) return
 
-        // Check if the current value of this other option is still valid
-        // given the new selection
+        // Check if the current value is still valid given the new selection
         const matchingVariants = (product.variants || []).filter((variant) => {
           const variantOpts = optionsAsKeymap(variant.options) || {}
           return Object.entries(newOptions).every(([oId, oVal]) => {
@@ -187,13 +184,31 @@ export default function ProductActions({
           })
         })
 
-        const stillAvailable = matchingVariants.some((variant) => {
-          const variantOpts = optionsAsKeymap(variant.options) || {}
-          return variantOpts[opt.id] === currentVal
-        })
+        const stillAvailable =
+          currentVal &&
+          matchingVariants.some((variant) => {
+            const variantOpts = optionsAsKeymap(variant.options) || {}
+            return variantOpts[opt.id] === currentVal
+          })
 
         if (!stillAvailable) {
-          newOptions[opt.id] = undefined
+          // Auto-select the smallest non-sample size instead of clearing
+          const availableVals: { value: string; area: number }[] = []
+          matchingVariants.forEach((variant) => {
+            const variantOpts = optionsAsKeymap(variant.options) || {}
+            const val = variantOpts[opt.id]
+            if (!val) return
+            if (val.toLowerCase().includes("sample")) return
+            const match = val.match(/(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)/i)
+            const area = match
+              ? parseFloat(match[1]) * parseFloat(match[2])
+              : 9999
+            if (!availableVals.find((v) => v.value === val)) {
+              availableVals.push({ value: val, area })
+            }
+          })
+          availableVals.sort((a, b) => a.area - b.area)
+          newOptions[opt.id] = availableVals[0]?.value
         }
       })
 
