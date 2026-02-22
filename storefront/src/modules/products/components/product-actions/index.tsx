@@ -60,14 +60,28 @@ export default function ProductActions({
 
     hasInitialized.current = true
 
-    // Find the first non-sample variant (prefer non-sample sizes)
-    const firstVariant =
-      product.variants.find((v) => {
+    // Sort variants by size (smallest first) and pick the first non-sample
+    const parseArea = (variant: any) => {
+      const opts = optionsAsKeymap(variant.options) || {}
+      for (const val of Object.values(opts)) {
+        const match = (val as string)?.match(
+          /(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)/i
+        )
+        if (match) return parseFloat(match[1]) * parseFloat(match[2])
+      }
+      return 9999
+    }
+
+    const sortedVariants = [...product.variants]
+      .filter((v) => {
         const opts = optionsAsKeymap(v.options) || {}
         return !Object.values(opts).some((val) =>
-          val?.toLowerCase().includes("sample")
+          (val as string)?.toLowerCase().includes("sample")
         )
-      }) || product.variants[0]
+      })
+      .sort((a, b) => parseArea(a) - parseArea(b))
+
+    const firstVariant = sortedVariants[0] || product.variants[0]
 
     if (firstVariant) {
       const variantOptions = optionsAsKeymap(firstVariant.options)
