@@ -56,7 +56,6 @@ export default function VariantPricingTable({
   const [inputValues, setInputValues] = useState<
     Record<string, Record<string, string>>
   >({});
-  const [savingVariant, setSavingVariant] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Which cell is currently in edit mode (double-clicked or typed into)
@@ -192,56 +191,64 @@ export default function VariantPricingTable({
     }));
   };
 
-  // Check if variant has unsaved changes
-  const hasChanges = (variantId: string): boolean => {
-    return (
-      !!editedPrices[variantId] &&
-      Object.keys(editedPrices[variantId]).length > 0
-    );
-  };
+  // Check if any variant has unsaved changes
+  const hasAnyChanges = Object.keys(editedPrices).some(
+    (vid) => Object.keys(editedPrices[vid]).length > 0,
+  );
 
-  // Save prices for a variant
-  const handleSave = async (variant: Variant) => {
-    if (!hasChanges(variant.id)) return;
+  // Count how many variants have changes
+  const changedVariantCount = Object.keys(editedPrices).filter(
+    (vid) => Object.keys(editedPrices[vid]).length > 0,
+  ).length;
 
-    setSavingVariant(variant.id);
+  // Save all changed variant prices
+  const [isSaving, setIsSaving] = useState(false);
+  const handleSaveAll = async () => {
+    if (!hasAnyChanges) return;
+
+    setIsSaving(true);
 
     try {
-      const priceUpdates: Array<{
-        id?: string;
-        currency_code: string;
-        region_id?: string;
-        amount: number;
-      }> = [];
+      const changedVariantIds = Object.keys(editedPrices).filter(
+        (vid) => Object.keys(editedPrices[vid]).length > 0,
+      );
 
-      priceContexts.forEach((context) => {
-        const price = getPrice(variant, context.key);
-        const editKey = price?.id || context.key;
-        const editedAmount = editedPrices[variant.id]?.[editKey];
+      for (const variantId of changedVariantIds) {
+        const variant = variants.find((v) => v.id === variantId);
+        if (!variant) continue;
 
-        if (editedAmount !== undefined) {
-          priceUpdates.push({
-            id: price?.id, // undefined for new prices
-            currency_code: context.currency_code,
-            region_id: context.region_id,
-            amount: editedAmount,
-          });
+        const priceUpdates: Array<{
+          id?: string;
+          currency_code: string;
+          region_id?: string;
+          amount: number;
+        }> = [];
+
+        priceContexts.forEach((context) => {
+          const price = getPrice(variant, context.key);
+          const editKey = price?.id || context.key;
+          const editedAmount = editedPrices[variantId]?.[editKey];
+
+          if (editedAmount !== undefined) {
+            priceUpdates.push({
+              id: price?.id,
+              currency_code: context.currency_code,
+              region_id: context.region_id,
+              amount: editedAmount,
+            });
+          }
+        });
+
+        if (priceUpdates.length > 0) {
+          await onSave(variantId, priceUpdates);
         }
-      });
-
-      if (priceUpdates.length > 0) {
-        await onSave(variant.id, priceUpdates);
       }
 
-      setEditedPrices((prev) => {
-        const newState = { ...prev };
-        delete newState[variant.id];
-        return newState;
-      });
+      setEditedPrices({});
     } catch (error) {
       console.error("Failed to save prices:", error);
     } finally {
-      setSavingVariant(null);
+      setIsSaving(false);
     }
   };
 
@@ -595,8 +602,7 @@ export default function VariantPricingTable({
               </th>
             ))}
 
-            {/* Actions Column */}
-            <th className="sticky right-0 border-b border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-800 w-24"></th>
+            {/* No Actions Column - single save button is outside table */}
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
@@ -730,19 +736,6 @@ export default function VariantPricingTable({
                   </td>
                 );
               })}
-
-              {/* Actions Cell */}
-              <td className="sticky right-0 px-3 py-2 bg-inherit border-l border-gray-200 dark:border-gray-700">
-                {hasChanges(variant.id) && (
-                  <button
-                    onClick={() => handleSave(variant)}
-                    disabled={savingVariant === variant.id}
-                    className="w-full px-2 py-1 text-xs font-medium bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {savingVariant === variant.id ? "Saving..." : "Save"}
-                  </button>
-                )}
-              </td>
             </tr>
           ))}
         </tbody>
@@ -758,25 +751,38 @@ export default function VariantPricingTable({
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Variants & Pricing
           </h2>
-          <button
-            onClick={() => setIsFullscreen(false)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="flex items-center gap-2">
+            {hasAnyChanges && (
+              <button
+                onClick={handleSaveAll}
+                disabled={isSaving}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSaving
+                  ? "Saving..."
+                  : `Save ${changedVariantCount} Variant${changedVariantCount > 1 ? "s" : ""}`}
+              </button>
+            )}
+            <button
+              onClick={() => setIsFullscreen(false)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-            Close
-          </button>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              Close
+            </button>
+          </div>
         </div>
         {tableContent}
       </div>
@@ -785,7 +791,18 @@ export default function VariantPricingTable({
 
   return (
     <div>
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-end gap-2 mb-2">
+        {hasAnyChanges && (
+          <button
+            onClick={handleSaveAll}
+            disabled={isSaving}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isSaving
+              ? "Saving..."
+              : `Save ${changedVariantCount} Variant${changedVariantCount > 1 ? "s" : ""}`}
+          </button>
+        )}
         <button
           onClick={() => setIsFullscreen(true)}
           className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
