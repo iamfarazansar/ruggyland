@@ -20,7 +20,7 @@ type NavItem = { id: number; name: string; url: string; target?: string }
 // Map category handles to their thumbnail images
 const categoryImages: Record<string, string> = {
   "anime-rugs": "/discover/anime.jpg",
-  "modern-rugs": "/discover/modern-rugs.jpg",
+  "hand-knotted-rugs": "/discover/hand-knotted-rugs.jpg",
   "botanical-rugs": "/discover/botanical-rugs.png",
   abstract: "/discover/abstract.png",
 }
