@@ -60,7 +60,14 @@ export default function ProductActions({
 
     hasInitialized.current = true
 
-    // Sort variants by size (smallest first) and pick the first non-sample
+    // Sort variants: first shape first, then smallest size
+    const shapeOpt = (product.options || []).find(
+      (o) => o.title?.toLowerCase() === "shape"
+    )
+    const shapeValues = shapeOpt
+      ? (shapeOpt.values ?? []).map((v: any) => v.value)
+      : []
+
     const parseArea = (variant: any) => {
       const opts = optionsAsKeymap(variant.options) || {}
       for (const val of Object.values(opts)) {
@@ -72,6 +79,13 @@ export default function ProductActions({
       return 9999
     }
 
+    const getShapeIdx = (variant: any) => {
+      if (!shapeOpt) return 0
+      const opts = optionsAsKeymap(variant.options) || {}
+      const idx = shapeValues.indexOf(opts[shapeOpt.id])
+      return idx === -1 ? 999 : idx
+    }
+
     const sortedVariants = [...product.variants]
       .filter((v) => {
         const opts = optionsAsKeymap(v.options) || {}
@@ -79,7 +93,11 @@ export default function ProductActions({
           (val as string)?.toLowerCase().includes("sample")
         )
       })
-      .sort((a, b) => parseArea(a) - parseArea(b))
+      .sort((a, b) => {
+        const shapeDiff = getShapeIdx(a) - getShapeIdx(b)
+        if (shapeDiff !== 0) return shapeDiff
+        return parseArea(a) - parseArea(b)
+      })
 
     const firstVariant = sortedVariants[0] || product.variants[0]
 
