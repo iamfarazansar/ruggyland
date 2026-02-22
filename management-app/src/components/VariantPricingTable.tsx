@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 interface Price {
   id?: string;
@@ -35,7 +35,7 @@ interface VariantPricingTableProps {
       currency_code: string;
       region_id?: string;
       amount: number;
-    }>
+    }>,
   ) => Promise<void>;
 }
 
@@ -53,15 +53,18 @@ export default function VariantPricingTable({
     Record<string, Record<string, number>>
   >({});
   const [savingVariant, setSavingVariant] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Column widths state
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(() => {
-    const widths: Record<string, number> = { title: 200 };
-    priceContexts.forEach((ctx) => {
-      widths[ctx.key] = 150;
-    });
-    return widths;
-  });
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
+    () => {
+      const widths: Record<string, number> = { title: 200 };
+      priceContexts.forEach((ctx) => {
+        widths[ctx.key] = 150;
+      });
+      return widths;
+    },
+  );
 
   // Column resizing state
   const [resizingColumn, setResizingColumn] = useState<string | null>(null);
@@ -70,17 +73,26 @@ export default function VariantPricingTable({
 
   // Cell selection state
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<CellPosition | null>(null);
+  const [selectionStart, setSelectionStart] = useState<CellPosition | null>(
+    null,
+  );
   const [selectionEnd, setSelectionEnd] = useState<CellPosition | null>(null);
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
 
   // Get price for a variant in a specific price context
-  const getPrice = (variant: Variant, contextKey: string): Price | undefined => {
+  const getPrice = (
+    variant: Variant,
+    contextKey: string,
+  ): Price | undefined => {
     return variant.prices?.find((p) => p.context_key === contextKey);
   };
 
   // Get edited or original price amount
-  const getPriceAmount = (variant: Variant, contextKey: string, priceId?: string): number | undefined => {
+  const getPriceAmount = (
+    variant: Variant,
+    contextKey: string,
+    priceId?: string,
+  ): number | undefined => {
     const editKey = priceId || contextKey;
     if (editedPrices[variant.id]?.[editKey] !== undefined) {
       return editedPrices[variant.id][editKey];
@@ -94,7 +106,7 @@ export default function VariantPricingTable({
     variantId: string,
     contextKey: string,
     priceId: string | undefined,
-    value: string
+    value: string,
   ) => {
     // Allow clearing the field
     if (value === "") {
@@ -128,7 +140,10 @@ export default function VariantPricingTable({
 
   // Check if variant has unsaved changes
   const hasChanges = (variantId: string): boolean => {
-    return !!editedPrices[variantId] && Object.keys(editedPrices[variantId]).length > 0;
+    return (
+      !!editedPrices[variantId] &&
+      Object.keys(editedPrices[variantId]).length > 0
+    );
   };
 
   // Save prices for a variant
@@ -152,7 +167,7 @@ export default function VariantPricingTable({
 
         if (editedAmount !== undefined) {
           priceUpdates.push({
-            id: price?.id,  // undefined for new prices
+            id: price?.id, // undefined for new prices
             currency_code: context.currency_code,
             region_id: context.region_id,
             amount: editedAmount,
@@ -202,10 +217,14 @@ export default function VariantPricingTable({
     setSelectionEnd({ variantId, contextKey });
 
     // Calculate selected cells range
-    const startVariantIdx = variants.findIndex(v => v.id === selectionStart.variantId);
-    const endVariantIdx = variants.findIndex(v => v.id === variantId);
-    const startContextIdx = priceContexts.findIndex(c => c.key === selectionStart.contextKey);
-    const endContextIdx = priceContexts.findIndex(c => c.key === contextKey);
+    const startVariantIdx = variants.findIndex(
+      (v) => v.id === selectionStart.variantId,
+    );
+    const endVariantIdx = variants.findIndex((v) => v.id === variantId);
+    const startContextIdx = priceContexts.findIndex(
+      (c) => c.key === selectionStart.contextKey,
+    );
+    const endContextIdx = priceContexts.findIndex((c) => c.key === contextKey);
 
     const minVariantIdx = Math.min(startVariantIdx, endVariantIdx);
     const maxVariantIdx = Math.max(startVariantIdx, endVariantIdx);
@@ -267,6 +286,21 @@ export default function VariantPricingTable({
     };
   }, []);
 
+  // Handle Escape key to exit fullscreen
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsFullscreen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    // Prevent body scroll in fullscreen
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [isFullscreen]);
+
   if (variants.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -275,10 +309,12 @@ export default function VariantPricingTable({
     );
   }
 
-  return (
+  const tableContent = (
     <div
-      className="overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg select-none"
-      style={{ userSelect: isSelecting ? 'none' : 'auto' }}
+      className={`overflow-auto border border-gray-200 dark:border-gray-700 select-none ${
+        isFullscreen ? "flex-1 rounded-none border-t-0" : "rounded-lg"
+      }`}
+      style={{ userSelect: isSelecting ? "none" : "auto" }}
     >
       <table className="min-w-full border-collapse">
         <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-20">
@@ -286,7 +322,11 @@ export default function VariantPricingTable({
             {/* Title Column */}
             <th
               className="relative border-r border-b border-gray-200 dark:border-gray-700 px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800"
-              style={{ width: columnWidths.title, minWidth: columnWidths.title, maxWidth: columnWidths.title }}
+              style={{
+                width: columnWidths.title,
+                minWidth: columnWidths.title,
+                maxWidth: columnWidths.title,
+              }}
             >
               <div className="flex items-center justify-between">
                 <span>Title</span>
@@ -302,7 +342,11 @@ export default function VariantPricingTable({
               <th
                 key={context.key}
                 className="relative border-r border-b border-gray-200 dark:border-gray-700 px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800 whitespace-nowrap"
-                style={{ width: columnWidths[context.key], minWidth: columnWidths[context.key], maxWidth: columnWidths[context.key] }}
+                style={{
+                  width: columnWidths[context.key],
+                  minWidth: columnWidths[context.key],
+                  maxWidth: columnWidths[context.key],
+                }}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -334,13 +378,19 @@ export default function VariantPricingTable({
             <tr
               key={variant.id}
               className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
-                idx % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/50 dark:bg-gray-800/30"
+                idx % 2 === 0
+                  ? "bg-white dark:bg-gray-900"
+                  : "bg-gray-50/50 dark:bg-gray-800/30"
               }`}
             >
               {/* Title Cell */}
               <td
                 className="border-r border-gray-200 dark:border-gray-700 px-3 py-2 bg-inherit"
-                style={{ width: columnWidths.title, minWidth: columnWidths.title, maxWidth: columnWidths.title }}
+                style={{
+                  width: columnWidths.title,
+                  minWidth: columnWidths.title,
+                  maxWidth: columnWidths.title,
+                }}
               >
                 <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {variant.title}
@@ -357,7 +407,8 @@ export default function VariantPricingTable({
                 const price = getPrice(variant, context.key);
                 const editKey = price?.id || context.key;
                 const amount = getPriceAmount(variant, context.key, price?.id);
-                const isEdited = editedPrices[variant.id]?.[editKey] !== undefined;
+                const isEdited =
+                  editedPrices[variant.id]?.[editKey] !== undefined;
                 const isSelected = isCellSelected(variant.id, context.key);
 
                 return (
@@ -368,9 +419,17 @@ export default function VariantPricingTable({
                         ? "bg-yellow-50 dark:bg-yellow-900/20"
                         : "bg-inherit"
                     }`}
-                    style={{ width: columnWidths[context.key], minWidth: columnWidths[context.key], maxWidth: columnWidths[context.key] }}
-                    onMouseDown={() => handleCellMouseDown(variant.id, context.key)}
-                    onMouseEnter={() => handleCellMouseEnter(variant.id, context.key)}
+                    style={{
+                      width: columnWidths[context.key],
+                      minWidth: columnWidths[context.key],
+                      maxWidth: columnWidths[context.key],
+                    }}
+                    onMouseDown={() =>
+                      handleCellMouseDown(variant.id, context.key)
+                    }
+                    onMouseEnter={() =>
+                      handleCellMouseEnter(variant.id, context.key)
+                    }
                   >
                     <div className="flex items-center gap-1">
                       <span className="text-gray-500 dark:text-gray-400 text-xs flex-shrink-0">
@@ -381,16 +440,21 @@ export default function VariantPricingTable({
                         step="0.01"
                         value={amount !== undefined ? amount.toFixed(2) : ""}
                         onChange={(e) =>
-                          handlePriceChange(variant.id, context.key, price?.id, e.target.value)
+                          handlePriceChange(
+                            variant.id,
+                            context.key,
+                            price?.id,
+                            e.target.value,
+                          )
                         }
                         className={`w-full min-w-0 px-1.5 py-1 text-sm rounded text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${
                           isSelected
                             ? "border-2 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm"
                             : isEdited
-                            ? "border border-yellow-400 dark:border-yellow-600 bg-white dark:bg-gray-800"
-                            : !price?.id
-                            ? "border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50"
-                            : "border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                              ? "border border-yellow-400 dark:border-yellow-600 bg-white dark:bg-gray-800"
+                              : !price?.id
+                                ? "border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50"
+                                : "border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                         }`}
                         placeholder={!price?.id ? "0.00" : "0.00"}
                       />
@@ -415,6 +479,67 @@ export default function VariantPricingTable({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-gray-900">
+        {/* Fullscreen Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Variants & Pricing
+          </h2>
+          <button
+            onClick={() => setIsFullscreen(false)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+            Close
+          </button>
+        </div>
+        {tableContent}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => setIsFullscreen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          title="Open in fullscreen"
+        >
+          <svg
+            className="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"
+            />
+          </svg>
+          Fullscreen
+        </button>
+      </div>
+      {tableContent}
     </div>
   );
 }
