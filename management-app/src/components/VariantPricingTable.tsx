@@ -96,7 +96,24 @@ export default function VariantPricingTable({
     priceId: string | undefined,
     value: string
   ) => {
-    const numValue = value === "" ? 0 : parseFloat(value);
+    // Allow clearing the field
+    if (value === "") {
+      const editKey = priceId || contextKey;
+      setEditedPrices((prev) => {
+        const newState = { ...prev };
+        if (newState[variantId]) {
+          delete newState[variantId][editKey];
+          // Remove variant entry if no prices left
+          if (Object.keys(newState[variantId]).length === 0) {
+            delete newState[variantId];
+          }
+        }
+        return newState;
+      });
+      return;
+    }
+
+    const numValue = parseFloat(value);
     if (isNaN(numValue)) return;
 
     const editKey = priceId || contextKey;
