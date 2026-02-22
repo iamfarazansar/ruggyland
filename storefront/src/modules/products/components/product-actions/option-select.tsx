@@ -24,6 +24,12 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   // Sort size options by numeric dimensions (e.g., "2x3 ft" -> 2*3 = 6)
   const sortBySize = (values: string[]) => {
     return [...values].sort((a, b) => {
+      // Push "Sample" sizes to the end
+      const aIsSample = a.toLowerCase().includes("sample")
+      const bIsSample = b.toLowerCase().includes("sample")
+      if (aIsSample && !bIsSample) return 1
+      if (!aIsSample && bIsSample) return -1
+
       const parseSize = (val: string) => {
         const match = val.match(/(\d+\.?\d*)\s*[x×]\s*(\d+\.?\d*)/i)
         if (match) {
