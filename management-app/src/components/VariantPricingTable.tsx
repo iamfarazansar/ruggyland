@@ -59,6 +59,9 @@ export default function VariantPricingTable({
   const [savingVariant, setSavingVariant] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Which cell is currently in edit mode (double-clicked or typed into)
+  const [editingCell, setEditingCell] = useState<string | null>(null); // "variantId|contextKey"
+
   // Column widths state
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
     () => {
@@ -251,14 +254,24 @@ export default function VariantPricingTable({
     setStartWidth(columnWidths[columnKey] || 150);
   };
 
-  // Handle cell selection start
+  // Handle cell selection start (single click = select, not edit)
   const handleCellMouseDown = (variantId: string, contextKey: string) => {
     if (resizingColumn) return;
+
+    // Exit any current editing
+    setEditingCell(null);
 
     setIsSelecting(true);
     setSelectionStart({ variantId, contextKey });
     setSelectionEnd({ variantId, contextKey });
     setSelectedCells(new Set([`${variantId}|${contextKey}`]));
+  };
+
+  // Handle double-click to enter edit mode
+  const handleCellDoubleClick = (variantId: string, contextKey: string) => {
+    const cellKey = `${variantId}|${contextKey}`;
+    setEditingCell(cellKey);
+    setSelectedCells(new Set([cellKey]));
   };
 
   // Handle cell selection move
@@ -346,6 +359,8 @@ export default function VariantPricingTable({
 
       // Paste: Cmd+V / Ctrl+V
       if (isMeta && e.key === "v") {
+        // Don't intercept if actively editing a cell
+        if (editingCell) return;
         e.preventDefault();
         navigator.clipboard.readText().then((text) => {
           const trimmed = text.trim();
@@ -412,9 +427,8 @@ export default function VariantPricingTable({
 
       // Copy: Cmd+C / Ctrl+C
       if (isMeta && e.key === "c") {
-        // Only intercept if an input isn't focused (let normal input copy work)
-        const active = document.activeElement;
-        if (active && active.tagName === "INPUT") return;
+        // Don't intercept if actively editing
+        if (editingCell) return;
 
         e.preventDefault();
 
@@ -455,11 +469,48 @@ export default function VariantPricingTable({
       }
     };
 
+    // Handle typing to enter edit mode on selected cell
+    const handleTyping = (e: KeyboardEvent) => {
+      if (editingCell) return;
+      if (selectedCells.size !== 1) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      // Only handle number keys, backspace, delete, period
+      const isNumber = e.key >= "0" && e.key <= "9";
+      const isPeriod = e.key === ".";
+      const isDelete = e.key === "Backspace" || e.key === "Delete";
+
+      if (isNumber || isPeriod || isDelete) {
+        e.preventDefault();
+        const cellKey = Array.from(selectedCells)[0];
+        setEditingCell(cellKey);
+
+        const [variantId, ...contextParts] = cellKey.split("|");
+        const contextKey = contextParts.join("|");
+        const variant = variants.find((v) => v.id === variantId);
+        if (!variant) return;
+        const price = getPrice(variant, contextKey);
+        const editKey = price?.id || contextKey;
+
+        // Start with the typed character (or empty for delete)
+        const startValue = isDelete ? "" : e.key;
+        setInputValues((prev) => ({
+          ...prev,
+          [variantId]: {
+            ...prev[variantId],
+            [editKey]: startValue,
+          },
+        }));
+      }
+    };
+
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleTyping);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleTyping);
     };
-  }, [selectedCells, variants, priceContexts, editedPrices]);
+  }, [selectedCells, variants, priceContexts, editedPrices, editingCell]);
 
   // Handle Escape key to exit fullscreen
   useEffect(() => {
@@ -585,11 +636,13 @@ export default function VariantPricingTable({
                 const isEdited =
                   editedPrices[variant.id]?.[editKey] !== undefined;
                 const isSelected = isCellSelected(variant.id, context.key);
+                const cellKey = `${variant.id}|${context.key}`;
+                const isEditing = editingCell === cellKey;
 
                 return (
                   <td
                     key={context.key}
-                    className={`border-r border-gray-200 dark:border-gray-700 px-1.5 py-1 overflow-hidden ${
+                    className={`border-r border-gray-200 dark:border-gray-700 px-1.5 py-1 overflow-hidden cursor-default ${
                       isEdited && !isSelected
                         ? "bg-yellow-50 dark:bg-yellow-900/20"
                         : "bg-inherit"
@@ -599,47 +652,80 @@ export default function VariantPricingTable({
                       minWidth: columnWidths[context.key],
                       maxWidth: columnWidths[context.key],
                     }}
-                    onMouseDown={() =>
-                      handleCellMouseDown(variant.id, context.key)
-                    }
+                    onMouseDown={(e) => {
+                      // If already editing this cell, don't reset
+                      if (isEditing) {
+                        e.stopPropagation();
+                        return;
+                      }
+                      handleCellMouseDown(variant.id, context.key);
+                    }}
                     onMouseEnter={() =>
                       handleCellMouseEnter(variant.id, context.key)
+                    }
+                    onDoubleClick={() =>
+                      handleCellDoubleClick(variant.id, context.key)
                     }
                   >
                     <div className="flex items-center gap-1">
                       <span className="text-gray-500 dark:text-gray-400 text-xs flex-shrink-0">
                         {getCurrencySymbol(context.currency_code)}
                       </span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={getInputDisplayValue(
-                          variant,
-                          context.key,
-                          price?.id,
-                        )}
-                        onChange={(e) =>
-                          handlePriceChange(
-                            variant.id,
+                      {isEditing ? (
+                        /* Edit mode - active input */
+                        <input
+                          type="number"
+                          step="0.01"
+                          autoFocus
+                          value={getInputDisplayValue(
+                            variant,
                             context.key,
                             price?.id,
-                            e.target.value,
-                          )
-                        }
-                        onBlur={() =>
-                          handleBlur(variant.id, context.key, price?.id)
-                        }
-                        className={`w-full min-w-0 px-1.5 py-1 text-sm rounded text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${
-                          isSelected
-                            ? "border-2 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm"
-                            : isEdited
-                              ? "border border-yellow-400 dark:border-yellow-600 bg-white dark:bg-gray-800"
-                              : !price?.id
-                                ? "border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50"
-                                : "border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
-                        }`}
-                        placeholder={!price?.id ? "0.00" : "0.00"}
-                      />
+                          )}
+                          onChange={(e) =>
+                            handlePriceChange(
+                              variant.id,
+                              context.key,
+                              price?.id,
+                              e.target.value,
+                            )
+                          }
+                          onBlur={() => {
+                            handleBlur(variant.id, context.key, price?.id);
+                            setEditingCell(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === "Escape") {
+                              e.preventDefault();
+                              handleBlur(variant.id, context.key, price?.id);
+                              setEditingCell(null);
+                            }
+                            if (e.key === "Tab") {
+                              handleBlur(variant.id, context.key, price?.id);
+                              setEditingCell(null);
+                            }
+                          }}
+                          className="w-full min-w-0 px-1.5 py-1 text-sm rounded text-gray-900 dark:text-white border-2 border-blue-500 dark:border-blue-400 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          placeholder="0.00"
+                        />
+                      ) : (
+                        /* Display mode - shows value, click to select */
+                        <div
+                          className={`w-full min-w-0 px-1.5 py-1 text-sm rounded cursor-default select-none ${
+                            isSelected
+                              ? "border-2 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm text-gray-900 dark:text-white"
+                              : isEdited
+                                ? "border border-yellow-400 dark:border-yellow-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                : "border border-transparent text-gray-900 dark:text-white"
+                          }`}
+                        >
+                          {amount !== undefined ? (
+                            amount.toString()
+                          ) : (
+                            <span className="text-gray-400">0.00</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </td>
                 );
