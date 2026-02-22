@@ -52,15 +52,18 @@ export default function ProductActions({
   // ✅ Quantity state
   const [quantity, setQuantity] = useState(1)
 
-  // Auto-select first option values on page load
+  // Auto-select first option values on page load (only once)
+  const hasInitialized = useRef(false)
   useEffect(() => {
+    if (hasInitialized.current) return
     if (!product.variants?.length || !product.options?.length) return
+
+    hasInitialized.current = true
 
     // Find the first non-sample variant (prefer non-sample sizes)
     const firstVariant =
       product.variants.find((v) => {
         const opts = optionsAsKeymap(v.options) || {}
-        // Check if any option value contains "sample"
         return !Object.values(opts).some((val) =>
           val?.toLowerCase().includes("sample")
         )
