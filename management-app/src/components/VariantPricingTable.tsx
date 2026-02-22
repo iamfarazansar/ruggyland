@@ -52,6 +52,10 @@ export default function VariantPricingTable({
   const [editedPrices, setEditedPrices] = useState<
     Record<string, Record<string, number>>
   >({});
+  // Raw string values for inputs so typing isn't interrupted by formatting
+  const [inputValues, setInputValues] = useState<
+    Record<string, Record<string, string>>
+  >({});
   const [savingVariant, setSavingVariant] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -87,7 +91,25 @@ export default function VariantPricingTable({
     return variant.prices?.find((p) => p.context_key === contextKey);
   };
 
-  // Get edited or original price amount
+  // Get the display value for an input field
+  const getInputDisplayValue = (
+    variant: Variant,
+    contextKey: string,
+    priceId?: string,
+  ): string => {
+    const editKey = priceId || contextKey;
+    // If user is actively editing, show raw input
+    const rawInput = inputValues[variant.id]?.[editKey];
+    if (rawInput !== undefined) return rawInput;
+    // Otherwise show the edited or original price
+    if (editedPrices[variant.id]?.[editKey] !== undefined) {
+      return editedPrices[variant.id][editKey].toString();
+    }
+    const price = getPrice(variant, contextKey);
+    return price?.amount !== undefined ? price.amount.toString() : "";
+  };
+
+  // Get edited or original price amount (for copy/paste/save logic)
   const getPriceAmount = (
     variant: Variant,
     contextKey: string,
@@ -101,21 +123,51 @@ export default function VariantPricingTable({
     return price?.amount;
   };
 
-  // Update price in local state
+  // Handle typing in the input - store raw string
   const handlePriceChange = (
     variantId: string,
     contextKey: string,
     priceId: string | undefined,
     value: string,
   ) => {
-    // Allow clearing the field
-    if (value === "") {
-      const editKey = priceId || contextKey;
+    const editKey = priceId || contextKey;
+    setInputValues((prev) => ({
+      ...prev,
+      [variantId]: {
+        ...prev[variantId],
+        [editKey]: value,
+      },
+    }));
+  };
+
+  // On blur, parse the raw input into a number and store in editedPrices
+  const handleBlur = (
+    variantId: string,
+    contextKey: string,
+    priceId: string | undefined,
+  ) => {
+    const editKey = priceId || contextKey;
+    const rawValue = inputValues[variantId]?.[editKey];
+    if (rawValue === undefined) return;
+
+    // Clear raw input
+    setInputValues((prev) => {
+      const newState = { ...prev };
+      if (newState[variantId]) {
+        delete newState[variantId][editKey];
+        if (Object.keys(newState[variantId]).length === 0) {
+          delete newState[variantId];
+        }
+      }
+      return newState;
+    });
+
+    // If empty, remove the edit
+    if (rawValue === "") {
       setEditedPrices((prev) => {
         const newState = { ...prev };
         if (newState[variantId]) {
           delete newState[variantId][editKey];
-          // Remove variant entry if no prices left
           if (Object.keys(newState[variantId]).length === 0) {
             delete newState[variantId];
           }
@@ -125,10 +177,9 @@ export default function VariantPricingTable({
       return;
     }
 
-    const numValue = parseFloat(value);
+    const numValue = parseFloat(rawValue);
     if (isNaN(numValue)) return;
 
-    const editKey = priceId || contextKey;
     setEditedPrices((prev) => ({
       ...prev,
       [variantId]: {
@@ -562,7 +613,11 @@ export default function VariantPricingTable({
                       <input
                         type="number"
                         step="0.01"
-                        value={amount !== undefined ? amount.toFixed(2) : ""}
+                        value={getInputDisplayValue(
+                          variant,
+                          context.key,
+                          price?.id,
+                        )}
                         onChange={(e) =>
                           handlePriceChange(
                             variant.id,
@@ -570,6 +625,9 @@ export default function VariantPricingTable({
                             price?.id,
                             e.target.value,
                           )
+                        }
+                        onBlur={() =>
+                          handleBlur(variant.id, context.key, price?.id)
                         }
                         className={`w-full min-w-0 px-1.5 py-1 text-sm rounded text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${
                           isSelected
