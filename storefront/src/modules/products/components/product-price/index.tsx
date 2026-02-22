@@ -1,5 +1,4 @@
 import { clx } from "@medusajs/ui"
-import { useEffect, useRef, useState } from "react"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
@@ -17,21 +16,6 @@ export default function ProductPrice({
   })
 
   const selectedPrice = variant ? variantPrice : cheapestPrice
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const prevPriceRef = useRef(selectedPrice?.calculated_price_number)
-
-  // Smooth transition when price changes
-  useEffect(() => {
-    if (
-      selectedPrice &&
-      prevPriceRef.current !== selectedPrice.calculated_price_number
-    ) {
-      setIsTransitioning(true)
-      const timer = setTimeout(() => setIsTransitioning(false), 50)
-      prevPriceRef.current = selectedPrice.calculated_price_number
-      return () => clearTimeout(timer)
-    }
-  }, [selectedPrice?.calculated_price_number])
 
   if (!selectedPrice) {
     return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
@@ -39,12 +23,7 @@ export default function ProductPrice({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div
-        className={clx(
-          "flex flex-wrap items-baseline gap-x-2.5 transition-opacity duration-300 ease-in-out",
-          isTransitioning ? "opacity-0" : "opacity-100"
-        )}
-      >
+      <div className="flex flex-wrap items-baseline gap-x-2.5">
         <span
           className="text-2xl font-bold text-ui-fg-base"
           data-testid="product-price"
