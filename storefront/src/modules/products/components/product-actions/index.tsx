@@ -84,24 +84,41 @@ export default function ProductActions({
   }, [product.variants, options])
 
   // Compute available values for each option based on other selected options
+  // Shape always shows ALL values; Size is filtered by selected Shape only
   const getAvailableValues = useMemo(() => {
     const result: Record<string, string[]> = {}
 
+    // Find the shape option ID so we know which option is the "parent"
+    const shapeOption = (product.options || []).find(
+      (o) => o.title?.toLowerCase() === "shape"
+    )
+
     ;(product.options || []).forEach((option) => {
-      // Find variants that match all OTHER selected options
+      const isShapeOption = option.id === shapeOption?.id
+
+      // Shape always shows all values — it's the parent selector
+      if (isShapeOption) {
+        const allVals = new Set<string>()
+        ;(product.variants || []).forEach((variant) => {
+          const variantOpts = optionsAsKeymap(variant.options) || {}
+          if (variantOpts[option.id]) {
+            allVals.add(variantOpts[option.id])
+          }
+        })
+        result[option.id] = Array.from(allVals)
+        return
+      }
+
+      // For other options (like Size), filter based on Shape selection only
       const matchingVariants = (product.variants || []).filter((variant) => {
         const variantOpts = optionsAsKeymap(variant.options) || {}
-        return Object.entries(options).every(([optId, optVal]) => {
-          // Skip the current option we're computing for
-          if (optId === option.id) return true
-          // Skip unselected options
-          if (!optVal) return true
-          // Check if this variant matches the selected value for this other option
-          return variantOpts[optId] === optVal
-        })
+        // Only filter by shape, not by other child options
+        if (shapeOption && options[shapeOption.id]) {
+          return variantOpts[shapeOption.id] === options[shapeOption.id]
+        }
+        return true
       })
 
-      // Collect unique values from matching variants for this option
       const availableVals = new Set<string>()
       matchingVariants.forEach((variant) => {
         const variantOpts = optionsAsKeymap(variant.options) || {}
