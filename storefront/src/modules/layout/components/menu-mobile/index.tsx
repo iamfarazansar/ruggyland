@@ -96,7 +96,7 @@ export default function MenuMobile({
               {/* Navigation links */}
               {links.map((item, index) => (
                 <div key={item.id} onClick={() => setMobileMenu(false)}>
-                  <Link target={item.target || ""} href={item.url}>
+                  <LocalizedClientLink href={item.url}>
                     <div
                       className={`py-4 px-5 cursor-pointer hover:bg-gray-100 bg-white ${
                         index > 0 ? "border-t border-gray-200" : ""
@@ -104,7 +104,7 @@ export default function MenuMobile({
                     >
                       {item.name}
                     </div>
-                  </Link>
+                  </LocalizedClientLink>
                 </div>
               ))}
 
