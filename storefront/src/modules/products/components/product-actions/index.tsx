@@ -48,6 +48,7 @@ export default function ProductActions({
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [isBuyingNow, setIsBuyingNow] = useState(false)
 
   // ✅ Quantity state
   const [quantity, setQuantity] = useState(1)
@@ -309,7 +310,29 @@ export default function ProductActions({
     window.dispatchEvent(new Event("show-nav"))
   }
 
-  const qtyDisabled = !!disabled || isAdding || !selectedVariant
+  const handleBuyNow = async () => {
+    if (!selectedVariant?.id) return null
+
+    setIsBuyingNow(true)
+    await addToCart({
+      variantId: selectedVariant.id,
+      quantity,
+      countryCode,
+    })
+    trackAddToCart(product, selectedVariant.id, quantity)
+    trackMetaAddToCart(
+      product,
+      selectedVariant.id,
+      quantity,
+      selectedVariant.calculated_price?.calculated_amount
+        ? Number(selectedVariant.calculated_price.calculated_amount)
+        : undefined,
+      selectedVariant.calculated_price?.currency_code ?? undefined
+    )
+    router.push(`/${countryCode}/checkout`)
+  }
+
+  const qtyDisabled = !!disabled || isAdding || isBuyingNow || !selectedVariant
 
   return (
     <div className="flex flex-col gap-y-3" ref={actionsRef}>
@@ -378,6 +401,7 @@ export default function ProductActions({
             !selectedVariant ||
             !!disabled ||
             isAdding ||
+            isBuyingNow ||
             !isValidVariant
           }
           variant="primary"
@@ -393,6 +417,29 @@ export default function ProductActions({
         </Button>
       </div>
 
+      {/* Buy Now button */}
+      <Button
+        onClick={handleBuyNow}
+        disabled={
+          !inStock ||
+          !selectedVariant ||
+          !!disabled ||
+          isAdding ||
+          isBuyingNow ||
+          !isValidVariant
+        }
+        variant="secondary"
+        className="w-full h-11 rounded-xl border-2 border-ui-fg-base font-semibold"
+        isLoading={isBuyingNow}
+        data-testid="buy-now-button"
+      >
+        {!selectedVariant
+          ? "Select variant"
+          : !inStock || !isValidVariant
+          ? "Out of stock"
+          : "Buy now"}
+      </Button>
+
       {/* ✅ Mobile bar */}
       <MobileActions
         product={product}
@@ -405,10 +452,6 @@ export default function ProductActions({
         show={!inView}
         optionsDisabled={!!disabled || isAdding}
         availableValues={getAvailableValues}
-        quantity={quantity}
-        maxQuantity={maxQuantity}
-        onDecQty={() => setQuantity((q) => Math.max(1, q - 1))}
-        onIncQty={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
       />
     </div>
   )

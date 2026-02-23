@@ -61,7 +61,7 @@ const CartTemplate = ({
                     <div className="border-t border-ui-border-base p-4 small:p-6">
                       <div className="rounded-xl border border-ui-border-base bg-ui-bg-subtle px-4 py-3">
                         <p className="text-sm text-ui-fg-subtle">
-                          Taxes & shipping are calculated at checkout.
+                          Prices are inclusive of all taxes. Shipping is free.
                         </p>
                       </div>
                     </div>

@@ -18,12 +18,6 @@ type MobileActionsProps = {
   updateOptions: (title: string, value: string) => void
   inStock?: boolean
 
-  // ✅ change to accept qty
-  quantity: number
-  onIncQty: () => void
-  onDecQty: () => void
-  maxQuantity?: number
-
   handleAddToCart: () => void
   isAdding?: boolean
   show: boolean
@@ -37,10 +31,6 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   options,
   updateOptions,
   inStock,
-  quantity,
-  onIncQty,
-  onDecQty,
-  maxQuantity = 10,
   handleAddToCart,
   isAdding,
   show,
@@ -61,9 +51,6 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   }, [price])
 
   const isSimple = isSimpleProduct(product)
-
-  const canDec = quantity > 1 && !isAdding
-  const canInc = quantity < maxQuantity && !isAdding
 
   const handleOptionSelect = (optionId: string, value: string) => {
     updateOptions(optionId, value)
@@ -158,35 +145,8 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 </Button>
               )}
 
-              {/* Qty + Add to cart */}
-              <div className="w-full flex gap-3">
-                {/* ✅ Qty control */}
-                <div className="flex items-center rounded-xl border border-gray-200 bg-white overflow-hidden">
-                  <button
-                    type="button"
-                    onClick={onDecQty}
-                    disabled={!canDec}
-                    className="h-11 w-11 flex items-center justify-center text-lg disabled:opacity-40"
-                    aria-label="Decrease quantity"
-                  >
-                    −
-                  </button>
-
-                  <div className="min-w-[34px] text-center text-sm font-semibold">
-                    {quantity}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={onIncQty}
-                    disabled={!canInc}
-                    className="h-11 w-11 flex items-center justify-center text-lg disabled:opacity-40"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
-
+              {/* Add to cart */}
+              <div className="w-full">
                 <Button
                   onClick={handleAddToCart}
                   disabled={!inStock || !variant || isAdding}
