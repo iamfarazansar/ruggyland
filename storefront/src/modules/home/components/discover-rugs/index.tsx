@@ -77,14 +77,14 @@ export default function DiscoverRugs({ categories }: Props) {
           </div>
 
           {/* CTA */}
-          {/* <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex justify-center">
             <LocalizedClientLink
-              href="/about#process"
-              className="rounded-full border border-neutral-300 bg-white/80 px-6 py-2 text-sm font-medium text-neutral-900 backdrop-blur hover:bg-white"
+              href="/store"
+              className="rounded-full border border-neutral-800 bg-neutral-900 px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-neutral-800 hover:shadow-lg transition-all duration-300"
             >
-              Learn About Our Process
+              Explore All Rugs <span aria-hidden>→</span>
             </LocalizedClientLink>
-          </div> */}
+          </div>
         </div>
       </div>
     </section>

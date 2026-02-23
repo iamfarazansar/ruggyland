@@ -9,7 +9,7 @@ import ProductInfo from "@modules/products/templates/product-info"
 import ProductActions from "@modules/products/components/product-actions"
 import RelatedProducts from "@modules/products/components/related-products"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
-import MobileBackButton from "@modules/common/components/mobile-back-button"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 
@@ -33,8 +33,36 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       <ProductViewTracker product={product} />
       {/* TOP GRID */}
       <div className="content-container py-6" data-testid="product-container">
-        {/* Mobile Back Button */}
-        <MobileBackButton />
+        {/* Breadcrumb: Home / Category / Product */}
+        <nav className="mb-4 text-xs text-neutral-500" aria-label="Breadcrumb">
+          <ol className="flex items-center gap-1 flex-wrap">
+            <li>
+              <LocalizedClientLink
+                href="/"
+                className="hover:text-neutral-900 transition-colors"
+              >
+                Home
+              </LocalizedClientLink>
+            </li>
+            {product.categories && product.categories.length > 0 && (
+              <>
+                <li aria-hidden>/</li>
+                <li>
+                  <LocalizedClientLink
+                    href={`/categories/${product.categories[0].handle}`}
+                    className="hover:text-neutral-900 transition-colors"
+                  >
+                    {product.categories[0].name}
+                  </LocalizedClientLink>
+                </li>
+              </>
+            )}
+            <li aria-hidden>/</li>
+            <li className="text-neutral-900 font-medium truncate max-w-[200px] sm:max-w-none">
+              {product.title}
+            </li>
+          </ol>
+        </nav>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
           {/* LEFT: Gallery */}
@@ -158,7 +186,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                           parts.push(str.slice(lastIndex, match.index))
                         }
                         if (match[2]) {
-                          parts.push(<strong key={match.index} className="font-semibold text-ui-fg-base">{match[2]}</strong>)
+                          parts.push(
+                            <strong
+                              key={match.index}
+                              className="font-semibold text-ui-fg-base"
+                            >
+                              {match[2]}
+                            </strong>
+                          )
                         } else if (match[3]) {
                           parts.push(<em key={match.index}>{match[3]}</em>)
                         }
@@ -172,7 +207,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
                     if (isBlockquote) {
                       return (
-                        <blockquote key={i} className="border-l-2 border-ui-border-base pl-4 italic text-ui-fg-muted">
+                        <blockquote
+                          key={i}
+                          className="border-l-2 border-ui-border-base pl-4 italic text-ui-fg-muted"
+                        >
                           {renderInline(text)}
                         </blockquote>
                       )
@@ -208,7 +246,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                     </span>
                     <span className="text-ui-fg-subtle text-right">
                       {product.origin_country
-                        ? new Intl.DisplayNames(["en"], { type: "region" }).of(product.origin_country.toUpperCase()) || product.origin_country
+                        ? new Intl.DisplayNames(["en"], { type: "region" }).of(
+                            product.origin_country.toUpperCase()
+                          ) || product.origin_country
                         : "-"}
                     </span>
                   </div>
