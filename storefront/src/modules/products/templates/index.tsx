@@ -106,7 +106,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                           />
                         </div>
                         <p className="text-xs text-[#574b45] text-center leading-tight font-medium">
-                          Ships in 7–10 days
+                          Free Shipping
                         </p>
                       </div>
 
@@ -283,11 +283,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                   />
                   <div>
                     <p className="font-semibold text-ui-fg-base">
-                      Ships in 7–10 days
+                      Free Shipping
                     </p>
                     <p className="mt-1 text-ui-fg-subtle">
-                      Your rug is handmade and ships in 7–10 days. Worldwide
-                      delivery available.
+                      Your rug is handmade and ships free worldwide. delivery
+                      available.
                     </p>
                   </div>
                 </div>
