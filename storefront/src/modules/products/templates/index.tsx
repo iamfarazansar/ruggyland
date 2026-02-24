@@ -286,8 +286,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                       Free Shipping
                     </p>
                     <p className="mt-1 text-ui-fg-subtle">
-                      Your rug is handmade and ships free worldwide. delivery
-                      available.
+                      Your rug is handmade and ships free worldwide.
                     </p>
                   </div>
                 </div>
