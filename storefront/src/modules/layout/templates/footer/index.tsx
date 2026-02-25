@@ -5,6 +5,7 @@ import { listRegions } from "@lib/data/regions"
 import { StoreRegion } from "@medusajs/types"
 import CountrySelectFooterNav from "@modules/layout/components/country-select-footer-nav"
 import FooterSocialIcons from "@modules/layout/components/footer-social-icons"
+import CookieSettingsButton from "@modules/layout/components/cookie-settings-button"
 
 export default async function Footer() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
@@ -133,8 +134,8 @@ export default async function Footer() {
             <p className="text-[11px] leading-relaxed text-white/40 text-center max-w-4xl mx-auto">
               All artworks posted on this website is intended as fan art and are
               submitted by independent artist from around the world and is not
-              purported to be official merchandise unless indicated otherwise. If
-              you have any issues regarding the artwork do write in to us at{" "}
+              purported to be official merchandise unless indicated otherwise.
+              If you have any issues regarding the artwork do write in to us at{" "}
               <a
                 href="mailto:info@ruggyland.com"
                 className="text-white/60 hover:text-white underline"
@@ -169,6 +170,7 @@ export default async function Footer() {
                 Shipping & Return Policy
               </div>
             </LocalizedClientLink>
+            <CookieSettingsButton />
           </div>
 
           {/* Country Selector - desktop only, right-aligned */}
