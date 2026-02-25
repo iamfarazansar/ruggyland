@@ -26,3 +26,6 @@ build
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# One-off email templates & send scripts
+email-templates/
