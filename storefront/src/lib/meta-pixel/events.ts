@@ -28,6 +28,7 @@ export function trackMetaViewContent(product: {
 }) {
   const variant = product.variants?.[0]
   const price = variant?.calculated_price
+  const eventId = `viewcontent_${product.id}_${Date.now()}`
   fbq("track", "ViewContent", {
     content_ids: [variant?.id || product.id],
     content_name: product.title,
@@ -37,7 +38,7 @@ export function trackMetaViewContent(product: {
       value: price.calculated_amount,
       currency: price.currency_code?.toUpperCase() || "USD",
     }),
-  })
+  }, { eventID: eventId })
 }
 
 export function trackMetaAddToCart(
@@ -47,6 +48,7 @@ export function trackMetaAddToCart(
   price?: number,
   currencyCode?: string
 ) {
+  const eventId = `addtocart_${variantId}_${Date.now()}`
   fbq("track", "AddToCart", {
     content_ids: [variantId],
     content_name: product.title,
@@ -57,7 +59,7 @@ export function trackMetaAddToCart(
       value: price,
       currency: currencyCode?.toUpperCase() || "USD",
     }),
-  })
+  }, { eventID: eventId })
 }
 
 export function trackMetaInitiateCheckout(cart: {
@@ -66,13 +68,14 @@ export function trackMetaInitiateCheckout(cart: {
   total?: number
   currency_code?: string
 }) {
+  const eventId = `checkout_${cart.id}_${Date.now()}`
   fbq("track", "InitiateCheckout", {
     content_ids: cart.items?.map((item: any) => item.variant_id) || [],
     content_type: "product",
     num_items: cart.items?.length || 0,
     value: cart.total || 0,
     currency: cart.currency_code?.toUpperCase() || "USD",
-  })
+  }, { eventID: eventId })
 }
 
 export function trackMetaPurchase(order: {
