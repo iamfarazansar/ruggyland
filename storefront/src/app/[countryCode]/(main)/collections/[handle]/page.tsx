@@ -6,6 +6,7 @@ import { listRegions } from "@lib/data/regions"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { getAlternates } from "@lib/seo/hreflang"
 
 type Props = {
   params: Promise<{ handle: string; countryCode: string }>
@@ -49,10 +50,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
-  const metadata = {
-    title: `${collection.title} | RuggyLand Store`,
-    description: `${collection.title} collection`,
-  } as Metadata
+  const metadata: Metadata = {
+    title: `${collection.title} | RuggyLand`,
+    description: `Shop our ${collection.title} collection — handcrafted rugs made to order, shipped worldwide by RuggyLand.`,
+    alternates: getAlternates(`/collections/${params.handle}`),
+  }
 
   return metadata
 }

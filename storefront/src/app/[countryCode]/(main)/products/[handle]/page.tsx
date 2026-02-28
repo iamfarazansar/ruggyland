@@ -4,6 +4,8 @@ import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
+import { getAlternates } from "@lib/seo/hreflang"
+import ProductSchema from "@components/seo/ProductSchema"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -83,12 +85,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const description = product.description
+    ? product.description.slice(0, 155)
+    : `${product.title} — handcrafted rug made to order by RuggyLand. Custom sizes available, shipped worldwide.`
+
   return {
-    title: `${product.title} | RuggyLand Store`,
-    description: `${product.title}`,
+    title: `${product.title} | RuggyLand`,
+    description,
+    alternates: getAlternates(`/products/${handle}`),
     openGraph: {
-      title: `${product.title} | RuggyLand Store`,
-      description: `${product.title}`,
+      title: `${product.title} | RuggyLand`,
+      description,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }
@@ -116,12 +123,25 @@ export default async function ProductPage(props: Props) {
 
   const images = getImagesForVariant(pricedProduct, selectedVariantId)
 
+  // Get lowest variant price for schema
+  const firstVariant = pricedProduct.variants?.[0]
+  const schemaPrice = firstVariant?.calculated_price?.calculated_amount ?? undefined
+  const schemaCurrency = region.currency_code ?? undefined
+
   return (
-    <ProductTemplate
-      product={pricedProduct}
-      region={region}
-      countryCode={params.countryCode}
-      images={images ?? pricedProduct.images ?? []}
-    />
+    <>
+      <ProductSchema
+        product={pricedProduct}
+        countryCode={params.countryCode}
+        price={schemaPrice ?? undefined}
+        currencyCode={schemaCurrency}
+      />
+      <ProductTemplate
+        product={pricedProduct}
+        region={region}
+        countryCode={params.countryCode}
+        images={images ?? pricedProduct.images ?? []}
+      />
+    </>
   )
 }

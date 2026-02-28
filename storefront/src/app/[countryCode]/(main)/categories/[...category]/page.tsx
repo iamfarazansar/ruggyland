@@ -6,6 +6,7 @@ import { listRegions } from "@lib/data/regions"
 import { StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
+import { getAlternates } from "@lib/seo/hreflang"
 
 type Props = {
   params: Promise<{ category: string[]; countryCode: string }>
@@ -47,11 +48,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     const description = productCategory.description ?? `${title} category.`
 
     return {
-      title: `${title} | RuggyLand Store`,
+      title: `${productCategory.name} | RuggyLand`,
       description,
-      alternates: {
-        canonical: `${params.category.join("/")}`,
-      },
+      alternates: getAlternates(`/categories/${params.category.join("/")}`),
     }
   } catch (error) {
     notFound()

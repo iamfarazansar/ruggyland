@@ -10,11 +10,16 @@ import WhyChooseRuggyLand from "@modules/home/components/why-choose"
 import CustomRugBanner from "@modules/home/components/custom-rug-banner"
 import StoriesTufted from "@modules/home/components/stories-tufted"
 import { listRugStories } from "@lib/data/rug-stories"
+import { getAlternates } from "@lib/seo/hreflang"
+import OrganizationSchema from "@components/seo/OrganizationSchema"
 
-export const metadata: Metadata = {
-  title: "RuggyLand | Premium Handmade Rugs Made to Order",
-  description:
-    "Premium handcrafted rugs made to order. Custom designs, clean carving, and export-quality finishing—delivered worldwide by RuggyLand.",
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "RuggyLand | Premium Handmade Rugs Made to Order",
+    description:
+      "Premium handcrafted rugs made to order. Custom designs, clean carving, and export-quality finishing—delivered worldwide by RuggyLand.",
+    alternates: getAlternates(""),
+  }
 }
 
 export default async function Home(props: {
@@ -39,6 +44,7 @@ export default async function Home(props: {
 
   return (
     <>
+      <OrganizationSchema />
       <Hero />
       <DiscoverRugs categories={productCategories} />
       <CustomRugBanner />

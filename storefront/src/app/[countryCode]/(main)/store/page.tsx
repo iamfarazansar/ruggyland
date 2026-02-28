@@ -2,10 +2,12 @@ import { Metadata } from "next"
 
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import StoreTemplate from "@modules/store/templates"
+import { getAlternates } from "@lib/seo/hreflang"
 
 export const metadata: Metadata = {
   title: "All Rugs | RuggyLand",
   description: "Explore our collection of custom-made premium rugs. Handcrafted with care, shipped worldwide.",
+  alternates: getAlternates("/store"),
 }
 
 type Params = {

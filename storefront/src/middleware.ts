@@ -165,7 +165,11 @@ async function getCountryCode(
       .get("x-vercel-ip-country")
       ?.toLowerCase()
 
-    const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+    // Map storefront URL prefixes to Medusa ISO country codes
+    // /uk in URL → gb (ISO 3166-1 alpha-2 for United Kingdom)
+    const URL_ALIAS: Record<string, string> = { uk: "gb" }
+    const rawUrlCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+    const urlCountryCode = URL_ALIAS[rawUrlCode] || rawUrlCode
 
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode
@@ -189,10 +193,37 @@ async function getCountryCode(
   }
 }
 
+// Known search engine and social bots — skip geo-redirect so they can index all pages
+const BOT_USER_AGENTS = [
+  "Googlebot",
+  "Googlebot-Image",
+  "bingbot",
+  "Baiduspider",
+  "YandexBot",
+  "DuckDuckBot",
+  "Slurp",
+  "facebookexternalhit",
+  "Twitterbot",
+  "LinkedInBot",
+  "WhatsApp",
+  "Applebot",
+  "PetalBot",
+]
+
+function isBot(request: NextRequest): boolean {
+  const ua = request.headers.get("user-agent") || ""
+  return BOT_USER_AGENTS.some((bot) => ua.includes(bot))
+}
+
 /**
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
+  // Let bots crawl freely without requiring a region cookie
+  if (isBot(request)) {
+    return NextResponse.next()
+  }
+
   let redirectUrl = request.nextUrl.href
 
   let response = NextResponse.redirect(redirectUrl, 307)
