@@ -1,8 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useCookieConsent, CookieCategories } from "@lib/context/cookie-consent"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+
+// Countries where cookie consent is NOT required — auto-accept
+const SKIP_CONSENT_COUNTRIES = ["in", "us"]
 
 export default function CookieBanner() {
   const { loaded, status, acceptAll, rejectAll, savePreferences } =
@@ -10,6 +13,15 @@ export default function CookieBanner() {
   const [showDetails, setShowDetails] = useState(false)
   const [analytics, setAnalytics] = useState(true)
   const [marketing, setMarketing] = useState(true)
+
+  // Auto-accept cookies for countries that don't require consent
+  useEffect(() => {
+    if (!loaded || status !== "undecided") return
+    const countryCode = window.location.pathname.split("/")[1]?.toLowerCase()
+    if (SKIP_CONSENT_COUNTRIES.includes(countryCode)) {
+      acceptAll()
+    }
+  }, [loaded, status, acceptAll])
 
   if (!loaded || status !== "undecided") return null
 
