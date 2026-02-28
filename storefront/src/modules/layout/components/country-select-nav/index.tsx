@@ -14,8 +14,8 @@ export default function CountrySelectNav({ regions }: Props) {
   return (
     <div
       className="flex items-center whitespace-nowrap"
-      onMouseEnter={countryToggleState.open}
-      onMouseLeave={countryToggleState.close}
+      onPointerEnter={(e) => e.pointerType === "mouse" && countryToggleState.open()}
+      onPointerLeave={(e) => e.pointerType === "mouse" && countryToggleState.close()}
     >
       <CountrySelect toggleState={countryToggleState} regions={regions} />
     </div>
