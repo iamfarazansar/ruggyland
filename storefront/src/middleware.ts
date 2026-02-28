@@ -219,9 +219,18 @@ function isBot(request: NextRequest): boolean {
  * Middleware to handle region selection and onboarding status.
  */
 export async function middleware(request: NextRequest) {
-  // Let bots crawl freely without requiring a region cookie
   if (isBot(request)) {
-    return NextResponse.next()
+    // If URL already starts with a 2-char country code, serve it directly (no cookie needed)
+    const firstSegment = request.nextUrl.pathname.split("/")[1]?.toLowerCase() ?? ""
+    if (firstSegment.length === 2) {
+      return NextResponse.next()
+    }
+    // Legacy non-localized URL (e.g. /products/foo, /cart) — 301 to /us/ so Google updates its index
+    const redirectPath = request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname
+    return NextResponse.redirect(
+      `${request.nextUrl.origin}/us${redirectPath}${request.nextUrl.search}`,
+      301
+    )
   }
 
   let redirectUrl = request.nextUrl.href
