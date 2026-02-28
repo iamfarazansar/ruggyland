@@ -145,10 +145,6 @@ export default async function Footer() {
             </p>
           </div>
 
-          <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer text-center md:text-left">
-            © {new Date().getFullYear()} RuggyLand, All Rights Reserved
-          </div>
-
           <div className="flex gap-2 md:gap-5 text-center md:text-left flex-wrap justify-center">
             <LocalizedClientLink href="/terms-of-service">
               <div className="text-[12px] text-white/[0.5] hover:text-white cursor-pointer">
@@ -177,6 +173,11 @@ export default async function Footer() {
           <div className="hidden md:flex justify-end">
             <CountrySelectFooterNav regions={regions} />
           </div>
+        </div>
+
+        {/* Copyright - bottom center */}
+        <div className="text-[12px] text-white/[0.5] text-center pt-4 pb-2">
+          © {new Date().getFullYear()} RuggyLand, All Rights Reserved
         </div>
       </Wrapper>
     </footer>
