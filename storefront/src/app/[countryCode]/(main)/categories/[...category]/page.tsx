@@ -50,7 +50,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     return {
       title: `${productCategory.name} | RuggyLand`,
       description,
-      alternates: getAlternates(`/categories/${params.category.join("/")}`),
+      alternates: getAlternates(`/categories/${params.category.join("/")}`, params.countryCode),
     }
   } catch (error) {
     notFound()

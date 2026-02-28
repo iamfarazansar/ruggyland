@@ -52,10 +52,14 @@ export function getAlternateLanguages(path: string): Record<string, string> {
 /**
  * Returns full Next.js `alternates` object ready for generateMetadata.
  * Pass the path WITHOUT the region prefix, e.g. "/products/shanks-rug"
+ * Pass countryCode to self-canonical (each region points to itself).
+ * Omit countryCode only for static metadata exports that can't access params.
  */
-export function getAlternates(path: string) {
+export function getAlternates(path: string, countryCode?: string) {
+  const cleanPath = path.startsWith("/") ? path : `/${path}`
+  const canonicalRegion = countryCode ?? CANONICAL_REGION
   return {
-    canonical: getCanonicalUrl(path),
+    canonical: `${BASE_URL}/${canonicalRegion}${cleanPath}`,
     languages: getAlternateLanguages(path),
   }
 }

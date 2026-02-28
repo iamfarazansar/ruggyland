@@ -13,12 +13,15 @@ import { listRugStories } from "@lib/data/rug-stories"
 import { getAlternates } from "@lib/seo/hreflang"
 import OrganizationSchema from "@components/seo/OrganizationSchema"
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata(props: {
+  params: Promise<{ countryCode: string }>
+}): Promise<Metadata> {
+  const { countryCode } = await props.params
   return {
     title: "RuggyLand | Premium Handmade Rugs Made to Order",
     description:
       "Premium handcrafted rugs made to order. Custom designs, clean carving, and export-quality finishing—delivered worldwide by RuggyLand.",
-    alternates: getAlternates(""),
+    alternates: getAlternates("", countryCode),
   }
 }
 

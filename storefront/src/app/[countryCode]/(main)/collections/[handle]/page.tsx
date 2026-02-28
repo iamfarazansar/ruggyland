@@ -53,7 +53,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const metadata: Metadata = {
     title: `${collection.title} | RuggyLand`,
     description: `Shop our ${collection.title} collection — handcrafted rugs made to order, shipped worldwide by RuggyLand.`,
-    alternates: getAlternates(`/collections/${params.handle}`),
+    alternates: getAlternates(`/collections/${params.handle}`, params.countryCode),
   }
 
   return metadata

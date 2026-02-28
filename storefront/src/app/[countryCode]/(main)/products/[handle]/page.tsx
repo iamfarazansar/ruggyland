@@ -92,7 +92,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${product.title} | RuggyLand`,
     description,
-    alternates: getAlternates(`/products/${handle}`),
+    alternates: getAlternates(`/products/${handle}`, params.countryCode),
     openGraph: {
       title: `${product.title} | RuggyLand`,
       description,

@@ -4,10 +4,13 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import StoreTemplate from "@modules/store/templates"
 import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "All Rugs | RuggyLand",
-  description: "Explore our collection of custom-made premium rugs. Handcrafted with care, shipped worldwide.",
-  alternates: getAlternates("/store"),
+export async function generateMetadata(props: Params): Promise<Metadata> {
+  const { countryCode } = await props.params
+  return {
+    title: "All Rugs | RuggyLand",
+    description: "Explore our collection of custom-made premium rugs. Handcrafted with care, shipped worldwide.",
+    alternates: getAlternates("/store", countryCode),
+  }
 }
 
 type Params = {
