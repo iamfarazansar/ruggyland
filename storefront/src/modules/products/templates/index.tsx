@@ -12,6 +12,7 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
+import FAQ from "@modules/common/components/faq"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -342,6 +343,9 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>
       </div>
+
+      {/* FAQ */}
+      <FAQ />
     </>
   )
 }

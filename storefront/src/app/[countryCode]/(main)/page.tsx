@@ -9,6 +9,7 @@ import { listCategories } from "@lib/data/categories"
 import WhyChooseRuggyLand from "@modules/home/components/why-choose"
 import CustomRugBanner from "@modules/home/components/custom-rug-banner"
 import StoriesTufted from "@modules/home/components/stories-tufted"
+import FAQ from "@modules/common/components/faq"
 import { listRugStories } from "@lib/data/rug-stories"
 import { getAlternates } from "@lib/seo/hreflang"
 import OrganizationSchema from "@components/seo/OrganizationSchema"
@@ -53,6 +54,7 @@ export default async function Home(props: {
       <CustomRugBanner />
       <StoriesTufted stories={stories} />
       <WhyChooseRuggyLand />
+      <FAQ />
       {/* <LearnAboutProcess /> */}
       <div className="py-12">
         <ul className="flex flex-col gap-x-6">
