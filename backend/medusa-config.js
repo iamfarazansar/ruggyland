@@ -350,4 +350,8 @@ const medusaConfig = {
   ],
 };
 
+if (process.env.NODE_ENV !== "production") {
+  console.log(JSON.stringify(medusaConfig, null, 2));
+}
+
 export default defineConfig(medusaConfig);
