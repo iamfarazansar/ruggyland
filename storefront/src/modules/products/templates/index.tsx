@@ -107,7 +107,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
                           />
                         </div>
                         <p className="text-xs text-[#574b45] text-center leading-tight font-medium">
-                          Free Shipping
+                          Ships Free Worldwide
                         </p>
                       </div>
 
