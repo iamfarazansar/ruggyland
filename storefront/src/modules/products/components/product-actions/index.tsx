@@ -21,6 +21,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
+import AskAboutProduct from "../ask-about-product"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -439,6 +440,8 @@ export default function ProductActions({
           ? "Out of stock"
           : "Buy now"}
       </Button>
+
+      <AskAboutProduct product={product} />
 
       {/* ✅ Mobile bar */}
       <MobileActions

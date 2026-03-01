@@ -114,6 +114,9 @@ const medusaConfig = {
       resolve: "./src/modules/custom-rug",
     },
     {
+      resolve: "./src/modules/product-inquiry",
+    },
+    {
       resolve: "./src/modules/rug-stories",
     },
     {

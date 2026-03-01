@@ -10,6 +10,7 @@ import multer from "multer";
 
 import { CustomRugRequestSchema } from "./store/custom-rug-requests/route";
 import { updateVariantPricesMiddlewares } from "./admin/products/[id]/variants/[variantId]/prices/middlewares";
+import { productInquiryStoreMiddlewares } from "./store/product-inquiries/middlewares";
 
 // ==============================
 // Upload config
@@ -136,6 +137,7 @@ function storyUploadMw(
 export default defineMiddlewares({
   routes: [
     ...updateVariantPricesMiddlewares,
+    ...productInquiryStoreMiddlewares,
     {
       matcher: "/store/custom-rug-requests",
       method: "POST",
