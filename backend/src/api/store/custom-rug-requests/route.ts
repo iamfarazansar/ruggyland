@@ -1,5 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
 import { z } from "@medusajs/framework/zod";
+import { Modules } from "@medusajs/framework/utils";
+import { INotificationModuleService } from "@medusajs/framework/types";
 
 import {
   createCustomRugRequestWorkflow,
@@ -34,6 +36,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const { result } = await createCustomRugRequestWorkflow(req.scope).run({
     input,
   });
+
+  // Send Slack notification
+  try {
+    const notificationModuleService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
+    await notificationModuleService.createNotifications({
+      to: "slack-channel",
+      channel: "slack",
+      template: "custom-rug-request",
+      data: { request: result },
+    })
+  } catch (error) {
+    console.error("Error sending Slack notification for custom rug request:", error)
+  }
 
   return res.status(201).json({
     id: result.id,

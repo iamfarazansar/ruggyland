@@ -1,4 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
+import { INotificationModuleService } from "@medusajs/framework/types"
 import { createProductInquiryWorkflow } from "../../../workflows/create-product-inquiry"
 import { CreateProductInquirySchema } from "./middlewares"
 
@@ -30,6 +32,19 @@ export async function POST(
       message: message as string,
     } satisfies WorkflowInput,
   })
+
+  // Send Slack notification
+  try {
+    const notificationModuleService: INotificationModuleService = req.scope.resolve(Modules.NOTIFICATION)
+    await notificationModuleService.createNotifications({
+      to: "slack-channel",
+      channel: "slack",
+      template: "product-inquiry",
+      data: { inquiry: result },
+    })
+  } catch (error) {
+    console.error("Error sending Slack notification for product inquiry:", error)
+  }
 
   return res.status(201).json({ inquiry: result })
 }

@@ -38,6 +38,32 @@ type OrderData = {
   }[]
 }
 
+type CustomRugRequestData = {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  width: number
+  height: number
+  unit: string
+  shape: string
+  budgetMin?: number
+  budgetMax?: number
+  currency: string
+  notes?: string
+}
+
+type ProductInquiryData = {
+  id: string
+  product_id?: string
+  product_handle?: string
+  product_title: string
+  name: string
+  email: string
+  phone?: string
+  message: string
+}
+
 class SlackNotificationProviderService extends AbstractNotificationProviderService {
   static identifier = "slack"
   protected options: Options
@@ -153,12 +179,130 @@ class SlackNotificationProviderService extends AbstractNotificationProviderServi
     return { id: order.id }
   }
 
+  private async sendCustomRugRequestNotification(
+    notification: ProviderSendNotificationDTO
+  ): Promise<ProviderSendNotificationResultsDTO> {
+    const req = notification.data?.request as CustomRugRequestData | undefined
+    if (!req) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Request data not found in notification")
+    }
+
+    const dimensionStr = `${req.width} × ${req.height} ${req.unit}`
+    const budgetStr =
+      req.budgetMin != null && req.budgetMax != null
+        ? `${req.currency} ${req.budgetMin}–${req.budgetMax}`
+        : req.budgetMin != null
+        ? `${req.currency} ${req.budgetMin}+`
+        : "Not specified"
+
+    const blocks: Record<string, unknown>[] = [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `:yarn: *New Custom Rug Request* from *${req.name}*`,
+        },
+      },
+      {
+        type: "section",
+        fields: [
+          { type: "mrkdwn", text: `*Email*\n${req.email}` },
+          { type: "mrkdwn", text: `*Phone*\n${req.phone || "—"}` },
+          { type: "mrkdwn", text: `*Size*\n${dimensionStr}` },
+          { type: "mrkdwn", text: `*Shape*\n${req.shape}` },
+          { type: "mrkdwn", text: `*Budget*\n${budgetStr}` },
+        ],
+      },
+    ]
+
+    if (req.notes) {
+      blocks.push({
+        type: "section",
+        text: { type: "mrkdwn", text: `*Notes*\n${req.notes}` },
+      })
+    }
+
+    blocks.push({
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: { type: "plain_text", text: "View in Admin" },
+          url: `${this.options.admin_url}/custom-rug-requests`,
+        },
+      ],
+    })
+
+    await axios.post(this.options.webhook_url, {
+      text: `New custom rug request from ${req.name}`,
+      blocks,
+    })
+
+    return { id: req.id }
+  }
+
+  private async sendProductInquiryNotification(
+    notification: ProviderSendNotificationDTO
+  ): Promise<ProviderSendNotificationResultsDTO> {
+    const inquiry = notification.data?.inquiry as ProductInquiryData | undefined
+    if (!inquiry) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "Inquiry data not found in notification")
+    }
+
+    const productLink = inquiry.product_handle
+      ? `<${this.options.admin_url.replace("/app", "")}/in/products/${inquiry.product_handle}|${inquiry.product_title}>`
+      : inquiry.product_title
+
+    const blocks: Record<string, unknown>[] = [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `:speech_balloon: *New Product Inquiry* for ${productLink}`,
+        },
+      },
+      {
+        type: "section",
+        fields: [
+          { type: "mrkdwn", text: `*From*\n${inquiry.name}` },
+          { type: "mrkdwn", text: `*Email*\n${inquiry.email}` },
+          { type: "mrkdwn", text: `*Phone*\n${inquiry.phone || "—"}` },
+        ],
+      },
+      {
+        type: "section",
+        text: { type: "mrkdwn", text: `*Message*\n${inquiry.message}` },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "View in Admin" },
+            url: `${this.options.admin_url}/product-inquiries`,
+          },
+        ],
+      },
+    ]
+
+    await axios.post(this.options.webhook_url, {
+      text: `New inquiry from ${inquiry.name} about ${inquiry.product_title}`,
+      blocks,
+    })
+
+    return { id: inquiry.id }
+  }
+
   async send(
     notification: ProviderSendNotificationDTO
   ): Promise<ProviderSendNotificationResultsDTO> {
     switch (notification.template) {
       case "order-created":
         return this.sendOrderNotification(notification)
+      case "custom-rug-request":
+        return this.sendCustomRugRequestNotification(notification)
+      case "product-inquiry":
+        return this.sendProductInquiryNotification(notification)
       default:
         throw new MedusaError(
           MedusaError.Types.NOT_FOUND,
