@@ -6,17 +6,36 @@ import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Checkout",
 }
 
-export default async function Checkout() {
+type Params = {
+  params: Promise<{ countryCode: string }>
+  searchParams: Promise<{ step?: string }>
+}
+
+export default async function Checkout({ params, searchParams }: Params) {
+  const { countryCode } = await params
+  const { step } = await searchParams
+
   const cart = await retrieveCart()
 
   if (!cart) {
     return notFound()
+  }
+
+  // Auto-advance to the appropriate step when none is set (e.g. arriving via Buy Now)
+  if (!step) {
+    if (!cart.shipping_address?.address_1) {
+      redirect(`/${countryCode}/checkout?step=address`)
+    } else if (!cart.shipping_methods?.length) {
+      redirect(`/${countryCode}/checkout?step=delivery`)
+    } else {
+      redirect(`/${countryCode}/checkout?step=payment`)
+    }
   }
 
   const customer = await retrieveCustomer()
