@@ -94,6 +94,12 @@ export default async function orderPlacedHandler({
         externalId: order.customer_id ?? undefined,
       })
 
+      // Pass fbc/fbp raw (not hashed) from cart metadata for higher EMQ
+      const fbc = (order.metadata as any)?.fbc as string | undefined
+      const fbp = (order.metadata as any)?.fbp as string | undefined
+      if (fbc) userData.fbc = fbc
+      if (fbp) userData.fbp = fbp
+
       await sendMetaCapiEvent(META_PIXEL_ID, META_CAPI_ACCESS_TOKEN, {
         event_name: 'Purchase',
         event_time: Math.floor(Date.now() / 1000),
