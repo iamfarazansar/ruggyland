@@ -10,6 +10,9 @@ export default function MetaPurchaseTracker({
   order: HttpTypes.StoreOrder
 }) {
   useEffect(() => {
+    const storageKey = `meta_purchase_tracked_${order.id}`
+    if (sessionStorage.getItem(storageKey)) return
+    sessionStorage.setItem(storageKey, "1")
     trackMetaPurchase({
       id: order.id,
       total: order.total ?? 0,
