@@ -1,7 +1,6 @@
 "use client"
 
 import { trackOrderCompleted } from "@lib/posthog/events"
-import { trackMetaPurchase } from "@lib/meta-pixel/events"
 import { useEffect } from "react"
 
 export default function OrderTracker({
@@ -16,7 +15,6 @@ export default function OrderTracker({
 }) {
   useEffect(() => {
     trackOrderCompleted(order)
-    trackMetaPurchase(order)
   }, [order.id])
 
   return null
