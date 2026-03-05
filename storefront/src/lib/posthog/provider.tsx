@@ -19,8 +19,8 @@ export default function PostHogProvider({
     if (categories.analytics) {
       if (!posthog.__loaded) {
         posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-          api_host:
-            process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+          api_host: "/ingest",
+          ui_host: "https://us.posthog.com",
           capture_pageview: false,
           capture_pageleave: true,
         })
