@@ -370,7 +370,7 @@ export default function AnalyticsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={data.topProducts.map((p) => ({
-                  name: truncate(p.product, 20),
+                  name: truncate(p.product.replace(/\b\w/g, (c: string) => c.toUpperCase()), 20),
                   count: p.count,
                 }))}
                 layout="vertical"

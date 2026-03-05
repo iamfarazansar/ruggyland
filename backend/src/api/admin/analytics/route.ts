@@ -30,7 +30,7 @@ function buildHogQLQuery(queryType: QueryType, days: number): string {
       return `SELECT properties.$current_url as url, count() as count FROM events WHERE event = '$pageview' AND ${dateFilter} AND properties.$current_url IS NOT NULL GROUP BY url ORDER BY count DESC LIMIT 10`
 
     case "top_products":
-      return `SELECT properties.product_name as product, count() as count FROM events WHERE event = 'Product Viewed' AND ${dateFilter} AND properties.product_name IS NOT NULL GROUP BY product ORDER BY count DESC LIMIT 10`
+      return `SELECT replaceAll(replaceRegexpOne(properties.$pathname, '^/[a-z]{2}/products/', ''), '-', ' ') as product, count() as count FROM events WHERE event = '$pageview' AND match(properties.$pathname, '^/[a-z]{2}/products/[^/]+$') AND ${dateFilter} AND product != '' GROUP BY product ORDER BY count DESC LIMIT 10`
 
     case "add_to_cart":
       return `SELECT toDate(timestamp) as day, count() as count FROM events WHERE event = 'Add to Cart' AND ${dateFilter} GROUP BY day ORDER BY day`
