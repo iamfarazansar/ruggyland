@@ -45,12 +45,25 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
     const title = productCategory.name + " | RuggyLand Store"
 
-    const description = productCategory.description ?? `${title} category.`
+    // Use admin description if it's long enough for a good meta description (80+ chars),
+    // otherwise generate a descriptive one
+    const adminDesc = productCategory.description || ""
+    const description =
+      adminDesc.length >= 80
+        ? adminDesc.slice(0, 155)
+        : `Shop ${
+            productCategory.name
+          } at RuggyLand — handcrafted premium rugs made to order. ${
+            adminDesc ? adminDesc + " " : ""
+          }Browse our collection and get free worldwide shipping.`
 
     return {
       title: `${productCategory.name} | RuggyLand`,
-      description,
-      alternates: getAlternates(`/categories/${params.category.join("/")}`, params.countryCode),
+      description: description.slice(0, 160),
+      alternates: getAlternates(
+        `/categories/${params.category.join("/")}`,
+        params.countryCode
+      ),
     }
   } catch (error) {
     notFound()

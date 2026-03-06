@@ -14,6 +14,7 @@ import { listRugStories } from "@lib/data/rug-stories"
 import { getAlternates } from "@lib/seo/hreflang"
 import OrganizationSchema from "@components/seo/OrganizationSchema"
 import FAQSchema from "@components/seo/FAQSchema"
+import SiteNavigationSchema from "@components/seo/SiteNavigationSchema"
 
 export async function generateMetadata(props: {
   params: Promise<{ countryCode: string }>
@@ -51,6 +52,30 @@ export default async function Home(props: {
     <>
       <OrganizationSchema />
       <FAQSchema />
+      <SiteNavigationSchema
+        items={[
+          {
+            name: "Shop All Rugs",
+            url: `https://www.ruggyland.com/${countryCode}/store`,
+          },
+          ...productCategories.map((cat: any) => ({
+            name: cat.name,
+            url: `https://www.ruggyland.com/${countryCode}/categories/${cat.handle}`,
+          })),
+          {
+            name: "Custom Rugs",
+            url: `https://www.ruggyland.com/${countryCode}/custom-rugs`,
+          },
+          {
+            name: "About Us",
+            url: `https://www.ruggyland.com/${countryCode}/about-us`,
+          },
+          {
+            name: "Contact Us",
+            url: `https://www.ruggyland.com/${countryCode}/contact-us`,
+          },
+        ]}
+      />
       <Hero />
       <DiscoverRugs categories={productCategories} />
       <CustomRugBanner />
