@@ -13,20 +13,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseURL()
 
   // Static pages — one entry per region
-  const staticPages: MetadataRoute.Sitemap = REGION_CODES.flatMap((region) => [
-    {
-      url: `${baseUrl}/${region}`,
+  const staticPaths = [
+    "", // homepage
+    "/store",
+    "/about-us",
+    "/contact-us",
+    "/sustainability",
+    "/custom-rugs",
+    "/privacy-policy",
+    "/terms-of-service",
+    "/cancellation-refund-policy",
+    "/shipping-return-policy",
+    "/payment-options",
+  ]
+
+  const staticPages: MetadataRoute.Sitemap = REGION_CODES.flatMap((region) =>
+    staticPaths.map((path) => ({
+      url: `${baseUrl}/${region}${path}`,
       lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: region === "us" ? 1.0 : 0.8,
-    },
-    {
-      url: `${baseUrl}/${region}/store`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.9,
-    },
-  ])
+      changeFrequency: (path === "" || path === "/store"
+        ? "daily"
+        : "monthly") as "daily" | "monthly",
+      priority:
+        path === ""
+          ? region === "us"
+            ? 1.0
+            : 0.8
+          : path === "/store"
+          ? 0.9
+          : 0.4,
+    }))
+  )
 
   // Fetch all products
   let productPages: MetadataRoute.Sitemap = []
@@ -41,7 +58,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     productPages = REGION_CODES.flatMap((region) =>
       products.map((product) => ({
         url: `${baseUrl}/${region}/products/${product.handle}`,
-        lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
+        lastModified: product.updated_at
+          ? new Date(product.updated_at)
+          : new Date(),
         changeFrequency: "weekly" as const,
         priority: region === "us" ? 0.8 : 0.6,
       }))
@@ -63,7 +82,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     categoryPages = REGION_CODES.flatMap((region) =>
       product_categories.map((category) => ({
         url: `${baseUrl}/${region}/categories/${category.handle}`,
-        lastModified: category.updated_at ? new Date(category.updated_at) : new Date(),
+        lastModified: category.updated_at
+          ? new Date(category.updated_at)
+          : new Date(),
         changeFrequency: "weekly" as const,
         priority: region === "us" ? 0.7 : 0.5,
       }))
@@ -85,7 +106,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     collectionPages = REGION_CODES.flatMap((region) =>
       collections.map((collection) => ({
         url: `${baseUrl}/${region}/collections/${collection.handle}`,
-        lastModified: collection.updated_at ? new Date(collection.updated_at) : new Date(),
+        lastModified: collection.updated_at
+          ? new Date(collection.updated_at)
+          : new Date(),
         changeFrequency: "weekly" as const,
         priority: region === "us" ? 0.7 : 0.5,
       }))

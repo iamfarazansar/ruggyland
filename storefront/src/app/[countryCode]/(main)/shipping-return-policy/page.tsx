@@ -1,9 +1,17 @@
 import Wrapper from "@modules/layout/components/wrapper"
 import { Metadata } from "next"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Shipping & Return Policy | RuggyLand",
-  description: "Shipping & Return Policy",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Shipping & Return Policy | RuggyLand",
+    description:
+      "RuggyLand shipping and return policy — turnaround time 3-5 weeks, free shipping worldwide.",
+    alternates: getAlternates("/shipping-return-policy", countryCode),
+  }
 }
 
 export default function ShippingPolicy() {

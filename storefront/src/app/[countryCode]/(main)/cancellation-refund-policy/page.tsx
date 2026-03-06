@@ -1,9 +1,17 @@
 import { Metadata } from "next"
 import Wrapper from "@modules/layout/components/wrapper"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Cancellation & Refund Policy",
-  description: "Each rug is handcrafted with love and attention to details",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Cancellation & Refund Policy | RuggyLand",
+    description:
+      "RuggyLand cancellation and refund policy — cancel within 48 hours, refund for damaged products.",
+    alternates: getAlternates("/cancellation-refund-policy", countryCode),
+  }
 }
 
 export default function CancellationRefundPolicy() {

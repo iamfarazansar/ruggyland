@@ -2,11 +2,18 @@ import { Metadata } from "next"
 import Image from "next/image"
 import { listRugStories } from "@lib/data/rug-stories"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Custom Rugs | Our Portfolio",
-  description:
-    "Explore our collection of handcrafted custom rugs. Each piece tells a unique story.",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Custom Rugs | Our Portfolio | RuggyLand",
+    description:
+      "Explore our collection of handcrafted custom rugs. Each piece tells a unique story.",
+    alternates: getAlternates("/custom-rugs", countryCode),
+  }
 }
 
 export default async function CustomRugsPage() {
@@ -39,18 +46,21 @@ export default async function CustomRugsPage() {
           </LocalizedClientLink>
 
           <div className="text-center">
-          <h1
-            className="text-[40px] sm:text-[56px] text-zinc-800"
-            style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 600 }}
-          >
-            Stories We&apos;ve Woven
-          </h1>
-          <div className="mx-auto mt-4 h-px w-48 bg-gradient-to-r from-transparent via-[#c4a97d] to-transparent" />
-          <p className="mt-6 text-lg text-zinc-600 max-w-2xl mx-auto">
-            Each custom rug has a story behind it. From initial sketches to the
-            final masterpiece, explore the journeys we&apos;ve been honored to
-            craft.
-          </p>
+            <h1
+              className="text-[40px] sm:text-[56px] text-zinc-800"
+              style={{
+                fontFamily: "'Dancing Script', cursive",
+                fontWeight: 600,
+              }}
+            >
+              Stories We&apos;ve Woven
+            </h1>
+            <div className="mx-auto mt-4 h-px w-48 bg-gradient-to-r from-transparent via-[#c4a97d] to-transparent" />
+            <p className="mt-6 text-lg text-zinc-600 max-w-2xl mx-auto">
+              Each custom rug has a story behind it. From initial sketches to
+              the final masterpiece, explore the journeys we&apos;ve been
+              honored to craft.
+            </p>
           </div>
         </div>
       </section>

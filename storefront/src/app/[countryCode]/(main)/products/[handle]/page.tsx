@@ -6,6 +6,8 @@ import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
 import { getAlternates } from "@lib/seo/hreflang"
 import ProductSchema from "@components/seo/ProductSchema"
+import BreadcrumbSchema from "@components/seo/BreadcrumbSchema"
+import FAQSchema from "@components/seo/FAQSchema"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -125,7 +127,8 @@ export default async function ProductPage(props: Props) {
 
   // Get lowest variant price for schema
   const firstVariant = pricedProduct.variants?.[0]
-  const schemaPrice = firstVariant?.calculated_price?.calculated_amount ?? undefined
+  const schemaPrice =
+    firstVariant?.calculated_price?.calculated_amount ?? undefined
   const schemaCurrency = region.currency_code ?? undefined
 
   return (
@@ -136,6 +139,11 @@ export default async function ProductPage(props: Props) {
         price={schemaPrice ?? undefined}
         currencyCode={schemaCurrency}
       />
+      <BreadcrumbSchema
+        product={pricedProduct}
+        countryCode={params.countryCode}
+      />
+      <FAQSchema />
       <ProductTemplate
         product={pricedProduct}
         region={region}

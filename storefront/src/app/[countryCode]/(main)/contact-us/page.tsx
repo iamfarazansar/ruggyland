@@ -1,10 +1,18 @@
 import Wrapper from "@modules/layout/components/wrapper"
 import Link from "next/link"
 import { Metadata } from "next"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Contact Us | RuggyLand",
-  description: "Contact RuggyLand",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Contact Us | RuggyLand",
+    description:
+      "Contact RuggyLand — reach out for queries about custom rugs, orders, or partnerships.",
+    alternates: getAlternates("/contact-us", countryCode),
+  }
 }
 
 export default function ContactUs() {

@@ -1,9 +1,17 @@
 import Wrapper from "@modules/layout/components/wrapper"
 import { Metadata } from "next"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Sustainability | RuggyLand",
-  description: "Sustainability",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Sustainability | RuggyLand",
+    description:
+      "RuggyLand's commitment to sustainability — eco-friendly materials, non-toxic dyes, and charitable giving.",
+    alternates: getAlternates("/sustainability", countryCode),
+  }
 }
 
 export default function Sustainability() {

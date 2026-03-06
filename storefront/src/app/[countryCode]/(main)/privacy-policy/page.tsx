@@ -1,10 +1,17 @@
 import Wrapper from "@modules/layout/components/wrapper"
 import { Metadata } from "next"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | RuggyLand",
-  description:
-    "Privacy Policy for RuggyLand — how we collect and use your data",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Privacy Policy | RuggyLand",
+    description:
+      "Privacy Policy for RuggyLand — how we collect, use, and protect your data.",
+    alternates: getAlternates("/privacy-policy", countryCode),
+  }
 }
 
 export default function PrivacyPolicy() {

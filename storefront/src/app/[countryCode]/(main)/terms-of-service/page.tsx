@@ -1,10 +1,18 @@
 import Wrapper from "@modules/layout/components/wrapper"
 import Link from "next/link"
 import { Metadata } from "next"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Terms of Service | RuggyLand",
-  description: "Terms of Service",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Terms of Service | RuggyLand",
+    description:
+      "Terms of Service for RuggyLand — conditions for using our website and services.",
+    alternates: getAlternates("/terms-of-service", countryCode),
+  }
 }
 
 export default function TermsOfService() {

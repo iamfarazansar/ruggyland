@@ -13,6 +13,7 @@ import FAQ from "@modules/common/components/faq"
 import { listRugStories } from "@lib/data/rug-stories"
 import { getAlternates } from "@lib/seo/hreflang"
 import OrganizationSchema from "@components/seo/OrganizationSchema"
+import FAQSchema from "@components/seo/FAQSchema"
 
 export async function generateMetadata(props: {
   params: Promise<{ countryCode: string }>
@@ -49,6 +50,7 @@ export default async function Home(props: {
   return (
     <>
       <OrganizationSchema />
+      <FAQSchema />
       <Hero />
       <DiscoverRugs categories={productCategories} />
       <CustomRugBanner />

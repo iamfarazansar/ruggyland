@@ -1,10 +1,17 @@
 import Wrapper from "@modules/layout/components/wrapper"
 import { Metadata } from "next"
+import { getAlternates } from "@lib/seo/hreflang"
 
-export const metadata: Metadata = {
-  title: "Payment Options | RuggyLand",
-  description:
-    "Choose from a variety of secure payment options available on our website",
+type Props = { params: Promise<{ countryCode: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { countryCode } = await params
+  return {
+    title: "Payment Options | RuggyLand",
+    description:
+      "Secure payment options at RuggyLand — PayPal, Razorpay, Visa, Mastercard.",
+    alternates: getAlternates("/payment-options", countryCode),
+  }
 }
 
 export default function PaymentOptions() {
