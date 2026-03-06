@@ -1,5 +1,6 @@
 import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
+import { NOINDEX_REGIONS } from "@lib/seo/hreflang"
 
 function maintenancePage() {
   return `<!DOCTYPE html>
@@ -262,7 +263,11 @@ export async function middleware(request: NextRequest) {
 
   // if one of the country codes is in the url and the cache id is set, return next
   if (urlHasCountryCode && cacheIdCookie) {
-    return NextResponse.next()
+    const res = NextResponse.next()
+    if (countryCode && NOINDEX_REGIONS.has(countryCode)) {
+      res.headers.set("X-Robots-Tag", "noindex, follow")
+    }
+    return res
   }
 
   // if one of the country codes is in the url and the cache id is not set, set the cache id and serve
@@ -271,7 +276,9 @@ export async function middleware(request: NextRequest) {
     res.cookies.set("_medusa_cache_id", cacheId, {
       maxAge: 60 * 60 * 24,
     })
-
+    if (countryCode && NOINDEX_REGIONS.has(countryCode)) {
+      res.headers.set("X-Robots-Tag", "noindex, follow")
+    }
     return res
   }
 

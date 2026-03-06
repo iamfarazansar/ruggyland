@@ -1,65 +1,101 @@
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.ruggyland.com"
 
-// All active storefront regions — keep in sync with Medusa Admin regions
+// Storefront paths — these are the only paths that exist in the app router
 export const REGIONS = [
   { countryCode: "us", hreflang: "en-US" },
   { countryCode: "in", hreflang: "en-IN" },
-  { countryCode: "au", hreflang: "en-AU" },
-  { countryCode: "ca", hreflang: "en-CA" },
-  { countryCode: "de", hreflang: "en-DE" }, // English content for now; change to de-DE if localized
-  { countryCode: "fr", hreflang: "en-FR" }, // English content for now; change to fr-FR if localized
-  { countryCode: "ae", hreflang: "en-AE" },
+  { countryCode: "gb", hreflang: "en-GB" },
+  { countryCode: "de", hreflang: "en-DE" },
   { countryCode: "sg", hreflang: "en-SG" },
-  { countryCode: "nz", hreflang: "en-NZ" },
-  { countryCode: "za", hreflang: "en-ZA" },
-  { countryCode: "jp", hreflang: "en-JP" },
-  { countryCode: "kr", hreflang: "en-KR" },
-  { countryCode: "mx", hreflang: "en-MX" },
-  { countryCode: "br", hreflang: "en-BR" },
-  { countryCode: "gb", hreflang: "en-GB" }, // Medusa ISO code for UK region
 ] as const
 
-// Canonical region — all duplicate regional pages point here
-const CANONICAL_REGION = "us"
+// The 5 regions Google will index
+export const INDEXED_REGIONS = ["us", "in", "gb", "de", "sg"]
 
-/**
- * Returns the canonical URL for a given path.
- * Always points to the /us/ version.
- */
-export function getCanonicalUrl(path: string): string {
-  const cleanPath = path.startsWith("/") ? path : `/${path}`
-  return `${BASE_URL}/${CANONICAL_REGION}${cleanPath}`
+// Maps any storefront countryCode to its canonical indexed region
+export const CANONICAL_REGION_MAP: Record<string, string> = {
+  // Indexed regions — canonical to themselves
+  us: "us",
+  in: "in",
+  gb: "gb",
+  de: "de",
+  sg: "sg",
+  // European non-canonical paths (if they exist) → /de
+  fr: "de",
+  dk: "de",
+  at: "de", be: "de", bg: "de", ch: "de", cy: "de",
+  cz: "de", ee: "de", es: "de", fi: "de", gr: "de",
+  hr: "de", hu: "de", ie: "de", is: "de", it: "de",
+  li: "de", lt: "de", lu: "de", lv: "de", mt: "de",
+  nl: "de", no: "de", pl: "de", pt: "de", ro: "de",
+  se: "de", si: "de", sk: "de",
+  // ROW non-canonical paths → /sg
+  au: "sg", ca: "sg", nz: "sg", jp: "sg", kr: "sg",
+  mx: "sg", br: "sg", ae: "sg", za: "sg",
 }
 
-/**
- * Returns Next.js `alternates.languages` object for hreflang.
- * Pass the path WITHOUT the region prefix, e.g. "/products/shanks-rug"
- */
+// Regions that should NOT be indexed (add any non-canonical paths here)
+export const NOINDEX_REGIONS = new Set([
+  "fr", "dk", "au", "ca", "nz", "jp",
+  "kr", "mx", "br", "ae", "za",
+])
+
+export function getCanonicalRegion(countryCode: string): string {
+  return CANONICAL_REGION_MAP[countryCode] ?? "sg"
+}
+
 export function getAlternateLanguages(path: string): Record<string, string> {
   const cleanPath = path.startsWith("/") ? path : `/${path}`
+
+  // All European country hreflang tags → /de
+  const euTags = [
+    "en-AT", "en-BE", "en-BG", "en-CH", "en-CY", "en-CZ",
+    "en-DE", "en-DK", "da-DK", "en-EE", "en-ES", "en-FI",
+    "en-FR", "en-GR", "en-HR", "en-HU", "en-IE", "en-IS",
+    "en-IT", "en-LI", "en-LT", "en-LU", "en-LV", "en-MT",
+    "en-NL", "en-NO", "en-PL", "en-PT", "en-RO", "en-SE",
+    "en-SI", "en-SK",
+  ]
+
   const languages: Record<string, string> = {}
 
-  REGIONS.forEach(({ countryCode, hreflang }) => {
-    languages[hreflang] = `${BASE_URL}/${countryCode}${cleanPath}`
+  // US
+  languages["en-US"] = `${BASE_URL}/us${cleanPath}`
+
+  // India
+  languages["en-IN"] = `${BASE_URL}/in${cleanPath}`
+
+  // UK
+  languages["en-GB"] = `${BASE_URL}/gb${cleanPath}`
+
+  // Europe — all EU country tags point to /de
+  euTags.forEach((tag) => {
+    languages[tag] = `${BASE_URL}/de${cleanPath}`
   })
 
-  // x-default points to the canonical region
-  languages["x-default"] = `${BASE_URL}/${CANONICAL_REGION}${cleanPath}`
+  // Rest of World — x-default and all other countries point to /sg
+  languages["en-SG"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-AU"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-CA"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-NZ"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-JP"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-KR"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-MX"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-BR"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-AE"] = `${BASE_URL}/sg${cleanPath}`
+  languages["en-ZA"] = `${BASE_URL}/sg${cleanPath}`
+
+  // x-default → /sg (Rest of World fallback)
+  languages["x-default"] = `${BASE_URL}/sg${cleanPath}`
 
   return languages
 }
 
-/**
- * Returns full Next.js `alternates` object ready for generateMetadata.
- * Pass the path WITHOUT the region prefix, e.g. "/products/shanks-rug"
- * Pass countryCode to self-canonical (each region points to itself).
- * Omit countryCode only for static metadata exports that can't access params.
- */
 export function getAlternates(path: string, countryCode?: string) {
   const cleanPath = path.startsWith("/") ? path : `/${path}`
-  const canonicalRegion = countryCode ?? CANONICAL_REGION
+  const canonicalRegion = getCanonicalRegion(countryCode ?? "sg")
   return {
     canonical: `${BASE_URL}/${canonicalRegion}${cleanPath}`,
-    languages: getAlternateLanguages(path),
+    languages: getAlternateLanguages(cleanPath),
   }
 }

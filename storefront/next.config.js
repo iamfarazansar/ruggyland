@@ -6,6 +6,40 @@ checkEnvVariables()
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/products/:slug",
+        destination: "/us/products/:slug",
+        permanent: true,
+      },
+      {
+        source: "/collections/:slug",
+        destination: "/us/collections/:slug",
+        permanent: true,
+      },
+      {
+        source: "/categories/:slug",
+        destination: "/us/collections/:slug",
+        permanent: true,
+      },
+      {
+        source: "/hand-knotted-rugs",
+        destination: "/us/collections/hand-knotted-rugs",
+        permanent: true,
+      },
+      {
+        source: "/anime-rugs",
+        destination: "/us/collections/anime-rugs",
+        permanent: true,
+      },
+      {
+        source: "/-",
+        destination: "/",
+        permanent: true,
+      },
+    ]
+  },
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,

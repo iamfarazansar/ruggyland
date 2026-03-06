@@ -2,12 +2,12 @@ import { MetadataRoute } from "next"
 import { sdk } from "@lib/config"
 import { HttpTypes } from "@medusajs/types"
 import { getBaseURL } from "@lib/util/env"
-import { REGIONS } from "@lib/seo/hreflang"
+import { INDEXED_REGIONS } from "@lib/seo/hreflang"
 
 // Refresh sitemap every 24 hours
 export const revalidate = 86400
 
-const REGION_CODES = REGIONS.map((r) => r.countryCode)
+const REGION_CODES = INDEXED_REGIONS
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseURL()

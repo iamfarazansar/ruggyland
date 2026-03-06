@@ -19,7 +19,7 @@ export default function robots(): MetadataRoute.Robots {
       // All other bots — allow site, block private paths
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/us/", "/in/", "/gb/", "/de/", "/sg/"],
         disallow,
       },
     ],
