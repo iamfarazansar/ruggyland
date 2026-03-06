@@ -255,24 +255,6 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // If region map was served from cache, verify the backend is still reachable
-  if (regionMap && BACKEND_URL) {
-    try {
-      const healthCheck = await fetch(`${BACKEND_URL}/health`, {
-        signal: AbortSignal.timeout(5000),
-      })
-      if (!healthCheck.ok) throw new Error("Backend unhealthy")
-    } catch {
-      return new NextResponse(maintenancePage(), {
-        status: 503,
-        headers: {
-          "Content-Type": "text/html",
-          "Retry-After": "30",
-        },
-      })
-    }
-  }
-
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
 
   const urlHasCountryCode =
